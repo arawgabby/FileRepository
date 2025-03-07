@@ -12,8 +12,8 @@
 <div class="container mx-auto p-6 bg-white rounded-xl" style="box-shadow: 4px 4px 10px rgba(0, 0, 0, 0.1);">
 
     <h1 class="text-[30px] font-bold mb-3 flex items-center">
-        <i class="fas fa-file w-[30px] h-[30px] mr-2"></i>
-        View File Versions
+        <i class="fas fa-archive w-[30px] h-[30px] mr-2"></i>
+        Archived File Versions
     </h1>
 
     <!-- Search & Filters -->
@@ -43,7 +43,7 @@
         </thead>
         <tbody id="fileTableBody">
             @foreach($fileVersions as $fileVersion)
-                @if($fileVersion->status === 'active') {{-- Show only active files --}}
+                @if($fileVersion->status === 'archived') {{-- Show only active files --}}
                     <tr class="file-row">
                         <td class="border p-2">{{ $fileVersion->file_id }}</td>
                         <td class="border p-2 filename">00{{ $fileVersion->version_id }}</td>
@@ -75,22 +75,22 @@
                                 </a>
                                 <a href="{{ route('admin.archiveFile', $fileVersion->version_id) }}" 
                                     class="text-blue-500 hover:text-blue-700" 
-                                    title="Archive"
+                                    title="Unarchive"
                                     onclick="confirmArchive(event, {{ $fileVersion->version_id }})">
-                                        <i class="fas fa-archive"></i>
+                                    <i class="fas fa-box-open"></i>
                                 </a>
 
                                 <form id="archive-form-{{ $fileVersion->version_id }}" 
-                                    action="{{ route('admin.archiveFile', $fileVersion->version_id) }}" 
+                                    action="{{ route('admin.unarchiveFile', $fileVersion->version_id) }}" 
                                     method="POST" 
                                     style="display: none;">
                                     @csrf
                                     @method('PUT')
                                 </form>
 
-                                <a href="{{ route('admin.editFileVersion', $fileVersion->version_id) }}" class="text-red-500 hover:text-red-700" title="Edit">
+                                <!-- <a href="{{ route('admin.editFileVersion', $fileVersion->version_id) }}" class="text-red-500 hover:text-red-700" title="Edit">
                                     <i class="fas fa-edit"></i>
-                                </a>
+                                </a> -->
                                 <a href="{{
                                  route('admin.trash', $fileVersion->version_id) }}" 
                                     class="text-blue-500 hover:text-blue-700" 
@@ -106,6 +106,7 @@
                                     @csrf
                                     @method('PUT')
                                 </form>
+
                             </div>
                         </td>
                     </tr>
@@ -125,13 +126,14 @@
 <script>
     function confirmArchive(event, versionId) {
         event.preventDefault();
-        if (confirm("Are you sure you want to archive this file version?")) {
+        if (confirm("Are you sure you want to undo archive this file version?")) {
             document.getElementById('archive-form-' + versionId).submit();
         }
     }
+
     function confirmTrash(event, versionId) {
         event.preventDefault();
-        if (confirm("Are you sure you want to put this on trash of this file version?")) {
+        if (confirm("Are you sure you want to put this file into trash?")) {
             document.getElementById('trash-form-' + versionId).submit();
         }
     }

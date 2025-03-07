@@ -3,6 +3,7 @@
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Auth\AdminAuthController;
 use App\Http\Controllers\FileController;
+use App\Http\Controllers\UserController;
 
 Route::get('/', function () {
     return view('welcome');
@@ -50,6 +51,10 @@ Route::middleware(['admin.auth'])->group(function () {
 
     Route::get('/admin-update-files', [AdminAuthController::class, 'ViewFilesVersions'])->name('admin.update');
 
+    Route::get('/admin-archive-files', [AdminAuthController::class, 'ArchivedViewFilesVersions'])->name('admin.archived.files');
+
+    Route::get('/admin-trash-files', [AdminAuthController::class, 'TrashViewFilesVersions'])->name('admin.trash.bins');
+
     Route::get('/admin-edit-file/{file_id}', [AdminAuthController::class, 'editFile'])->name('admin.editFile');
 
     Route::put('/admin-update-file/{file_id}', [AdminAuthController::class, 'updateFile'])->name('admin.updateFile');
@@ -66,9 +71,33 @@ Route::middleware(['admin.auth'])->group(function () {
 
     Route::put('/admin/archive-file/{version_id}', [FileController::class, 'archiveFile'])->name('admin.archiveFile');
 
+    Route::put('/admin/restore-file/{version_id}', [FileController::class, 'RestoreFile'])->name('admin.restore');
+
+    Route::put('/admin/unarchive-file/{version_id}', [FileController::class, 'UnarchiveFile'])->name('admin.unarchiveFile');
+
+    Route::put('/admin-view/trash-file/{version_id}', [FileController::class, 'TrashFile'])->name('admin.trash');
+
 
     Route::put('/admin/archive-primary-file/{file_id}', [FileController::class, 'archiveFileAdmin'])->name('admin.archiveFileV');
 
+    Route::get('/admin/users', [UserController::class, 'index'])->name('admin.users');
+
+
+    Route::get('/admin/users/create', [UserController::class, 'AddUserViewBlade'])->name('admin.users.view');
+
+
+    Route::post('/admin/users/store', [UserController::class, 'store'])->name('admin.users.store');
+
+
+    Route::get('/admin/users/{id}/edit', [UserController::class, 'edit'])->name('admin.users.edit');
+
+    Route::put('/admin/users/{id}/update', [UserController::class, 'updateUser'])->name('admin.users.update');
+
+    Route::get('/admin/files/{file_id}/edit-primary', [FileController::class, 'editPrimaryFile'])
+    ->name('admin.files.editPrimary');
+
+    Route::post('/admin/files/{file_id}/update-primary', [FileController::class, 'updatePrimaryFile'])
+    ->name('admin.files.updatePrimary');
 
 
 

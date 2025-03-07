@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
 use App\Models\User;
+use App\Models\AccessLog;
 use App\Models\FileVersions;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
@@ -63,8 +64,6 @@ class AdminAuthController extends Controller
         return redirect('/admin-login')->with('success', 'You have been logged out successfully.');
     }
 
-
-
     public function uploadFile(Request $request)
     {
         $request->validate([
@@ -81,7 +80,7 @@ class AdminAuthController extends Controller
     
         if ($request->hasFile('file')) {
             $file = $request->file('file');
-            $filename = time() . '_' . $file->getClientOriginalName();
+            $filename = $file->getClientOriginalName();
             $filePath = $file->storeAs('uploads', $filename, 'public');
     
             File::create([
@@ -149,13 +148,84 @@ class AdminAuthController extends Controller
         return view('admin.pages.EditFilesOverview', compact('fileVersions')); // Pass $fileVersions to view
     }
 
+    public function ArchivedViewFilesVersions(Request $request) 
+    {
+        $query = FileVersions::query(); // Make sure you're fetching from FileVersion model
 
+        // Apply search filter
+        if ($request->has('search') && !empty($request->search)) {
+            $query->where('filename', 'LIKE', '%' . $request->search . '%');
+        }
+
+        // Apply file type filter
+        if ($request->has('file_type') && !empty($request->file_type)) {
+            $query->where('file_type', $request->file_type);
+        }
+
+        // Apply category filter
+        if ($request->has('category') && !empty($request->category)) {
+            $query->where('category', $request->category);
+        }
+
+        // Get filtered results
+        $fileVersions = $query->paginate(10); // Fetch from file_versions table
+
+        return view('admin.pages.ArchivedFiles', compact('fileVersions')); // Pass $fileVersions to view
+    }
+
+
+    public function TrashViewFilesVersions(Request $request) 
+    {
+        $query = FileVersions::query(); // Make sure you're fetching from FileVersion model
+
+        // Apply search filter
+        if ($request->has('search') && !empty($request->search)) {
+            $query->where('filename', 'LIKE', '%' . $request->search . '%');
+        }
+
+        // Apply file type filter
+        if ($request->has('file_type') && !empty($request->file_type)) {
+            $query->where('file_type', $request->file_type);
+        }
+
+        // Apply category filter
+        if ($request->has('category') && !empty($request->category)) {
+            $query->where('category', $request->category);
+        }
+
+        // Get filtered results
+        $fileVersions = $query->paginate(10); // Fetch from file_versions table
+
+        return view('admin.pages.TrashBinFiles', compact('fileVersions')); // Pass $fileVersions to view
+    }
 
     public function editFile($file_id)
     {
+        // Ensure $file_id is correctly received and cast to integer
+        $file_id = (int) $file_id;
+
+        // Check if the file exists
         $file = File::findOrFail($file_id);
+
+        // Ensure auth user is logged in before logging
+        if (auth()->check()) {
+
+            \Log::info('File ID:', ['file_id' => $file_id]);
+            \Log::info('Auth User:', ['user_id' => auth()->id()]);
+
+
+            AccessLog::create([
+                'file_id' => $file->id,
+                'accessed_by' => auth()->id(),
+                'action' => 'Edited File',
+                'access_time' => now()
+            ]);
+        }
+
         return view('admin.pages.EditFilesView', compact('file'));
     }
+
+
     
     public function updateFile(Request $request, $file_id)
     {
@@ -183,7 +253,7 @@ class AdminAuthController extends Controller
             $uploadedFile = $request->file('file');
     
             // Generate a unique filename with the same name
-            $newFileName = pathinfo($file->filename, PATHINFO_FILENAME) . '_' . time() . '.' . $uploadedFile->getClientOriginalExtension();
+            $newFileName = pathinfo($file->filename, PATHINFO_FILENAME) . '.' . $uploadedFile->getClientOriginalExtension();
             $filePath = $uploadedFile->storeAs('uploads/files', $newFileName, 'public'); // Store with new name
             $fileSize = $uploadedFile->getSize();
             $fileType = $uploadedFile->getClientOriginalExtension();
@@ -204,8 +274,17 @@ class AdminAuthController extends Controller
             'uploaded_by' => $user->id ?? null, // Use session user ID
         ]);
     
+        // Log the file update in `access_logs`
+        AccessLog::create([
+            'file_id' => $file->file_id,
+            'accessed_by' => $user->id ?? null, // Ensure user is logged in
+            'action' => 'Added File - Version ' . $newVersion,
+            'access_time' => now()
+        ]);
+    
         return redirect()->route('admin.editFile', $file_id)->with('success', 'New file version saved!');
     }
+    
     
 
     

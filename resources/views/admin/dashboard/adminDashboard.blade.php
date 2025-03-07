@@ -9,7 +9,7 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <style>
         body {
-            font-family: 'Poppins', sans-serif;
+            font-family: 'Lato', sans-serif;
             zoom: 80%;
         }
     </style>
@@ -25,7 +25,7 @@
             <!-- <img src="{{ asset('product-images/efvlogo.png') }}" alt="EFV Logo" class="w-25 h-25"> -->
             <p style="margin-top: 8px; text-align: center"><a href="#" class="text-white">Admin</a></p>
         </div>
-            <nav class="space-y-4">
+            <nav class="space-y-6">
 
             <p class="text-white text-1xl font-bold">
                 <i class="fas fa-folder-open"></i> Manage Files
@@ -43,14 +43,31 @@
                 <i class="fas fa-history mr-4"></i> File Versions
             </a>
 
-            <a href="#" class="flex items-center text-gray-300 hover:text-white ml-4">
-                <i class="fas fa-archive mr-4"></i> Archive Files
+            <a href="{{ route('admin.archived.files') }}" class="flex items-center text-gray-300 hover:text-white ml-4">
+                <i class="fas fa-archive mr-4"></i> Archived Files
             </a>
 
             
-            <a href="#" class="flex items-center text-gray-300 hover:text-white ml-4">
-                <i class="fas fa-trash-alt mr-4"></i> Deleted Files
+            <a href="{{ route('admin.trash.bins') }}" class="flex items-center text-gray-300 hover:text-white ml-4">
+                <i class="fas fa-trash-alt mr-4"></i> Trash Files
             </a>
+
+            <p class="text-white text-1xl font-bold mt-8">
+                <i class="fas fa-folder-open"></i> User Management 
+            </p>
+
+            <a href="{{ route('admin.users') }}" class="flex items-center text-gray-300 hover:text-white ml-4">
+                <i class="fas fa-user mr-4"></i> Users
+            </a>
+
+            <p class="text-white text-1xl font-bold mt-8">
+                <i class="fas fa-folder-open"></i> Activity Log
+            </p>
+
+            <a href="#" class="flex items-center text-gray-300 hover:text-white ml-4">
+                <i class="fas fa-file mr-4"></i> Logs
+            </a>
+
 
 
 

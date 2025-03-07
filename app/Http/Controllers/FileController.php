@@ -10,16 +10,28 @@ use App\Models\File;
 
 class FileController extends Controller
 {
-    public function downloadFile($filename)
+
+    public function downloadFile($filePath)
     {
-        $filePath = 'public/uploads/' . $filename;
-
-        if (Storage::exists($filePath)) {
-            return Storage::download($filePath);
+        // Ensure that the file path doesn't start with 'uploads/' (because it could break the path)
+        $storagePath = 'uploads/' . $filePath;  // Full path to the file inside 'uploads'
+    
+        // Check if the file exists in the 'uploads' folder
+        if (Storage::disk('public')->exists($storagePath)) {
+            // Generate the correct path to be used for download
+            return response()->download(storage_path("app/public/$storagePath"));
         }
-
+    
+        // Check if the file exists in 'uploads/primaryFiles' folder
+        $primaryFilePath = 'uploads/primaryFiles/' . $filePath;
+        if (Storage::disk('public')->exists($primaryFilePath)) {
+            return response()->download(storage_path("app/public/$primaryFilePath"));
+        }
+    
+        // If not found, return an error
         return back()->with('error', 'File not found.');
     }
+    
 
 
 
@@ -57,7 +69,7 @@ class FileController extends Controller
         // Handle file upload
         if ($request->hasFile('file')) {
             $uploadedFile = $request->file('file');
-            $newFileName = time() . '_' . $uploadedFile->getClientOriginalName();
+            $newFileName = $uploadedFile->getClientOriginalName();
             $filePath = $uploadedFile->storeAs('uploads/files', $newFileName, 'public'); // Store with new name
     
             // Update file details
@@ -85,7 +97,41 @@ class FileController extends Controller
         // Update status to 'archived'
         $fileVersion->update(['status' => 'archived']);
 
+        return redirect()->back()->with('success', 'File version unarchived successfully!');
+    }
+
+    public function RestoreFile($version_id)
+    {
+        // Find the file version
+        $fileVersion = FileVersions::findOrFail($version_id);
+
+        // Update status to 'archived'
+        $fileVersion->update(['status' => 'active']);
+
+        return redirect()->back()->with('success', 'File version restored successfully!');
+    }
+
+    public function unarchiveFile($version_id)
+    {
+        // Find the file version
+        $fileVersion = FileVersions::findOrFail($version_id);
+
+        // Update status to 'archived'
+        $fileVersion->update(['status' => 'active']);
+
         return redirect()->back()->with('success', 'File version archived successfully!');
+    }
+
+
+    public function TrashFile($version_id)
+    {
+        // Find the file version
+        $fileVersion = FileVersions::findOrFail($version_id);
+
+        // Update status to 'archived'
+        $fileVersion->update(['status' => 'deleted']);
+
+        return redirect()->back()->with('success', 'File version placed on trash successfully!');
     }
 
 
@@ -110,6 +156,80 @@ class FileController extends Controller
 
         return redirect()->back()->with('success', 'File archived successfully!');
     }
+
+    public function editPrimaryFile($file_id)
+    {
+        // Fetch the file using the provided ID
+        $file = File::findOrFail($file_id);
+
+        return view('admin.pages.EditPrimaryFile', compact('file'));
+    }
+
+
+    public function updatePrimaryFile(Request $request, $file_id)
+    {
+        $file = File::findOrFail($file_id);
+    
+        // Validate input
+        $request->validate([
+            'filename' => 'required|string|max:255',
+            'category' => 'required|string|max:50',
+            'status' => 'required|string|in:active,inactive,pending,deactivated',
+            'file' => 'nullable|file|max:5120', // Optional file upload, max 5MB
+        ]);
+    
+        // Check if a new file is uploaded
+        if ($request->hasFile('file')) {
+            $uploadedFile = $request->file('file');
+    
+            // Use the original filename
+            $newFileName = $uploadedFile->getClientOriginalName();
+            
+            // Store the new file in 'uploads/primaryFiles' directory
+            $filePath = $uploadedFile->storeAs('uploads/primaryFiles', $newFileName, 'public');
+    
+            // Delete old file if it exists
+            if ($file->file_path) {
+                Storage::disk('public')->delete($file->file_path);
+            }
+    
+            // Update file path & size
+            $file->file_path = $filePath;
+            $file->file_size = $uploadedFile->getSize();
+        } else {
+            // If no new file is uploaded, rename the existing file
+            $oldFilePath = $file->file_path; // Get the existing file path
+    
+            if ($oldFilePath && str_starts_with($oldFilePath, 'uploads/')) {
+                // Extract the directory and get the file extension
+                $directory = dirname($oldFilePath);
+                $oldExtension = pathinfo($oldFilePath, PATHINFO_EXTENSION);
+                
+                // Ensure the filename doesn't already contain the extension
+                $newFileName = pathinfo($request->filename, PATHINFO_FILENAME) . '.' . $oldExtension;
+                $newFilePath = $directory . '/' . $newFileName;
+    
+                // Rename the file in storage
+                Storage::disk('public')->move($oldFilePath, $newFilePath);
+    
+                // Update the file path in the database
+                $file->file_path = $newFilePath;
+            }
+        }
+    
+        // Update file details
+        $file->filename = pathinfo($request->filename, PATHINFO_FILENAME); // Save filename without extension
+        $file->category = $request->category;
+        $file->status = $request->status;
+        $file->save();
+    
+        return redirect()->route('admin.files', $file_id)->with('success', 'File updated successfully!');
+    }
+    
+
+
+
+
 
 
 

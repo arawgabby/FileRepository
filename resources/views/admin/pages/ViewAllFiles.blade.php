@@ -25,7 +25,7 @@
 
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
 
-    <h1 style="font-size: 30px; font-weight: bold; margin-bottom: 12px">Files Overview</h1>
+    <h1 style="font-size: 30px; font-weight: bold; margin-bottom: 12px; text-align: center">Files Overview</h1>
 
     <!-- Search & Filters -->
     <div class="mb-4 flex gap-4">
@@ -59,6 +59,7 @@
                 <th class="border p-2">Category</th>
                 <th class="border p-2">Uploaded By</th>
                 <th class="border p-2">Created At</th>
+                <th class="border p-2">Status</th>
                 <th class="border p-2">Actions</th>
             </tr>
         </thead>
@@ -87,10 +88,16 @@
                 <td class="border p-2">
                     {{ $file->user ? $file->user->name : 'Unknown' }}
                 </td>
-                <td class="border p-2 filename">{{ $file->created_at }}</td>
+                <td class="border p-2 filename">{{ $file->created_at->diffForHumans() }}</td>
+                <td class="border p-2 filename">{{ $file->status }}</td>
                 <td class="border p-2">
                     <div class="flex justify-center space-x-4">
-                        <a href="{{ route('files.download', $file->filename) }}" class="text-blue-500" title="Download"> <i class="fas fa-download"> </i> </a> 
+                        <a href="{{ route('files.download', basename($file->file_path)) }}" class="text-blue-500" title="Download">
+                            <i class="fas fa-download"></i>
+                        </a>
+                        <a href="{{ route('admin.files.editPrimary', ['file_id' => $file->file_id]) }}" class="text-blue-500" title="Edit Primary File">
+                            <i class="fas fa-edit"></i>
+                        </a>
                         <a href="{{ route('admin.editFile', $file->file_id) }}" class="text-red-500" title="Upload New File Based on this version"><i class="fas fa-upload"></i></a> 
                         <a href="#" class="text-gray-500 hover:text-red-700" title="Delete">
                         <i class="fas fa-trash"></i>

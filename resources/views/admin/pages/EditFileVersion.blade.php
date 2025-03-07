@@ -6,7 +6,7 @@
     
     <!-- Back Button -->
     <a href="{{ route('admin.update') }}" class="text-gray-600 hover:text-gray-800 flex items-center mb-4">
-        <i class="fas fa-arrow-left mr-2" style="font-size: 44px; font-weight: bold"> ←</i>
+        <i class="fas fa-arrow-left mr-2" style="font-size: 44px; font-weight: bold"> </i>
     </a>
 
     <h1 class="text-3xl font-semibold mb-4">Edit File Version</h1>
