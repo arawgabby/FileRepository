@@ -6,10 +6,11 @@
     <title>Admin</title>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;700&display=swap" rel="stylesheet">
     <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <style>
         body {
             font-family: 'Poppins', sans-serif;
-            zoom: 90%;
+            zoom: 80%;
         }
     </style>
 </head>
@@ -26,23 +27,31 @@
         </div>
             <nav class="space-y-4">
 
-            <p class="text-white text-1xl font-bold">Manage Files</p>
+            <p class="text-white text-1xl font-bold">
+                <i class="fas fa-folder-open"></i> Manage Files
+            </p>
 
-                <a href="{{ route('admin.upload') }}" class="flex items-center text-gray-300 hover:text-white ml-4">
-                    Upload New File
-                </a>
+            <a href="{{ route('admin.upload') }}" class="flex items-center text-gray-300 hover:text-white ml-4">
+                <i class="fas fa-upload mr-4"></i> Upload New File
+            </a>
 
-                <a href="{{ route('admin.files') }}" class="flex items-center text-gray-300 hover:text-white ml-4">
-                    View All Files
-                </a>
+            <a href="{{ route('admin.files') }}" class="flex items-center text-gray-300 hover:text-white ml-4">
+                <i class="fas fa-file-alt mr-4"></i> View Primary Files
+            </a>
 
-                <a href="#" class="flex items-center text-gray-300 hover:text-white ml-4">
-                    Edit/Updated Files
-                </a>
+            <a href="{{ route('admin.update') }}" class="flex items-center text-gray-300 hover:text-white ml-4">
+                <i class="fas fa-history mr-4"></i> File Versions
+            </a>
 
-                <a href="#" class="flex items-center text-gray-300 hover:text-white ml-4">
-                    Delete and Archive Files
-                </a>
+            <a href="#" class="flex items-center text-gray-300 hover:text-white ml-4">
+                <i class="fas fa-archive mr-4"></i> Archive Files
+            </a>
+
+            
+            <a href="#" class="flex items-center text-gray-300 hover:text-white ml-4">
+                <i class="fas fa-trash-alt mr-4"></i> Deleted Files
+            </a>
+
 
 
                 <a href="{{ url('/admin-logout') }}" class="flex items-center text-white hover:text-white" style="font-weight: bold">Logout</a>

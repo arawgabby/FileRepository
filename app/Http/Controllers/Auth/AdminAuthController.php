@@ -4,10 +4,12 @@ namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
 use App\Models\User;
+use App\Models\FileVersions;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Storage;
 use App\Models\File;
+use Symfony\Component\HttpFoundation\Response;
 
 
 class AdminAuthController extends Controller
@@ -122,11 +124,93 @@ class AdminAuthController extends Controller
         return view('admin.pages.ViewAllFiles', compact('files'));
     }
 
+    public function ViewFilesVersions(Request $request) 
+    {
+        $query = FileVersions::query(); // Make sure you're fetching from FileVersion model
+
+        // Apply search filter
+        if ($request->has('search') && !empty($request->search)) {
+            $query->where('filename', 'LIKE', '%' . $request->search . '%');
+        }
+
+        // Apply file type filter
+        if ($request->has('file_type') && !empty($request->file_type)) {
+            $query->where('file_type', $request->file_type);
+        }
+
+        // Apply category filter
+        if ($request->has('category') && !empty($request->category)) {
+            $query->where('category', $request->category);
+        }
+
+        // Get filtered results
+        $fileVersions = $query->paginate(10); // Fetch from file_versions table
+
+        return view('admin.pages.EditFilesOverview', compact('fileVersions')); // Pass $fileVersions to view
+    }
+
+
+
+    public function editFile($file_id)
+    {
+        $file = File::findOrFail($file_id);
+        return view('admin.pages.EditFilesView', compact('file'));
+    }
+    
+    public function updateFile(Request $request, $file_id)
+    {
+        if (!session()->has('user')) {
+            return redirect()->route('admin.upload')->with('error', 'Unauthorized: Please log in.');
+        }
+    
+        $user = session('user'); // Get user from session
+        $file = File::findOrFail($file_id);
+    
+        // Validate input
+        $request->validate([
+            'filename' => 'required|string|max:255',
+            'file_type' => 'required|string|max:10',
+            'category' => 'required|string|max:50',
+            'file' => 'nullable|file|max:5120', // Optional file upload, max 5MB
+        ]);
+    
+        // Get the latest version number and increment it
+        $latestVersion = FileVersions::where('file_id', $file->file_id)->max('version_number') ?? 0;
+        $newVersion = $latestVersion + 1;
+    
+        // Handle file upload
+        if ($request->hasFile('file')) {
+            $uploadedFile = $request->file('file');
+    
+            // Generate a unique filename with the same name
+            $newFileName = pathinfo($file->filename, PATHINFO_FILENAME) . '_' . time() . '.' . $uploadedFile->getClientOriginalExtension();
+            $filePath = $uploadedFile->storeAs('uploads/files', $newFileName, 'public'); // Store with new name
+            $fileSize = $uploadedFile->getSize();
+            $fileType = $uploadedFile->getClientOriginalExtension();
+        } else {
+            $filePath = $file->file_path;
+            $fileSize = $file->file_size;
+            $fileType = $file->file_type;
+        }
+    
+        // Store the new version in `file_versions`
+        FileVersions::create([
+            'file_id' => $file->file_id,
+            'version_number' => $newVersion,
+            'filename' => $request->filename, // Use the updated filename from input
+            'file_path' => $filePath,
+            'file_size' => $fileSize,
+            'file_type' => $fileType,
+            'uploaded_by' => $user->id ?? null, // Use session user ID
+        ]);
+    
+        return redirect()->route('admin.editFile', $file_id)->with('success', 'New file version saved!');
+    }
     
 
-
-
-
+    
+    
+  
 
 
 }

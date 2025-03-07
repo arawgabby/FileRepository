@@ -20,6 +20,7 @@ class File extends Model
         'file_type',
         'uploaded_by',
         'category',
+        'status',
     ];
 
     public $timestamps = true;

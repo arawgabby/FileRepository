@@ -5,7 +5,7 @@
 <meta name="csrf-token" content="{{ csrf_token() }}">
 <div class="container mx-auto p-6 bg-white rounded-xl" style="box-shadow: 4px 4px 10px rgba(0, 0, 0, 0.1);">
 
-    <h1 style="font-size: 30px; font-weight: 500; margin-bottom: 12px">Upload New File</h1>
+    <h1 style="font-size: 30px; font-weight: bold; margin-bottom: 12px">Upload New File</h1>
 
     <form action="{{ route('admin.uploadFile') }}" method="POST" enctype="multipart/form-data">
         @csrf

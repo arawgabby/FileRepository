@@ -9,16 +9,20 @@ class FileVersions extends Model
 {
     use HasFactory;
 
-    protected $table = 'file_versions'; // Explicitly defining the table name
+    protected $table = 'file_versions'; 
+    protected $primaryKey = 'version_id'; 
+
+    public $timestamps = true; // Ensure timestamps are enabled
 
     protected $fillable = [
-        'file_id', // References the original file
-        'version_number', // Versioning (e.g., 1.0, 1.1)
-        'filename', // Name of the versioned file
-        'file_path', // Storage path
-        'file_size', // File size in bytes
-        'file_type', // File type (e.g., pdf, docx)
-        'uploaded_by', // User who uploaded the version
+        'file_id',
+        'version_number',
+        'filename',
+        'file_path',
+        'file_size',
+        'file_type',
+        'uploaded_by',
+        'status',
     ];
 
     // Relationship to the main File model

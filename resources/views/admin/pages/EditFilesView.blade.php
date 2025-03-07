@@ -1,0 +1,44 @@
+@extends('admin.dashboard.adminDashboard')
+
+@section('content')
+<meta name="csrf-token" content="{{ csrf_token() }}">
+
+<div class="container mx-auto p-6 bg-white rounded-xl" style="box-shadow: 4px 4px 10px rgba(0, 0, 0, 0.1);">
+
+    <a href="{{ route('admin.files') }}" class="text-gray-600 hover:text-gray-800 flex items-center mb-4">
+            <i class="fas fa-arrow-left mr-2" style="font-size: 44px; font-weight: bold"> ←</i>
+    </a>
+
+    <h1 class="text-3xl font-semibold mb-4">Edit File</h1>
+
+    <form action="{{ route('admin.updateFile', $file->file_id) }}" method="POST" enctype="multipart/form-data">
+        @csrf
+        @method('PUT')
+
+        <div class="mb-4">
+            <label class="block text-gray-700 font-semibold">Filename</label>
+            <input type="text" name="filename" value="{{ $file->filename }}" class="border rounded p-2 w-full">
+        </div>
+
+        <div class="mb-4">
+            <label class="block text-gray-700 font-semibold">File Type</label>
+            <input type="text" name="file_type" value="{{ $file->file_type }}" class="border rounded p-2 w-full">
+        </div>
+
+        <div class="mb-4">
+            <label class="block text-gray-700 font-semibold">Category</label>
+            <input type="text" name="category" value="{{ $file->category }}" class="border rounded p-2 w-full">
+        </div>
+
+        <div class="mb-4">
+            <label class="block text-gray-700 font-semibold">Upload New Version</label>
+            <input type="file" name="file" class="border rounded p-2 w-full">
+        </div>
+
+        <button type="submit" class="bg-blue-500 text-white px-4 py-2 rounded">Update</button>
+    </form>
+
+
+</div>
+
+@endsection

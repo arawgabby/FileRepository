@@ -9,12 +9,23 @@
     }
 </style>
 
+@if (session('success'))
+    <script>
+        alert("{{ session('success') }}");
+    </script>
+@endif
+
+@if (session('error'))
+    <script>
+        alert("{{ session('error') }}");
+    </script>
+@endif
 
 <div class="container mx-auto p-6 bg-white rounded-xl" style="box-shadow: 4px 4px 10px rgba(0, 0, 0, 0.1);">
 
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
 
-    <h1 style="font-size: 30px; font-weight: 500; margin-bottom: 12px">Files Overview</h1>
+    <h1 style="font-size: 30px; font-weight: bold; margin-bottom: 12px">Files Overview</h1>
 
     <!-- Search & Filters -->
     <div class="mb-4 flex gap-4">
@@ -42,18 +53,19 @@
     <table class="w-full border-collapse border border-gray-300">
         <thead>
             <tr class="bg-gray-200">
-                <th class="border p-2"></th>
+                <th class="border p-2">File ID</th>
                 <th class="border p-2">Filename</th>
                 <th class="border p-2">File Type</th>
                 <th class="border p-2">Category</th>
                 <th class="border p-2">Uploaded By</th>
+                <th class="border p-2">Created At</th>
                 <th class="border p-2">Actions</th>
             </tr>
         </thead>
         <tbody id="fileTableBody">
             @foreach($files as $file)
             <tr class="file-row">
-                <td class="border p-2 filename">{{ $file->file_id }}</td>
+                <td class="border p-2 filename">00{{ $file->file_id }}</td>
                 <td class="border p-2 filename">{{ $file->filename }}</td>
                 <td class="border p-2 file-type">
                     @php
@@ -75,8 +87,29 @@
                 <td class="border p-2">
                     {{ $file->user ? $file->user->name : 'Unknown' }}
                 </td>
+                <td class="border p-2 filename">{{ $file->created_at }}</td>
                 <td class="border p-2">
-                    <a href="{{ route('files.download', $file->filename) }}" class="text-blue-500">Download</a>
+                    <div class="flex justify-center space-x-4">
+                        <a href="{{ route('files.download', $file->filename) }}" class="text-blue-500" title="Download"> <i class="fas fa-download"> </i> </a> 
+                        <a href="{{ route('admin.editFile', $file->file_id) }}" class="text-red-500" title="Upload New File Based on this version"><i class="fas fa-upload"></i></a> 
+                        <a href="#" class="text-gray-500 hover:text-red-700" title="Delete">
+                        <i class="fas fa-trash"></i>
+                        </a> 
+                        <!-- <a href="{{ route('admin.archiveFileV', $file->file_id) }}" 
+                            class="text-blue-500 hover:text-blue-700"
+                            title="Archive"
+                            onclick="event.preventDefault(); confirmArchive({{ $file->file_id }});">
+                            <i class="fas fa-archive"></i>
+                        </a>
+
+                        <form id="archive-form-{{ $file->file_id }}" 
+                            action="{{ route('admin.archiveFileV', $file->file_id) }}" 
+                            method="POST" 
+                            style="display: none;">
+                            @csrf
+                            @method('PUT')
+                        </form> -->
+                    </div>
                 </td>
             </tr>
             @endforeach
@@ -85,6 +118,13 @@
 
 </div>
 
+<script>
+    function confirmArchive(fileId) {
+        if (confirm("Are you sure you want to archive this file?")) {
+            document.getElementById('archive-form-' + fileId).submit();
+        }
+    }
+</script>
 <script>
     document.addEventListener("DOMContentLoaded", function () {
         const searchInput = document.getElementById("searchInput");
