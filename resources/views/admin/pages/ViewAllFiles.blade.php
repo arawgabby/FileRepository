@@ -34,9 +34,9 @@
         
         <select id="fileTypeFilter" class="border rounded p-2">
             <option value="">All Types</option>
-            <option value="pdf">PDF</option>
-            <option value="docx">DOCX</option>
-            <option value="pptx">PPTX</option>
+            <option value="pdf">Pdf</option>
+            <option value="docx">Docx</option>
+            <option value="pptx">Pptx</option>
         </select>
 
         <select id="categoryFilter" class="border rounded p-2">
@@ -49,6 +49,10 @@
         </select>
     </div>
 
+    <div class="mt-2 flex items-center text-red-600 text-sm mb-2">
+        <i class="fas fa-info-circle mr-2"></i>
+        <span>File versions on this section are cannot be downloaded, please go to file versions section to download your selected file version. Thank you</span>
+    </div>
     <!-- Files Table -->
     <table class="w-full border-collapse border border-gray-300">
         <thead>
@@ -64,70 +68,121 @@
             </tr>
         </thead>
         <tbody id="fileTableBody">
-            @foreach($files as $file)
-            <tr class="file-row">
-                <td class="border p-2 filename">00{{ $file->file_id }}</td>
-                <td class="border p-2 filename">{{ $file->filename }}</td>
-                <td class="border p-2 file-type">
-                    @php
-                        $fileType = strtolower($file->file_type);
-                    @endphp
+        @foreach($files as $file)
+        @if($file->status == 'active') 
+        <tr class="file-row">
+            <td class="border p-2 filename">00{{ $file->file_id }}</td>
+            <td class="border p-2 filename">{{ $file->filename }}</td>
+            <td class="border p-2 file-type">
+                @php
+                    $fileType = strtolower($file->file_type);
+                @endphp
 
-                    @if($fileType == 'pdf')
-                        <i class="fa-solid fa-file-pdf text-red-500"></i>
-                    @elseif($fileType == 'docx' || $fileType == 'doc')
-                        <i class="fa-solid fa-file-word text-blue-500"></i>
-                    @elseif($fileType == 'pptx' || $fileType == 'ppt')
-                        <i class="fa-solid fa-file-powerpoint text-orange-500"></i>
-                    @else
-                        <i class="fa-solid fa-file text-gray-500"></i>
-                    @endif
-                    {{ strtoupper($fileType) }}
-                </td>         
-                <td class="border p-2 category">{{ $file->category }}</td>
-                <td class="border p-2">
-                    {{ $file->user ? $file->user->name : 'Unknown' }}
-                </td>
-                <td class="border p-2 filename">{{ $file->created_at->diffForHumans() }}</td>
-                <td class="border p-2 filename">{{ $file->status }}</td>
-                <td class="border p-2">
-                    <div class="flex justify-center space-x-4">
-                        <a href="{{ route('files.download', basename($file->file_path)) }}" class="text-blue-500" title="Download">
-                            <i class="fas fa-download"></i>
-                        </a>
-                        <a href="{{ route('admin.files.editPrimary', ['file_id' => $file->file_id]) }}" class="text-blue-500" title="Edit Primary File">
-                            <i class="fas fa-edit"></i>
-                        </a>
-                        <a href="{{ route('admin.editFile', $file->file_id) }}" class="text-red-500" title="Upload New File Based on this version"><i class="fas fa-upload"></i></a> 
-                        <a href="#" class="text-gray-500 hover:text-red-700" title="Delete">
+                @if($fileType == 'pdf')
+                    <i class="fa-solid fa-file-pdf text-red-500"></i>
+                @elseif($fileType == 'docx' || $fileType == 'doc')
+                    <i class="fa-solid fa-file-word text-blue-500"></i>
+                @elseif($fileType == 'pptx' || $fileType == 'ppt')
+                    <i class="fa-solid fa-file-powerpoint text-orange-500"></i>
+                @else
+                    <i class="fa-solid fa-file text-gray-500"></i>
+                @endif
+                {{ strtoupper($fileType) }}
+            </td>         
+            <td class="border p-2 category">{{ $file->category ?? 'No Category' }}</td>
+            <td class="border p-2">
+                {{ $file->user ? $file->user->name : 'Unknown' }}
+            </td>
+            <td class="border p-2 filename">{{ $file->created_at->diffForHumans() }}</td>
+            <td class="border p-2 filename">{{ $file->status }}</td>
+            <td class="border p-2">
+                <div class="flex justify-center space-x-4">
+                    <a href="{{ route('files.download', basename($file->file_path)) }}" class="text-blue-500" title="Download">
+                        <i class="fas fa-download"></i>
+                    </a>
+                    <a href="{{ route('admin.files.editPrimary', ['file_id' => $file->file_id]) }}" class="text-blue-500" title="Edit Primary File">
+                        <i class="fas fa-edit"></i>
+                    </a>
+                    <a href="{{ route('admin.editFile', $file->file_id) }}" class="text-red-500" title="Upload New File Based on this version">
+                        <i class="fas fa-upload"></i>
+                    </a>
+                    <form action="{{ route('admin.files.trash', $file->file_id) }}" method="POST" onsubmit="return confirmTrash(event);">
+                        @csrf
+                        @method('PUT') <!-- This tells Laravel to treat it as a PUT request -->
+                        <button type="submit" class="text-blue-500 hover:text-blue-700" title="Delete this permanently?">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </form>
+
+                    <script>
+                        function confirmTrash(event) {
+                            if (!confirm("Are you sure you want to move this file to trash?")) {
+                                event.preventDefault();
+                                return false;
+                            }
+                            return true;
+                        }
+                    </script>
+                </div>
+            </td>
+        </tr>
+        @endif
+
+    
+
+        <!-- Display associated file versions -->
+        @foreach($fileVersions->where('file_id', $file->file_id) as $fileVersion)
+        <tr class="file-version-row bg-gray-100">
+            <td class="border p-2 pl-6 filename">Ver. {{ $fileVersion->version_number }}</td>
+            <td class="border p-2 filename">{{ $fileVersion->filename }}</td>
+            <td class="border p-2 file-type">
+                @php
+                    $fileVersionType = strtolower($fileVersion->file_type);
+                @endphp
+
+                @if($fileVersionType == 'pdf')
+                    <i class="fa-solid fa-file-pdf text-red-500"></i>
+                @elseif($fileVersionType == 'docx' || $fileVersionType == 'doc')
+                    <i class="fa-solid fa-file-word text-blue-500"></i>
+                @elseif($fileVersionType == 'pptx' || $fileVersionType == 'ppt')
+                    <i class="fa-solid fa-file-powerpoint text-orange-500"></i>
+                @else
+                    <i class="fa-solid fa-file text-gray-500"></i>
+                @endif
+                {{ strtoupper($fileVersionType) }}
+            </td>         
+            <td class="border p-2 category">{{ $fileVersion->category ?? $file->category ?? 'No Category' }}</td>
+            <td class="border p-2">
+                {{ $fileVersion->user ? $fileVersion->user->name : 'Unknown' }}
+            </td>
+            <td class="border p-2 filename">{{ $fileVersion->created_at->diffForHumans() }}</td>
+            <td class="border p-2 filename">{{ $fileVersion->status }}</td>
+            <td class="border p-2">
+                <div class="flex justify-center space-x-4">
+                    <a href="{{ route('files.download', basename($fileVersion->file_path)) }}" class="text-blue-500" title="Download">
+                        <i class="fas fa-download"></i>
+                    </a>
+                    <a href="{{ route('admin.editFile', $fileVersion->file_id) }}" class="text-red-500" title="Upload New Version">
+                        <i class="fas fa-upload"></i>
+                    </a>
+                    <a href="{{ route('admin.overview.trash', $fileVersion->version_id) }}" class="text-blue-500 hover:text-blue-700" title="Add this version file to Trash"
+                    onclick="confirmTrash(event, {{ $fileVersion->version_id }})">
                         <i class="fas fa-trash"></i>
-                        </a> 
-                        <!-- <a href="{{ route('admin.archiveFileV', $file->file_id) }}" 
-                            class="text-blue-500 hover:text-blue-700"
-                            title="Archive"
-                            onclick="event.preventDefault(); confirmArchive({{ $file->file_id }});">
-                            <i class="fas fa-archive"></i>
-                        </a>
-
-                        <form id="archive-form-{{ $file->file_id }}" 
-                            action="{{ route('admin.archiveFileV', $file->file_id) }}" 
-                            method="POST" 
-                            style="display: none;">
-                            @csrf
-                            @method('PUT')
-                        </form> -->
-                    </div>
-                </td>
-            </tr>
-            @endforeach
+                    </a>
+                </div>
+            </td>
+        </tr>
+        @endforeach
+        @endforeach
+        
         </tbody>
     </table>
 
 </div>
 
 <script>
-    function confirmArchive(fileId) {
-        if (confirm("Are you sure you want to archive this file?")) {
+    function confirmTrash(fileId) {
+        if (confirm("Are you sure you want to put this on trash this file?")) {
             document.getElementById('archive-form-' + fileId).submit();
         }
     }

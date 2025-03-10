@@ -23,7 +23,7 @@
             @endif -->
             <div class="text-2xl font-bold">
             <!-- <img src="{{ asset('product-images/efvlogo.png') }}" alt="EFV Logo" class="w-25 h-25"> -->
-            <p style="margin-top: 8px; text-align: center"><a href="#" class="text-white">Admin</a></p>
+            <p style="margin-top: 8px; text-align: center"><a href="#" class="text-white">Staff Panel</a></p>
         </div>
             <nav class="space-y-6">
 
@@ -73,7 +73,7 @@
                 <i class="fas fa-file mr-4"></i> Logs
             </a>
 
-            <a href="{{ url('/admin-logout') }}" class="flex items-center text-white hover:text-white" 
+            <a href="{{ url('/staff-logout') }}" class="flex items-center text-white hover:text-white" 
             style="font-weight: bold" onclick="return confirmLogout();">
             Logout
             </a>

@@ -122,8 +122,36 @@ class FileController extends Controller
         return redirect()->back()->with('success', 'File version archived successfully!');
     }
 
+    public function moveToTrash(Request $request, $id)
+    {
+        // Find the file by file_id
+        $file = File::where('file_id', $id)->first();
+    
+        if ($file) {
+            $file->status = 'deleted';
+            $file->save();
+            return redirect()->back()->with('success', 'File moved to trash successfully.');
+        }
+    
+        return redirect()->back()->with('error', 'File not found.');
+    }
+    
+    
+
+
 
     public function TrashFile($version_id)
+    {
+        // Find the file version
+        $fileVersion = FileVersions::findOrFail($version_id);
+
+        // Update status to 'archived'
+        $fileVersion->update(['status' => 'deleted']);
+
+        return redirect()->back()->with('success', 'File version placed on trash successfully!');
+    }
+
+    public function OverviewTrashFile($version_id)
     {
         // Find the file version
         $fileVersion = FileVersions::findOrFail($version_id);

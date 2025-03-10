@@ -38,6 +38,29 @@ class AdminAuthController extends Controller
         }
     }   
 
+    public function Staffstore(Request $request)
+    {
+        $validated = $request->validate([
+            'name' => 'required|string|max:255',
+            'email' => 'required|email|unique:users,email',
+            'password' => 'required|string|min:6',
+            'role' => 'required|in:staff,faculty',
+        ]);
+    
+        try {
+            User::create([
+                'name' => $validated['name'],
+                'email' => $validated['email'],
+                'password' => Hash::make($validated['password']),
+                'role' => $validated['role'],
+            ]);
+    
+            return redirect('/staff-login')->with('success', 'Account created successfully! You can now log in.');
+        } catch (\Exception $e) {
+            return redirect('/staff-signup')->with('error', 'Something went wrong. Please try again.');
+        }
+    }
+    
     public function login(Request $request)
     {
         $credentials = $request->validate([
@@ -58,11 +81,46 @@ class AdminAuthController extends Controller
         }
     }
 
+    public function Stafflogin(Request $request)
+    {
+        $credentials = $request->validate([
+            'email' => 'required|email',
+            'password' => 'required|string',
+        ]);
+
+        // Find the user
+        $user = User::where('email', $credentials['email'])->first();
+
+        // Check if user exists and password is correct
+        if ($user && Hash::check($credentials['password'], $user->password)) {
+
+            // Check if the user's role is either 'faculty' or 'staff'
+            if ($user->role === 'faculty' || $user->role === 'staff') {
+                // Store user in session if you want
+                session(['user' => $user]);
+
+                return redirect()->route('staff.dashboard')->with('success', 'Login successful!');
+            } else {
+                return redirect('/staff-login')->with('error', 'Access denied. Only faculty or staff can log in.');
+            }
+        } else {
+            return redirect('/staff-login')->with('error', 'Invalid email or password. Please try again.');
+        }
+    }
+
+
     public function logout()
     {
         session()->forget('user'); // Clear the user session
         return redirect('/admin-login')->with('success', 'You have been logged out successfully.');
     }
+
+    public function Stafflogout()
+    {
+        session()->flush(); // Clear all session data
+        return redirect('/staff-login')->with('success', 'You have been logged out successfully.');
+    }
+
 
     public function uploadFile(Request $request)
     {
@@ -100,27 +158,28 @@ class AdminAuthController extends Controller
 
     public function viewFiles(Request $request)
     {
-        $query = File::query();
+        // Fetch primary files
+        $files = File::query();
 
-        // Apply search filter
+        // Apply filters to primary files
         if ($request->has('search') && !empty($request->search)) {
-            $query->where('filename', 'LIKE', '%' . $request->search . '%');
+            $files->where('filename', 'LIKE', '%' . $request->search . '%');
         }
 
-        // Apply file type filter
         if ($request->has('file_type') && !empty($request->file_type)) {
-            $query->where('file_type', $request->file_type);
+            $files->where('file_type', $request->file_type);
         }
 
-        // Apply category filter
         if ($request->has('category') && !empty($request->category)) {
-            $query->where('category', $request->category);
+            $files->where('category', $request->category);
         }
 
-        // Get filtered results
-        $files = $query->paginate(10); // Pagination for better UI
+        $files = $files->paginate(10); // Paginate results
 
-        return view('admin.pages.ViewAllFiles', compact('files'));
+        // Fetch file versions separately and link to files
+        $fileVersions = FileVersions::whereIn('file_id', $files->pluck('file_id'))->get();
+
+        return view('admin.pages.ViewAllFiles', compact('fileVersions', 'files'));
     }
 
     public function ViewFilesVersions(Request $request) 
