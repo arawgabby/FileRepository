@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Admin</title>
+    <title>Staff</title>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;700&display=swap" rel="stylesheet">
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
@@ -27,24 +27,33 @@
         </div>
             <nav class="space-y-6">
 
+
+            <p class="text-white text-1xl font-bold">
+                <i class="fas fa-folder-open"></i> File Repository
+            </p>
+
+            <a href="{{ route('staff.upload') }}" class="flex items-center text-gray-300 hover:text-white ml-4">
+                <i class="fas fa-upload mr-4"></i> Upload New File
+            </a>
+
+            <a href="{{ route('staff.files') }}" class="flex items-center text-gray-300 hover:text-white ml-4">
+                <i class="fas fa-file-alt mr-4"></i>  My Uploads
+            </a>
+
+            <a href="{{ route('staff.pending.files') }}" class="flex items-center text-gray-300 hover:text-white ml-4">
+                <i class="fas fa-file-alt mr-4"></i> Pending File Request
+            </a>
+
+            <a href="{{ route('staff.active.files') }}" class="flex items-center text-gray-300 hover:text-white ml-4">
+                <i class="fas fa-file-alt mr-4"></i> My Active Files
+            </a>
+
+
             <p class="text-white text-1xl font-bold">
                 <i class="fas fa-folder-open"></i> Manage Files
             </p>
 
-            <a href="{{ route('admin.upload') }}" class="flex items-center text-gray-300 hover:text-white ml-4">
-                <i class="fas fa-upload mr-4"></i> Upload New File
-            </a>
-
-            <a href="{{ route('admin.files') }}" class="flex items-center text-gray-300 hover:text-white ml-4">
-                <i class="fas fa-file-alt mr-4"></i> View Files
-            </a>
-
-            <a href="#" class="flex items-center text-gray-300 hover:text-white ml-4">
-                <i class="fas fa-info mr-4"></i> View File Request
-            </a>
-
-
-            <a href="{{ route('admin.update') }}" class="flex items-center text-gray-300 hover:text-white ml-4">
+            <a href="{{ route('staff.update') }}" class="flex items-center text-gray-300 hover:text-white ml-4">
                 <i class="fas fa-history mr-4"></i> File Versions
             </a>
 
@@ -58,19 +67,11 @@
             </a>
 
             <p class="text-white text-1xl font-bold mt-8">
-                <i class="fas fa-folder-open"></i> User Management 
-            </p>
-
-            <a href="{{ route('admin.users') }}" class="flex items-center text-gray-300 hover:text-white ml-4">
-                <i class="fas fa-user mr-4"></i> Users
-            </a>
-
-            <p class="text-white text-1xl font-bold mt-8">
                 <i class="fas fa-folder-open"></i> Activity Log
             </p>
 
             <a href="#" class="flex items-center text-gray-300 hover:text-white ml-4">
-                <i class="fas fa-file mr-4"></i> Logs
+                <i class="fas fa-file mr-4"></i> Staff Logs
             </a>
 
             <a href="{{ url('/staff-logout') }}" class="flex items-center text-white hover:text-white" 

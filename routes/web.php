@@ -4,6 +4,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Auth\AdminAuthController;
 use App\Http\Controllers\FileController;
 use App\Http\Controllers\UserController;
+use App\Http\Controllers\StaffController;
 
 Route::get('/', function () {
     return view('welcome');
@@ -52,6 +53,41 @@ Route::middleware(['staff.auth'])->group(function () {
     Route::get('/staff-dashboard', function () {
         return view('staff.dashboard.staffDashboard');
     })->name('staff.dashboard');
+
+    Route::get('/staff-upload', function () {
+        return view('staff.pages.StaffUploadNewFile');
+    })->name('staff.upload');
+
+    Route::get('/staff-files-requests', [StaffController::class, 'pendingFileRequests'])->name('staff.pending.files');
+
+    Route::get('/staff-active-files', [StaffController::class, 'activeFiles'])->name('staff.active.files');
+
+    Route::post('/staff-upload', [StaffController::class, 'StaffuploadFile'])->name('staff.uploadFile');
+
+    Route::get('/staff-files', [StaffController::class, 'StaffviewFiles'])->name('staff.files');
+
+    Route::get('/my-uploads', [StaffController::class, 'MyUploads'])->name('my.uploads');
+
+    Route::get('/staff-files/download/{file}', [StaffController::class, 'StaffdownloadFile'])->name('staff.files.download');
+
+    Route::put('/staff/files/trash-view/{id}', [StaffController::class, 'StaffmoveToTrash'])->name('staff.files.trash');
+
+    Route::put('/overview/staff-trash/{version_id}', [StaffController::class, 'StaffOverviewTrashFile'])->name('staff.overview.trash');
+
+    Route::post('/staff/request-file/{file_id}', [StaffController::class, 'requestFile'])->name('staff.requestFile');
+
+    Route::get('/staff/files/{file_id}/edit-primary', [StaffController::class, 'StaffeditPrimaryFile'])
+    ->name('staff.files.editPrimary');
+
+    Route::post('/staff/files/{file_id}/update-primary', [StaffController::class, 'StaffupdatePrimaryFile'])
+    ->name('staff.files.updatePrimary');
+
+    Route::get('/staff-edit-file/{file_id}', [StaffController::class, 'StaffeditFile'])->name('staff.editFile');
+
+    Route::put('/staff-update-file/{file_id}', [StaffController::class, 'StaffupdateFile'])->name('staff.updateFile');
+
+    Route::get('/staff-update-files', [StaffController::class, 'StaffViewFilesVersions'])->name('staff.update');
+
 
 });
 

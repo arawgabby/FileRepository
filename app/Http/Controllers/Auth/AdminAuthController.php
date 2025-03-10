@@ -344,9 +344,7 @@ class AdminAuthController extends Controller
         return redirect()->route('admin.editFile', $file_id)->with('success', 'New file version saved!');
     }
     
-    
 
-    
     
   
 
