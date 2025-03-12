@@ -7,6 +7,7 @@ use App\Models\AccessLog;
 use Illuminate\Support\Facades\Storage;
 use App\Models\File;
 use App\Models\FileVersions;
+use App\Models\FileTimeStamp;
 use Illuminate\Support\Facades\Auth;
 use App\Models\FileRequest;
 
@@ -211,8 +212,6 @@ class StaffController extends Controller
         return view('staff.pages.PendingFiles', compact('fileRequests'));
     }
 
-
-
     public function activeFiles(Request $request)
     {
         // Ensure the user is logged in via session
@@ -248,8 +247,6 @@ class StaffController extends Controller
 
         return view('staff.pages.StaffViewAllFilesActive', compact('fileVersions', 'files'));
     }
-
-    
 
     public function StaffeditPrimaryFile($file_id)
     {
@@ -440,18 +437,26 @@ class StaffController extends Controller
     {
         // Find the file version
         $fileVersion = FileVersions::findOrFail($version_id);
-
+    
         // Update status to 'archived'
         $fileVersion->update(['status' => 'archived']);
-
-        return redirect()->back()->with('success', 'File version unarchived successfully!');
+    
+        // Insert into file_time_stamps with file_id in event_type
+        FileTimeStamp::create([
+            'file_id' => $fileVersion->file_id,
+            'version_id' => $fileVersion->version_id,
+            'event_type' => 'File ID ' . $fileVersion->file_id . ' Archived', // Include file_id in the message
+            'timestamp' => now(),
+        ]);
+    
+        return redirect()->back()->with('success', 'File version archived successfully!');
     }
 
     public function StaffeditFileVersion($version_id)
     {
         $fileVersion = FileVersions::where('version_id', $version_id)->firstOrFail(); // Fetch file version by version_id
     
-        return view('admin.pages.EditFileVersion', compact('fileVersion'));
+        return view('staff.pages.StaffEditFileVersion', compact('fileVersion'));
     }
 
     public function StaffTrashFile($version_id)
@@ -459,11 +464,20 @@ class StaffController extends Controller
         // Find the file version
         $fileVersion = FileVersions::findOrFail($version_id);
 
-        // Update status to 'archived'
+        // Update status to 'deleted'
         $fileVersion->update(['status' => 'deleted']);
 
-        return redirect()->back()->with('success', 'File version placed on trash successfully!');
+        // Insert into file_time_stamps with file_id in event_type
+        FileTimeStamp::create([
+            'file_id' => $fileVersion->file_id,
+            'version_id' => $fileVersion->version_id,
+            'event_type' => 'File ID ' . $fileVersion->file_id . ' Moved to Trash', // Log trash event
+            'timestamp' => now(),
+        ]);
+
+        return redirect()->back()->with('success', 'File version placed in trash successfully!');
     }
+
 
     public function StaffArchivedViewFilesVersions(Request $request) 
     {
@@ -503,11 +517,19 @@ class StaffController extends Controller
     {
         // Find the file version
         $fileVersion = FileVersions::findOrFail($version_id);
-
-        // Update status to 'archived'
+    
+        // Update status to 'active'
         $fileVersion->update(['status' => 'active']);
-
-        return redirect()->back()->with('success', 'File version archived successfully!');
+    
+        // Insert into file_time_stamps with file_id in event_type
+        FileTimeStamp::create([
+            'file_id' => $fileVersion->file_id,
+            'version_id' => $fileVersion->version_id,
+            'event_type' => 'File ID ' . $fileVersion->file_id . ' Unarchived', // Log unarchive event
+            'timestamp' => now(),
+        ]);
+    
+        return redirect()->back()->with('success', 'File version unarchived successfully!');
     }
             
     public function StaffTrashViewFilesVersions(Request $request) 
@@ -547,12 +569,72 @@ class StaffController extends Controller
     {
         // Find the file version
         $fileVersion = FileVersions::findOrFail($version_id);
-
-        // Update status to 'archived'
+    
+        // Update status to 'active'
         $fileVersion->update(['status' => 'active']);
-
+    
+        // Insert into file_time_stamps with file_id in event_type
+        FileTimeStamp::create([
+            'file_id' => $fileVersion->file_id,
+            'version_id' => $fileVersion->version_id,
+            'event_type' => 'File ID ' . $fileVersion->file_id . ' Restored from Trash', // Log restore event
+            'timestamp' => now(),
+        ]);
+    
         return redirect()->back()->with('success', 'File version restored successfully!');
     }
+    
+
+    public function StaffupdateFileVersion(Request $request, $version_id)
+    {
+        // Fetch file version by version_id
+        $fileVersion = FileVersions::where('version_id', $version_id)->firstOrFail();
+    
+        // Validate input
+        $request->validate([
+            'filename' => 'required|string|max:255',
+            'file_type' => 'required|string|max:10',
+            'file' => 'nullable|file|max:5120', // Optional file upload, max 5MB
+        ]);
+    
+        // Track changes
+        $changesMade = false;
+    
+        // Handle file upload
+        if ($request->hasFile('file')) {
+            $uploadedFile = $request->file('file');
+            $newFileName = $uploadedFile->getClientOriginalName();
+            $filePath = $uploadedFile->storeAs('uploads/files', $newFileName, 'public'); // Store with new name
+    
+            // Update file details
+            $fileVersion->file_path = 'uploads/files/' . $newFileName;
+            $fileVersion->file_size = $uploadedFile->getSize();
+            $fileVersion->file_type = $uploadedFile->getClientOriginalExtension();
+            $fileVersion->updated_at = now();
+            $changesMade = true;
+        }
+    
+        // Update other details
+        if ($fileVersion->filename !== $request->filename) {
+            $fileVersion->filename = $request->filename;
+            $changesMade = true;
+        }
+    
+        if ($changesMade) {
+            $fileVersion->save();
+    
+            // Log the update in file_time_stamps
+            FileTimeStamp::create([
+                'file_id' => $fileVersion->file_id,
+                'version_id' => $fileVersion->version_id,
+                'event_type' => 'File ID ' . $fileVersion->file_id . ' Updated',
+                'timestamp' => now(),
+            ]);
+        }
+    
+        return redirect()->route('staff.update')->with('success', 'File version updated successfully!');
+    }
+    
     
 
 

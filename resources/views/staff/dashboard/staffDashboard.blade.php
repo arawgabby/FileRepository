@@ -89,6 +89,10 @@
             </p>
 
             <a href="#" class="flex items-center text-gray-300 hover:text-white ml-4">
+                <i class="fas fa-file mr-4"></i> File Timestamps
+            </a>
+
+            <a href="#" class="flex items-center text-gray-300 hover:text-white ml-4">
                 <i class="fas fa-file mr-4"></i> Staff Logs
             </a>
 

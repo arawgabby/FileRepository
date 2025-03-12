@@ -103,6 +103,10 @@ Route::middleware(['staff.auth'])->group(function () {
 
     Route::put('/staff/restore-file/{version_id}', [StaffController::class, 'StafRestoreFile'])->name('staff.restore');
 
+    Route::put('/staff/update-file-version/{version_id}', [StaffController::class, 'StaffupdateFileVersion'])
+    ->name('staff.updateFileVersion');
+
+    Route::put('/staff-view/trash-file/{version_id}', [StaffController::class, 'StaffTrashFile'])->name('staff.trash');
 
 });
 

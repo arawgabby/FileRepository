@@ -96,7 +96,7 @@
                                     <i class="fas fa-edit"></i>
                                 </a>
                                 <a href="{{
-                                 route('admin.trash', $fileVersion->version_id) }}" 
+                                 route('staff.trash', $fileVersion->version_id) }}" 
                                     class="text-blue-500 hover:text-blue-700" 
                                     title="Add to Trash"
                                     onclick="confirmTrash(event, {{ $fileVersion->version_id }})">
@@ -104,7 +104,7 @@
                                 </a>
 
                                 <form id="trash-form-{{ $fileVersion->version_id }}" 
-                                    action="{{ route('admin.trash', $fileVersion->version_id) }}" 
+                                    action="{{ route('staff.trash', $fileVersion->version_id) }}" 
                                     method="POST" 
                                     style="display: none;">
                                     @csrf
