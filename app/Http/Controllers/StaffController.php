@@ -316,7 +316,7 @@ class StaffController extends Controller
         $file->status = $request->status;
         $file->save();
     
-        return redirect()->route('staff.files', $file_id)->with('success', 'File updated successfully!');
+        return redirect()->route('staff.active.files', $file_id)->with('success', 'File updated successfully!');
     }
 
     public function StaffeditFile($file_id)
@@ -436,7 +436,124 @@ class StaffController extends Controller
         return view('staff.pages.StaffEditFilesOverview', compact('fileVersions')); // Pass data to view
     }
 
+    public function StaffarchiveFile($version_id)
+    {
+        // Find the file version
+        $fileVersion = FileVersions::findOrFail($version_id);
+
+        // Update status to 'archived'
+        $fileVersion->update(['status' => 'archived']);
+
+        return redirect()->back()->with('success', 'File version unarchived successfully!');
+    }
+
+    public function StaffeditFileVersion($version_id)
+    {
+        $fileVersion = FileVersions::where('version_id', $version_id)->firstOrFail(); // Fetch file version by version_id
+    
+        return view('admin.pages.EditFileVersion', compact('fileVersion'));
+    }
+
+    public function StaffTrashFile($version_id)
+    {
+        // Find the file version
+        $fileVersion = FileVersions::findOrFail($version_id);
+
+        // Update status to 'archived'
+        $fileVersion->update(['status' => 'deleted']);
+
+        return redirect()->back()->with('success', 'File version placed on trash successfully!');
+    }
+
+    public function StaffArchivedViewFilesVersions(Request $request) 
+    {
+        // Ensure the user is logged in via session
+        if (!session()->has('user')) {
+            return redirect()->route('staff.upload')->with('error', 'Unauthorized: Please log in.');
+        }
+
+        $user = session('user'); // Get the logged-in user
+
+        // Fetch file versions uploaded by the logged-in user
+        $query = FileVersions::where('uploaded_by', $user->id);
+
+        // Apply search filter
+        if ($request->has('search') && !empty($request->search)) {
+            $query->where('filename', 'LIKE', '%' . $request->search . '%');
+        }
+
+        // Apply file type filter
+        if ($request->has('file_type') && !empty($request->file_type)) {
+            $query->where('file_type', $request->file_type);
+        }
+
+        // Apply category filter
+        if ($request->has('category') && !empty($request->category)) {
+            $query->where('category', $request->category);
+        }
+
+        // Get filtered results with pagination
+        $fileVersions = $query->paginate(10);
+
+        return view('staff.pages.StaffArchivedFiles', compact('fileVersions')); // Pass data to view
+    }
+
+    
+    public function StaffunarchiveFile($version_id)
+    {
+        // Find the file version
+        $fileVersion = FileVersions::findOrFail($version_id);
+
+        // Update status to 'archived'
+        $fileVersion->update(['status' => 'active']);
+
+        return redirect()->back()->with('success', 'File version archived successfully!');
+    }
             
+    public function StaffTrashViewFilesVersions(Request $request) 
+    {
+        // Ensure the user is logged in via session
+        if (!session()->has('user')) {
+            return redirect()->route('staff.upload')->with('error', 'Unauthorized: Please log in.');
+        }
+    
+        $user = session('user'); // Get the logged-in user
+    
+        // Fetch only trashed file versions uploaded by the logged-in user
+        $query = FileVersions::where('uploaded_by', $user->id);
+    
+        // Apply search filter
+        if ($request->has('search') && !empty($request->search)) {
+            $query->where('filename', 'LIKE', '%' . $request->search . '%');
+        }
+    
+        // Apply file type filter
+        if ($request->has('file_type') && !empty($request->file_type)) {
+            $query->where('file_type', $request->file_type);
+        }
+    
+        // Apply category filter
+        if ($request->has('category') && !empty($request->category)) {
+            $query->where('category', $request->category);
+        }
+    
+        // Get filtered results with pagination
+        $fileVersions = $query->paginate(10);
+    
+        return view('staff.pages.StaffTrashBinFiles', compact('fileVersions')); // Pass data to view
+    }
+
+    public function StafRestoreFile($version_id)
+    {
+        // Find the file version
+        $fileVersion = FileVersions::findOrFail($version_id);
+
+        // Update status to 'archived'
+        $fileVersion->update(['status' => 'active']);
+
+        return redirect()->back()->with('success', 'File version restored successfully!');
+    }
+    
 
 
 }

@@ -12,7 +12,7 @@
 
 
      <!-- Ensure the form submits to the correct route with file_id -->
-     <form action="{{ route('admin.files.updatePrimary', ['file_id' => $file->file_id]) }}" method="POST" enctype="multipart/form-data">
+     <form action="{{ route('staff.files.updatePrimary', ['file_id' => $file->file_id]) }}" method="POST" enctype="multipart/form-data">
         @csrf
         @method('POST')
 

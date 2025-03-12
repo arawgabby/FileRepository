@@ -54,26 +54,26 @@
         <span>File versions on this section are cannot be downloaded, please go to file versions section to download your selected file version. Thank you</span>
     </div>
     <!-- Files Table -->
-    <table class="w-full border-collapse border border-gray-300">
+    <table class="w-full -collapse  -gray-300">
         <thead>
             <tr class="bg-gray-200">
-                <th class="border p-2">File ID</th>
-                <th class="border p-2">Filename</th>
-                <th class="border p-2">File Type</th>
-                <th class="border p-2">Category</th>
-                <th class="border p-2">Uploaded By</th>
-                <th class="border p-2">Created At</th>
-                <th class="border p-2">Request Status</th>
-                <th class="border p-2">Actions</th>
+                <th class=" p-2">File ID</th>
+                <th class=" p-2">Filename</th>
+                <th class=" p-2">File Type</th>
+                <th class=" p-2">Category</th>
+                <th class=" p-2">Uploaded By</th>
+                <th class=" p-2">Created At</th>
+                <th class=" p-2">Request Status</th>
+                <th class=" p-2">Actions</th>
             </tr>
         </thead>
         <tbody id="fileTableBody">
         @foreach($files as $file)
             @if($file->status == 'pending') 
             <tr class="file-row">
-                <td class="border p-2 filename">00{{ $file->file_id }}</td>
-                <td class="border p-2 filename">{{ $file->filename }}</td>
-                <td class="border p-2 file-type">
+                <td class=" p-2 filename">00{{ $file->file_id }}</td>
+                <td class=" p-2 filename">{{ $file->filename }}</td>
+                <td class=" p-2 file-type">
                     @php
                         $fileType = strtolower($file->file_type);
                     @endphp
@@ -89,11 +89,11 @@
                     @endif
                     {{ strtoupper($fileType) }}
                 </td>         
-                <td class="border p-2 category">{{ $file->category ?? 'No Category' }}</td>
-                <td class="border p-2">{{ $file->user ? $file->user->name : 'Unknown' }}</td>
-                <td class="border p-2 filename">{{ $file->created_at->diffForHumans() }}</td>
-                <td class="border p-2 filename">{{ $file->status }}</td>
-                <td class="border p-2">
+                <td class=" p-2 category">{{ $file->category ?? 'No Category' }}</td>
+                <td class=" p-2">{{ $file->user ? $file->user->name : 'Unknown' }}</td>
+                <td class=" p-2 filename">{{ $file->created_at->diffForHumans() }}</td>
+                <td class=" p-2 filename">{{ $file->status }}</td>
+                <td class=" p-2">
                     <div class="flex justify-center space-x-4">
                         
                         @if($file->status == 'active')
@@ -108,14 +108,6 @@
                             </a>
                         @endif
 
-                        <form action="{{ route('staff.files.trash', $file->file_id) }}" method="POST" onsubmit="return confirmTrash(event);">
-                            @csrf
-                            @method('PUT')
-                            <button type="submit" class="text-blue-500 hover:text-blue-700" title="Delete this permanently?">
-                                <i class="fas fa-trash"></i>
-                            </button>
-                        </form>
-
                         <form action="{{ route('staff.requestFile', ['file_id' => $file->file_id]) }}" method="POST" onsubmit="return confirmRequest();">
                             @csrf
                             <input type="hidden" name="file_id" value="{{ $file->file_id }}">
@@ -123,6 +115,15 @@
                                 <i class="fas fa-file"></i>
                             </button>
                         </form>
+
+                        <form action="{{ route('staff.files.trash', $file->file_id) }}" method="POST" onsubmit="return confirmTrash(event);">
+                            @csrf
+                            @method('PUT')
+                            <button type="submit" class="text-blue-500 hover:text-blue-700" title="Add to Trash">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </form>
+
                     </div>
                 </td>
             </tr>
@@ -132,9 +133,9 @@
             @foreach($fileVersions->where('file_id', $file->file_id) as $fileVersion)
                 @if($file->status == 'pending') 
                 <tr class="file-version-row bg-gray-100">
-                    <td class="border p-2 pl-6 filename">Ver. {{ $fileVersion->version_number }}</td>
-                    <td class="border p-2 filename">{{ $fileVersion->filename }}</td>
-                    <td class="border p-2 file-type">
+                    <td class=" p-2 pl-6 filename">Ver. {{ $fileVersion->version_number }}</td>
+                    <td class=" p-2 filename">{{ $fileVersion->filename }}</td>
+                    <td class=" p-2 file-type">
                         @php
                             $fileVersionType = strtolower($fileVersion->file_type);
                         @endphp
@@ -150,11 +151,11 @@
                         @endif
                         {{ strtoupper($fileVersionType) }}
                     </td>         
-                    <td class="border p-2 category">{{ $fileVersion->category ?? $file->category ?? 'No Category' }}</td>
-                    <td class="border p-2">{{ $fileVersion->user ? $fileVersion->user->name : 'Unknown' }}</td>
-                    <td class="border p-2 filename">{{ $fileVersion->created_at->diffForHumans() }}</td>
-                    <td class="border p-2 filename">{{ $fileVersion->status }}</td>
-                    <td class="border p-2">
+                    <td class=" p-2 category">{{ $fileVersion->category ?? $file->category ?? 'No Category' }}</td>
+                    <td class=" p-2">{{ $fileVersion->user ? $fileVersion->user->name : 'Unknown' }}</td>
+                    <td class=" p-2 filename">{{ $fileVersion->created_at->diffForHumans() }}</td>
+                    <td class=" p-2 filename">{{ $fileVersion->status }}</td>
+                    <td class=" p-2">
                         <div class="flex justify-center space-x-4">
 
                             @if($fileVersion->status == 'active')

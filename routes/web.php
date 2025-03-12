@@ -88,6 +88,21 @@ Route::middleware(['staff.auth'])->group(function () {
 
     Route::get('/staff-update-files', [StaffController::class, 'StaffViewFilesVersions'])->name('staff.update');
 
+    Route::put('/staff/archive-file/{version_id}', [StaffController::class, 'StaffarchiveFile'])->name('staff.archiveFile');
+
+    Route::get('/staff/edit-file-version/{version_id}', [StaffController::class, 'StaffeditFileVersion'])
+    ->name('staff.editFileVersion');
+
+    Route::put('/staff-view/trash-file/{version_id}', [StaffController::class, 'StaffTrashFile'])->name('staff.trash');
+
+    Route::get('/staff-archive-files', [StaffController::class, 'StaffArchivedViewFilesVersions'])->name('staff.archived.files');
+
+    Route::put('/staff/unarchive-file/{version_id}', [StaffController::class, 'StaffunarchiveFile'])->name('staff.unarchiveFile');
+
+    Route::get('/staff-trash-files', [StaffController::class, 'StaffTrashViewFilesVersions'])->name('staff.trash.bins');
+
+    Route::put('/staff/restore-file/{version_id}', [StaffController::class, 'StafRestoreFile'])->name('staff.restore');
+
 
 });
 
@@ -157,7 +172,7 @@ Route::middleware(['admin.auth'])->group(function () {
 
 
     Route::get('/admin/users/{id}/edit', [UserController::class, 'edit'])->name('admin.users.edit');
-
+    
     Route::put('/admin/users/{id}/update', [UserController::class, 'updateUser'])->name('admin.users.update');
 
     Route::get('/admin/files/{file_id}/edit-primary', [FileController::class, 'editPrimaryFile'])

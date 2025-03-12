@@ -38,7 +38,7 @@
             <input type="file" name="file" id="fileUpload" class="border rounded p-2 w-full">
         </div>
 
-        <button type="submit" class="bg-blue-500 text-white px-4 py-2 rounded">Update</button>
+        <button type="submit" class="bg-blue-500 text-white px-4 py-2 rounded">Confirm</button>
     </form>
 
 </div>
