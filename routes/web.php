@@ -5,6 +5,7 @@ use App\Http\Controllers\Auth\AdminAuthController;
 use App\Http\Controllers\FileController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\StaffController;
+use App\Http\Controllers\FileTimeStampController;
 
 Route::get('/', function () {
     return view('welcome');
@@ -107,6 +108,12 @@ Route::middleware(['staff.auth'])->group(function () {
     ->name('staff.updateFileVersion');
 
     Route::put('/staff-view/trash-file/{version_id}', [StaffController::class, 'StaffTrashFile'])->name('staff.trash');
+
+    Route::get('/timestamps', [FileTimeStampController::class, 'ViewIndex'])->name('timestamps.index');
+
+    Route::get('/file-timestamps/{file_id}', [FileTimeStampController::class, 'show'])->name('file.timestamps.details');
+
+
 
 });
 

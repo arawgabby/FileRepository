@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use App\Models\FileVersions;
 
 class FileTimeStamp extends Model
 {
@@ -28,6 +29,6 @@ class FileTimeStamp extends Model
 
     public function fileVersion()
     {
-        return $this->belongsTo(FileVersion::class, 'version_id');
+        return $this->belongsTo(FileVersions::class, 'version_id');
     }
 }
