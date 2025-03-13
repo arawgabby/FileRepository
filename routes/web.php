@@ -51,9 +51,7 @@ Route::get('/staff-logout', [AdminAuthController::class, 'Stafflogout'])->name('
 //For Staff Middleware
 Route::middleware(['staff.auth'])->group(function () {
 
-    Route::get('/staff-main', function () {
-        return view('staff.dashboard.staffDashboard');
-    })->name('staff.dashboard');
+    Route::get('/staff-main', [StaffController::class, 'dashboard'])->name('staff.dashboard');
 
     Route::get('/staff-upload', function () {
         return view('staff.pages.StaffUploadNewFile');

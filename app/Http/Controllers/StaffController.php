@@ -14,6 +14,20 @@ use App\Models\FileRequest;
 
 class StaffController extends Controller
 {
+
+    public function dashboard()
+    {
+        $userId = Auth::id(); // Get logged-in user ID
+
+        // Count pending file requests for the user
+        $pendingRequestCount = FileRequest::where('requested_by', $userId)
+                                        ->where('request_status', 'pending')
+                                        ->count();
+
+        return view('staff.dashboard.staffDashboard', compact('pendingRequestCount'));
+    }
+
+
     public function StaffuploadFile(Request $request)
     {
         $request->validate([

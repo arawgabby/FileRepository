@@ -61,11 +61,15 @@
 
             <a href="{{ route('staff.pending.files') }}" class="flex items-center text-gray-300 hover:text-white ml-4 relative">
                 <i class="fas fa-file-alt mr-4"></i> Pending File Request
-                <!-- Badge Placeholder -->
-                <span class="ml-2 bg-red-500 text-white text-xs font-bold px-2 py-1 rounded-full absolute -top-2 -right-1">
-                    0
-                </span>
+
+                @if($pendingRequestCount > 0)
+                    <span class="ml-2 bg-red-500 text-white text-xs font-bold px-2 py-1 rounded-full absolute -top-2 -right-1">
+                        {{ $pendingRequestCount }}
+                    </span>
+                @endif
             </a>
+
+
 
 
             <p class="text-white text-1xl font-bold">
@@ -131,9 +135,9 @@
                     <i class="fas fa-user text-gray-300 text-2xl"></i>
                 </div>
                 <div class="flex flex-col">
-                    <p class="text-black text-sm">ID: {{ session('user')->id }}</p>
+                    <!-- <p class="text-black text-sm">ID: {{ session('user')->id }}</p> -->
                     <p class="text-lg font-semibold text-black">{{ session('user')->name }}</p>
-                    <p class="text-lg font-semibold text-black">{{ session('user')->role }}</p>
+                    <p class="text-lg font-semibold text-black">Role: {{ session('user')->role }}</p>
                 </div>
             </div>
         </div>

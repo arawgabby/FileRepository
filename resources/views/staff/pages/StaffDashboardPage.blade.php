@@ -54,8 +54,8 @@
     </div>
     
     <!-- Recent Activities Section -->
-    <div class="mt-10 bg-white p-6 rounded-md shadow-md">
-        <h2 class="text-2xl font-semibold text-gray-700 mb-4">📌 Recent Activities (Staff & Faculty)</h2>
+    <div class="mt-6 bg-white p-4">
+        <h2 class="text-2xl font-semibold text-gray-700 mb-4">📌 Recent Activities </h2>
 
         <!-- Scrollable Table Container -->
         <div class="max-h-80 overflow-y-auto border border-gray-200 rounded-md">
