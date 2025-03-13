@@ -25,27 +25,27 @@
                 <!-- <p><a href="#" class="text-white">Staff Panel</a></p>  -->
            </div>
 
-            <div class="flex items-center bg-white text-white rounded-lg p-4 space-x-3 w-full">
+            <!-- <div class="flex items-center bg-white text-white rounded-lg p-4 space-x-3 w-full">
                 <div class="w-12 h-12 bg-gray-600 flex items-center justify-center rounded-full">
                     <i class="fas fa-user text-gray-300 text-2xl"></i>
                 </div>
                 <div class="flex flex-col">
                     <p class="text-black text-sm">ID: {{ session('user')->id }}</p>
-                    <p class="text-lg font-semibold text-black">{{ session('user')->name }}</p>
+                    <p class="text-lg font-semibold text-black">{{ session('user')->role }}</p>
+                    <p class="text-lg font-semibold text-black">{{ session('user')->role }}</p>
                 </div>
-            </div>
+            </div> -->
 
 
             <nav class="space-y-6">
 
             <p class="text-white text-1xl font-bold">
-                <i class="fas fa-dashboard"></i> Dashboard
+                <i class="fas fa-folder-open"></i> Main
             </p>
 
-            <a href="#" class="flex items-center text-gray-300 hover:text-white ml-4">
-                <i class="fas fa-upload mr-4"></i> Overview
+            <a href="{{ route('staff.page.dashboard') }}" class="flex items-center text-gray-300 hover:text-white ml-4">
+                <i class="fas fa-dashboard mr-4"></i> Dashboard
             </a>
-
 
             <p class="text-white text-1xl font-bold">
                 <i class="fas fa-folder"></i> Request File
@@ -59,9 +59,14 @@
                 <i class="fas fa-file-alt mr-4"></i>  My Uploads
             </a>
 
-            <a href="{{ route('staff.pending.files') }}" class="flex items-center text-gray-300 hover:text-white ml-4">
+            <a href="{{ route('staff.pending.files') }}" class="flex items-center text-gray-300 hover:text-white ml-4 relative">
                 <i class="fas fa-file-alt mr-4"></i> Pending File Request
+                <!-- Badge Placeholder -->
+                <span class="ml-2 bg-red-500 text-white text-xs font-bold px-2 py-1 rounded-full absolute -top-2 -right-1">
+                    0
+                </span>
             </a>
+
 
             <p class="text-white text-1xl font-bold">
                 <i class="fas fa-folder-open"></i> Manage Files
@@ -89,7 +94,7 @@
             </p>
 
             <a href="{{ route ('timestamps.index')}}" class="flex items-center text-gray-300 hover:text-white ml-4">
-                <i class="fas fa-file mr-4"></i> File Timestamps
+                <i class="fas fa-file mr-4"></i> File Manage Timestamps
             </a>
 
             <a href="#" class="flex items-center text-gray-300 hover:text-white ml-4">
@@ -116,6 +121,22 @@
 
         <div class="flex-1 flex flex-col ml-0 md:ml-64">
            
+        <div class="flex justify-between items-center">
+            <!-- Page Title -->
+            <h1 class="text-2xl font-bold text-gray-800"></h1>
+
+            <!-- User Profile (Right End) -->
+            <div class="flex items-center bg-white rounded-lg p-2 space-x-3 shadow-md w-[220px] overflow-hidden">
+                <div class="w-12 h-12 bg-gray-600 flex items-center justify-center rounded-full">
+                    <i class="fas fa-user text-gray-300 text-2xl"></i>
+                </div>
+                <div class="flex flex-col">
+                    <p class="text-black text-sm">ID: {{ session('user')->id }}</p>
+                    <p class="text-lg font-semibold text-black">{{ session('user')->name }}</p>
+                    <p class="text-lg font-semibold text-black">{{ session('user')->role }}</p>
+                </div>
+            </div>
+        </div>
 
             <main class="p-8 sm: pt-7">
                 @yield('content')

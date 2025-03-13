@@ -33,7 +33,7 @@ class StaffController extends Controller
             $filename = $file->getClientOriginalName();
             $filePath = $file->storeAs('uploads', $filename, 'public');
 
-            // Insert the file with "pending" status
+            // ✅ Insert the file first
             $fileEntry = File::create([
                 'filename' => $filename,
                 'file_path' => $filePath,
@@ -44,13 +44,15 @@ class StaffController extends Controller
                 'status' => 'pending', // Set the file status to pending
             ]);
 
-            // // Log this action in access_logs
-            // AccessLog::create([
-            //     'file_id' => $fileEntry->id, 
-            //     'accessed_by' => $user->id,
-            //     'action' => 'File uploaded and set to pending',
-            //     'access_time' => now(), // Capture the timestamp
-            // ]);
+            // ✅ Log this action ONLY if fileEntry is successfully created
+            if ($fileEntry) {
+                AccessLog::create([
+                    'file_id' => $fileEntry->id ?? 0, // If no file ID, store NULL
+                    'accessed_by' => $user->id,
+                    'action' => 'Uploaded file - Pending approval',
+                    'access_time' => now(),
+                ]);
+            }
 
             return redirect()->route('staff.upload')->with('success', 'File uploaded successfully and marked as pending!');
         }
@@ -142,26 +144,56 @@ class StaffController extends Controller
 
     public function StaffmoveToTrash(Request $request, $id)
     {
+        // Ensure the user is logged in via session
+        if (!session()->has('user')) {
+            return redirect()->back()->with('error', 'Unauthorized: Please log in.');
+        }
+
+        $user = session('user'); // Get logged-in user from session
+
         // Find the file by file_id
         $file = File::where('file_id', $id)->first();
-    
-        if ($file) {
-            $file->status = 'deleted';
-            $file->save();
-            return redirect()->back()->with('success', 'File moved to trash successfully.');
+
+        if (!$file) {
+            return redirect()->back()->with('error', 'File not found.');
         }
-    
-        return redirect()->back()->with('error', 'File not found.');
+
+        // Update status to 'deleted'
+        $file->update(['status' => 'deleted']);
+
+        // ✅ Log the action in access_logs
+        AccessLog::create([
+            'file_id' => $file->file_id, // Ensure valid file_id
+            'accessed_by' => $user->id, // Get user ID from session
+            'action' => 'File moved to trash (File ID: ' . $file->file_id . ')',
+            'access_time' => now(),
+        ]);
+
+        return redirect()->back()->with('success', 'File moved to trash successfully.');
     }
 
+    
     public function StaffOverviewTrashFile($version_id)
     {
         // Find the file version
         $fileVersion = FileVersions::findOrFail($version_id);
-
-        // Update status to 'archived'
+    
+        // Ensure the related file exists
+        if (!$fileVersion->file_id) {
+            return redirect()->back()->with('error', 'Invalid file version.');
+        }
+    
+        // Update status to 'deleted'
         $fileVersion->update(['status' => 'deleted']);
-
+    
+        // ✅ Log the action in access_logs
+        AccessLog::create([
+            'file_id' => $fileVersion->file_id, // Ensure valid file_id
+            'accessed_by' => auth()->id(), // Get the authenticated user's ID
+            'action' => 'File moved to trash',
+            'access_time' => now(),
+        ]);
+    
         return redirect()->back()->with('success', 'File version placed on trash successfully!');
     }
 
@@ -171,26 +203,42 @@ class StaffController extends Controller
         if (!session()->has('user')) {
             return redirect()->route('staff.upload')->with('error', 'Unauthorized: Please log in.');
         }
-
+    
         $user = session('user'); // Get logged-in user
-
+    
+        // Check if the file exists before proceeding
+        $file = File::find($file_id);
+        if (!$file) {
+            return redirect()->back()->with('error', 'File not found.');
+        }
+    
         // Check if the request already exists to avoid duplicates
         $existingRequest = FileRequest::where('file_id', $file_id)
             ->where('requested_by', $user->id)
             ->where('request_status', 'pending')
             ->first();
-
+    
         if ($existingRequest) {
             return redirect()->back()->with('error', 'You have already requested this file.');
         }
-
-        // Insert new request
-        FileRequest::create([
+    
+        // ✅ Insert new request
+        $fileRequest = FileRequest::create([
             'file_id' => $file_id,
             'requested_by' => $user->id,
             'request_status' => 'pending', // Default status
         ]);
-
+    
+        // ✅ Log the action only if the request is successfully created
+        if ($fileRequest) {
+            AccessLog::create([
+                'file_id' => $file_id, // Ensure valid file_id
+                'accessed_by' => $user->id,
+                'action' => 'Requested file access - Pending approval',
+                'access_time' => now(),
+            ]);
+        }
+    
         return redirect()->back()->with('success', 'File request submitted successfully.');
     }
 

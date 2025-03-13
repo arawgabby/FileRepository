@@ -25,7 +25,12 @@
 
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
 
-    <h1 style="font-size: 30px; font-weight: bold; margin-bottom: 12px">Active Files</h1>
+    <div class="flex justify-between items-center mt-4 p-3 rounded-lg shadow">
+        <h1 class="text-4xl font-bold">Active Files</h1>
+        <span class="text-blue-500 text-4xl font-semibold" id="activeFileCount">0</span>
+    </div>
+
+    <br>
 
     <!-- Search & Filters -->
     <div class="mb-4 flex gap-4">
@@ -172,6 +177,19 @@
         searchInput.addEventListener("input", filterTable);
         fileTypeFilter.addEventListener("change", filterTable);
         categoryFilter.addEventListener("change", filterTable);
+    });
+</script>
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        // Count the visible file rows
+        function updateFileCount() {
+            const visibleRows = document.querySelectorAll(".file-row");
+            const count = visibleRows.length;
+            document.getElementById("activeFileCount").textContent = count;
+        }
+
+        // Run count function on load
+        updateFileCount();
     });
 </script>
 

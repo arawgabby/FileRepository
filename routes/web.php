@@ -51,13 +51,17 @@ Route::get('/staff-logout', [AdminAuthController::class, 'Stafflogout'])->name('
 //For Staff Middleware
 Route::middleware(['staff.auth'])->group(function () {
 
-    Route::get('/staff-dashboard', function () {
+    Route::get('/staff-main', function () {
         return view('staff.dashboard.staffDashboard');
     })->name('staff.dashboard');
 
     Route::get('/staff-upload', function () {
         return view('staff.pages.StaffUploadNewFile');
     })->name('staff.upload');
+
+    Route::get('/staff-dashboard', function () {
+        return view('staff.pages.StaffDashboardPage');
+    })->name('staff.page.dashboard');
 
     Route::get('/staff-files-requests', [StaffController::class, 'pendingFileRequests'])->name('staff.pending.files');
 

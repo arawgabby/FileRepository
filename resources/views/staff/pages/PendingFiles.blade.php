@@ -67,10 +67,10 @@
                         <i class="fa-solid {{ $iconClass }}"></i> {{ $filename }}
                     </td>
                     <td class=" p-2">{{ $request->user->name ?? 'Unknown' }}</td>
+                    <td class=" p-2">{{ $request->created_at->diffForHumans() }}</td>
                     <td class=" p-2">
                         <span class="status-pending">{{ ucfirst($request->request_status) }}</span>
                     </td>
-                    <td class=" p-2">{{ $request->created_at->diffForHumans() }}</td>
                 </tr>
             @empty
                 <tr>
