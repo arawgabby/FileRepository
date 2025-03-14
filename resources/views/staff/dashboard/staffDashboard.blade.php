@@ -101,9 +101,16 @@
                 <i class="fas fa-file mr-4"></i> File Manage Timestamps
             </a>
 
-            <a href="#" class="flex items-center text-gray-300 hover:text-white ml-4">
-                <i class="fas fa-file mr-4"></i> Staff Logs
-            </a>
+            @if (session('user')->role === 'staff')
+                <a href="{{ route('staff.logs.view') }}" class="flex items-center text-gray-300 hover:text-white ml-4">
+                    <i class="fas fa-file mr-4"></i> Staff Logs
+                </a>
+            @elseif (session('user')->role === 'faculty')
+                <a href="#" class="flex items-center text-gray-300 hover:text-white ml-4">
+                    <i class="fas fa-file mr-4"></i> Faculty Logs
+                </a>
+            @endif
+
 
             <a href="{{ url('/staff-logout') }}" class="flex items-center text-white hover:text-white mr-2" 
             style="font-weight: bold" onclick="return confirmLogout();">
@@ -129,18 +136,53 @@
             <!-- Page Title -->
             <h1 class="text-2xl font-bold text-gray-800"></h1>
 
-            <!-- User Profile (Right End) -->
-            <div class="flex items-center bg-white rounded-lg p-2 space-x-3 shadow-md w-[220px] overflow-hidden">
-                <div class="w-12 h-12 bg-gray-600 flex items-center justify-center rounded-full">
-                    <i class="fas fa-user text-gray-300 text-2xl"></i>
-                </div>
-                <div class="flex flex-col">
-                    <!-- <p class="text-black text-sm">ID: {{ session('user')->id }}</p> -->
-                    <p class="text-lg font-semibold text-black">{{ session('user')->name }}</p>
-                    <p class="text-lg font-semibold text-black">Role: {{ session('user')->role }}</p>
+            <div class="flex items-center space-x-6">
+        
+                <!-- User Profile (Right End) -->
+                <div class="flex items-center bg-white rounded-lg p-2 space-x-3 shadow-md w-[250px] overflow-hidden">
+                    <div class="w-12 h-12 bg-gray-600 flex items-center justify-center rounded-full">
+                        <i class="fas fa-user text-gray-300 text-2xl"></i>
+                    </div>
+                    <div class="flex flex-col">
+                        <p class="text-lg font-semibold text-black">{{ session('user')->name }}</p>
+                        <p class="text-lg font-semibold text-black">Role: {{ session('user')->role }}</p>
+                    </div>
+
+                   <!-- Notification Bell with Modal Trigger -->
+                    <button id="bellButton" class="text-gray-600 text-4xl focus:outline-none relative">
+                        <i class="fas fa-bell"></i>
+                        <span class="absolute top-0 right-0 bg-red-500 text-white text-xs font-bold rounded-full px-1.5 py-0.5">
+                            3
+                        </span>
+                    </button>
+
+                    <!-- Notification Modal (Hidden Initially) -->
+                    <div id="notificationModal" 
+                        class="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center hidden transition-all duration-300 ease-in-out">
+                        
+                        <div class="bg-white w-166 p-6 rounded-lg shadow-lg transform scale-95 opacity-0 transition-all duration-300 ease-in-out">
+                            <div class="flex justify-between items-center border-b pb-2">
+                                <h2 class="text-xl font-bold text-gray-800">Notifications</h2>
+                                <button id="closeModal" class="text-gray-600 text-2xl focus:outline-none">
+                                    <i class="fas fa-times"></i>
+                                </button>
+                            </div>
+                            
+                            <div class="mt-4">
+                                <p class="text-gray-600">🔔 You have new notifications!</p>
+                                <ul class="mt-2 space-y-2">
+                                    <li class="p-2 bg-gray-100 rounded">📢 System Update: New features added!</li>
+                                    <li class="p-2 bg-gray-100 rounded">📌 Reminder: Meeting at 3 PM.</li>
+                                    <li class="p-2 bg-gray-100 rounded">✉️ Message from Admin: Check your inbox.</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+
                 </div>
             </div>
         </div>
+
 
             <main class="p-8 sm: pt-7">
                 @yield('content')
@@ -154,6 +196,38 @@
             alert("{{ session('success') }}");
         </script>
     @endif
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+        const bellButton = document.getElementById("bellButton");
+        const modal = document.getElementById("notificationModal");
+        const closeModal = document.getElementById("closeModal");
+
+        // Open Modal with Animation
+        bellButton.addEventListener("click", () => {
+            modal.classList.remove("hidden");
+            setTimeout(() => {
+                modal.children[0].classList.remove("scale-95", "opacity-0");
+                modal.children[0].classList.add("scale-100", "opacity-100");
+            }, 50);
+        });
+
+        // Close Modal with Animation
+        closeModal.addEventListener("click", () => {
+            modal.children[0].classList.remove("scale-100", "opacity-100");
+            modal.children[0].classList.add("scale-95", "opacity-0");
+            setTimeout(() => {
+                modal.classList.add("hidden");
+            }, 200);
+        });
+
+        // Close Modal when clicking outside the box
+        modal.addEventListener("click", (event) => {
+            if (event.target === modal) {
+                closeModal.click();
+            }
+        });
+        });
+    </script>
     <script>
         document.addEventListener("DOMContentLoaded", function () {
             const navLinks = document.querySelectorAll("#sidebar nav a");

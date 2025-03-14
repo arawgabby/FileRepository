@@ -31,7 +31,7 @@
     <!-- Files Table -->
     <table class="w-full border-collapse border border-gray-300">
         <thead>
-            <tr class="bg-gray-200">
+            <tr class="bg-gray-800">
                 <th class="border p-2">File ID</th>
                 <th class="border p-2">Version #</th>
                 <th class="border p-2">Filename</th>

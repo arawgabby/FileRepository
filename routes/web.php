@@ -57,6 +57,8 @@ Route::middleware(['staff.auth'])->group(function () {
         return view('staff.pages.StaffUploadNewFile');
     })->name('staff.upload');
 
+    Route::get('/staff-logs', [StaffController::class, 'StaffviewLogs'])->name('staff.logs.view');
+
     Route::get('/staff-dashboard', function () {
         return view('staff.pages.StaffDashboardPage');
     })->name('staff.page.dashboard');

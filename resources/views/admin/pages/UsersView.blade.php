@@ -39,13 +39,13 @@
     <table class="min-w-full border border-gray-300 text-center">
         <thead>
             <tr>
-                <th class="py-3 px-6 bg-gray-200 text-gray-600 font-semibold">ID</th>
-                <th class="py-3 px-6 bg-gray-200 text-gray-600 font-semibold">Name</th>
-                <th class="py-3 px-6 bg-gray-200 text-gray-600 font-semibold">Email</th>
-                <th class="py-3 px-6 bg-gray-200 text-gray-600 font-semibold">Role</th>
-                <th class="py-3 px-6 bg-gray-200 text-gray-600 font-semibold">Updated At</th>
-                <th class="py-3 px-6 bg-gray-200 text-gray-600 font-semibold">Status</th>
-                <th class="py-3 px-6 bg-gray-200 text-gray-600 font-semibold">Action</th>
+                <th class="py-3 px-6 bg-gray-800 text-gray-600 font-semibold">ID</th>
+                <th class="py-3 px-6 bg-gray-800 text-gray-600 font-semibold">Name</th>
+                <th class="py-3 px-6 bg-gray-800 text-gray-600 font-semibold">Email</th>
+                <th class="py-3 px-6 bg-gray-800 text-gray-600 font-semibold">Role</th>
+                <th class="py-3 px-6 bg-gray-800 text-gray-600 font-semibold">Updated At</th>
+                <th class="py-3 px-6 bg-gray-800 text-gray-600 font-semibold">Status</th>
+                <th class="py-3 px-6 bg-gray-800 text-gray-600 font-semibold">Action</th>
             </tr>
         </thead>
         <tbody id="userTable">

@@ -74,6 +74,22 @@ class StaffController extends Controller
         return redirect()->route('staff.upload')->with('error', 'File upload failed.');
     }
 
+    public function StaffviewLogs()
+    {
+        // Get logged-in user from session
+        $user = session('user');
+    
+        // Fetch logs where accessed_by matches the logged-in user's ID
+        $accessLogs = AccessLog::where('accessed_by', $user->id)
+                        ->with(['user', 'file']) // Load related user and file
+                        ->latest()
+                        ->get();
+    
+        return view('staff.pages.StaffLogsView', compact('accessLogs', 'user'));
+    }
+    
+
+
     public function StaffviewFiles(Request $request)
     {
         // Ensure the user is logged in via session

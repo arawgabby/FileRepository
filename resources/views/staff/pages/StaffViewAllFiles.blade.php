@@ -116,6 +116,7 @@
                             </button>
                         </form>
 
+
                         <form action="{{ route('staff.files.trash', $file->file_id) }}" method="POST" onsubmit="return confirmTrash(event);">
                             @csrf
                             @method('PUT')
@@ -191,6 +192,11 @@
 
 </div>
 
+<script>
+    function confirmRequest() {
+        return confirm("Are you sure you want to request this file to be saved?");
+    }
+</script>
 <script>
     function confirmTrash(fileId) {
         if (confirm("Are you sure you want to put this on trash this file?")) {

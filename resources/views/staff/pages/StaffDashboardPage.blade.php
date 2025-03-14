@@ -58,14 +58,14 @@
         <h2 class="text-2xl font-semibold text-gray-700 mb-4">📌 Recent Activities </h2>
 
         <!-- Scrollable Table Container -->
-        <div class="max-h-80 overflow-y-auto border border-gray-200 rounded-md">
+        <div class="max-h-80 overflow-y-auto border rounded-md">
             <table class="w-full border-collapse">
-                <thead class="sticky top-0 bg-gray-100">
+                <thead class="top-0 bg-gray-100">
                     <tr>
-                        <th class="border border-gray-200 px-4 py-2 text-left">File Name</th>
-                        <th class="border border-gray-200 px-4 py-2 text-left">Accessed By</th>
-                        <th class="border border-gray-200 px-4 py-2 text-left">Action</th>
-                        <th class="border border-gray-200 px-4 py-2 text-left">Access Time</th>
+                        <th class="border px-4 py-2 text-left">File Name</th>
+                        <th class="border px-4 py-2 text-left">Accessed By</th>
+                        <th class="border px-4 py-2 text-left">Action</th>
+                        <th class="border px-4 py-2 text-left">Access Time</th>
                     </tr>
                 </thead>
                 <tbody>
