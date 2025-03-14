@@ -6,7 +6,9 @@
 
 <div class="container mx-auto p-6 bg-white rounded-xl" style="box-shadow: 4px 4px 10px rgba(0, 0, 0, 0.1);">
 
-    <h1 class="text-6xl font-bold mb-6">CSIT Repository System</h1>
+    <h1 class="text-6xl font-bold mb-6">
+    <span class="text-green-800">CS</span><span class="text-blue-800">IT</span> Repository Management System
+    </h1>
 
     <!-- Cards Container -->
     <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6">
