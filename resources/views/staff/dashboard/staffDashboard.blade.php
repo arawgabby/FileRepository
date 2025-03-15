@@ -168,15 +168,15 @@
                     </div>
 
                    <!-- Notification Bell with Modal Trigger -->
-                    <button id="bellButton" class="text-gray-600 text-4xl focus:outline-none relative">
+                    <!-- <button id="bellButton" class="text-gray-600 text-4xl focus:outline-none relative">
                         <i class="fas fa-bell"></i>
                         <span class="absolute top-0 right-0 bg-red-500 text-white text-xs font-bold rounded-full px-1.5 py-0.5">
                             3
                         </span>
-                    </button>
+                    </button> -->
 
                     <!-- Notification Modal (Hidden Initially) -->
-                    <div id="notificationModal" 
+                    <!-- <div id="notificationModal" 
                         class="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center hidden transition-all duration-300 ease-in-out">
                         
                         <div class="bg-white w-166 p-6 rounded-lg shadow-lg transform scale-95 opacity-0 transition-all duration-300 ease-in-out">
@@ -196,7 +196,7 @@
                                 </ul>
                             </div>
                         </div>
-                    </div>
+                    </div> -->
 
                 </div>
             </div>
@@ -209,6 +209,47 @@
         </div>
     </div>
 
+    <!-- Notification Pop-up -->
+    <div id="fileRequestNotification" class="fixed bottom-5 right-[-300px] bg-blue-500 text-white px-4 py-3 rounded-md shadow-md opacity-0 transition-all duration-500 ease-in-out">
+        <p id="notificationMessage"></p>
+        <button onclick="closeNotification()" class="bg-white text-blue-500 px-3 py-1 rounded-md mt-2">OK</button>
+    </div>
+
+    <script>
+        let lastCheckedTime = null;
+
+        function checkFileRequests() {
+            fetch("{{ route('staff.check.file.requests') }}")
+                .then(response => response.json())
+                .then(data => {
+                    if (data.status === 'approved') {
+                        showNotification(data.message);
+                        lastCheckedTime = Date.now();
+                    }
+                })
+                .catch(error => console.error("Error fetching file requests:", error));
+        }
+
+        function showNotification(message) {
+            document.getElementById("notificationMessage").innerText = message;
+            let notification = document.getElementById("fileRequestNotification");
+            
+            // Show with slide-in animation
+            notification.style.right = "20px";
+            notification.style.opacity = "1";
+        }
+
+        function closeNotification() {
+            let notification = document.getElementById("fileRequestNotification");
+            
+            // Hide with slide-out animation
+            notification.style.right = "-300px";
+            notification.style.opacity = "0";
+        }
+
+        // Poll every 5 seconds
+        setInterval(checkFileRequests, 5000);
+    </script>
 
     @if(session('success'))
         <script>
@@ -247,48 +288,47 @@
         });
         });
     </script>
-  <script>
-    document.addEventListener("DOMContentLoaded", function () {
-        const navLinks = document.querySelectorAll("#sidebar nav a");
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            const navLinks = document.querySelectorAll("#sidebar nav a");
 
-        // Function to update active link state with smooth animation
-        function setActiveLink(clickedLink) {
-            navLinks.forEach(link => {
-                link.classList.remove(
+            // Function to update active link state with smooth animation
+            function setActiveLink(clickedLink) {
+                navLinks.forEach(link => {
+                    link.classList.remove(
+                        "text-black", "bg-white", "shadow-md", "scale-105", 
+                        "font-bold", "p-4", "rounded-lg"
+                    );
+                    link.classList.add("text-gray-300", "hover:text-white", "transition-all", "duration-300", "ease-in-out");
+                });
+
+                clickedLink.classList.add(
                     "text-black", "bg-white", "shadow-md", "scale-105", 
-                    "font-bold", "p-4", "rounded-lg"
+                    "font-bold", "p-4", "rounded-lg", "transition-all", "duration-300", "ease-in-out"
                 );
-                link.classList.add("text-gray-300", "hover:text-white", "transition-all", "duration-300", "ease-in-out");
-            });
+                clickedLink.classList.remove("text-gray-300", "hover:text-white"); 
 
-            clickedLink.classList.add(
-                "text-black", "bg-white", "shadow-md", "scale-105", 
-                "font-bold", "p-4", "rounded-lg", "transition-all", "duration-300", "ease-in-out"
-            );
-            clickedLink.classList.remove("text-gray-300", "hover:text-white"); 
-
-            // Store the active link in localStorage to persist highlight
-            localStorage.setItem("activeNav", clickedLink.getAttribute("href"));
-        }
-
-        // Check if there is a stored active link in localStorage
-        const storedActiveLink = localStorage.getItem("activeNav");
-        if (storedActiveLink) {
-            const activeElement = [...navLinks].find(link => link.getAttribute("href") === storedActiveLink);
-            if (activeElement) {
-                setActiveLink(activeElement);
+                // Store the active link in localStorage to persist highlight
+                localStorage.setItem("activeNav", clickedLink.getAttribute("href"));
             }
-        }
 
-        // Add click event listener to each nav link
-        navLinks.forEach(link => {
-            link.addEventListener("click", function () {
-                setActiveLink(this);
+            // Check if there is a stored active link in localStorage
+            const storedActiveLink = localStorage.getItem("activeNav");
+            if (storedActiveLink) {
+                const activeElement = [...navLinks].find(link => link.getAttribute("href") === storedActiveLink);
+                if (activeElement) {
+                    setActiveLink(activeElement);
+                }
+            }
+
+            // Add click event listener to each nav link
+            navLinks.forEach(link => {
+                link.addEventListener("click", function () {
+                    setActiveLink(this);
+                });
             });
         });
-    });
-</script>
-
+    </script>
     <script>
         function toggleDropdown() {
             const dropdown = document.getElementById('dropdownMenu');

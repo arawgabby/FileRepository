@@ -21,6 +21,7 @@ class File extends Model
         'uploaded_by',
         'category',
         'published_by',
+        'year_published',
         'uploaded_by',
         'description',
         'status',

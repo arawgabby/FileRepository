@@ -35,7 +35,7 @@ class StaffController extends Controller
             'file' => 'required|file|max:502400', 
             'category' => 'required|in:capstone,thesis,faculty_request,accreditation,admin_docs',
             'published_by' => 'required|string|max:255',
-            'year_published' => 'required|integer|min:1900|max:' . date('Y'),
+            'year_published' => 'required|string|regex:/^\d{4}$/', // ✅ Ensure it’s a 4-digit year
             'description' => 'nullable|string|max:1000',
         ]);
 
@@ -58,7 +58,7 @@ class StaffController extends Controller
                 'uploaded_by' => $user->id,
                 'category' => $request->category,
                 'published_by' => $request->published_by,
-                'year_published' => $request->year_published,
+                'year_published' => (string) $request->year_published, // ✅ Ensure it's stored as a string
                 'description' => $request->description ?? null,
                 'status' => 'pending',
             ]);
@@ -79,6 +79,23 @@ class StaffController extends Controller
 
         return response()->json(['message' => 'No file detected.'], 400);
     }
+
+    public function ActiveFileArchived($file_id)
+    {
+        // Find the file
+        $file = File::find($file_id);
+
+        if (!$file) {
+            return redirect()->back()->with('error', 'File not found');
+        }
+
+        // Update the status to archived
+        $file->status = 'archived';
+        $file->save();
+
+        return redirect()->back()->with('success', 'File successfully archived');
+    }
+
 
 
     public function StaffviewLogs()
@@ -583,52 +600,95 @@ class StaffController extends Controller
         if (!session()->has('user')) {
             return redirect()->route('staff.upload')->with('error', 'Unauthorized: Please log in.');
         }
-
+    
         $user = session('user'); // Get the logged-in user
-
-        // Fetch file versions uploaded by the logged-in user
-        $query = FileVersions::where('uploaded_by', $user->id);
-
+    
+        // Fetch archived file versions uploaded by the user
+        $fileVersionsQuery = FileVersions::where('uploaded_by', $user->id)
+            ->where('status', 'archived');
+    
+        // Fetch archived files uploaded by the user
+        $filesQuery = File::where('uploaded_by', $user->id)
+            ->where('status', 'archived');
+    
         // Apply search filter
         if ($request->has('search') && !empty($request->search)) {
-            $query->where('filename', 'LIKE', '%' . $request->search . '%');
+            $fileVersionsQuery->where('filename', 'LIKE', '%' . $request->search . '%');
+            $filesQuery->where('filename', 'LIKE', '%' . $request->search . '%');
         }
-
+    
         // Apply file type filter
         if ($request->has('file_type') && !empty($request->file_type)) {
-            $query->where('file_type', $request->file_type);
+            $fileVersionsQuery->where('file_type', $request->file_type);
+            $filesQuery->where('file_type', $request->file_type);
         }
-
+    
         // Apply category filter
         if ($request->has('category') && !empty($request->category)) {
-            $query->where('category', $request->category);
+            $fileVersionsQuery->where('category', $request->category);
+            $filesQuery->where('category', $request->category);
         }
-
-        // Get filtered results with pagination
-        $fileVersions = $query->paginate(10);
-
-        return view('staff.pages.StaffArchivedFiles', compact('fileVersions')); // Pass data to view
-    }
-
     
-    public function StaffunarchiveFile($version_id)
-    {
-        // Find the file version
-        $fileVersion = FileVersions::findOrFail($version_id);
+        // Merge results and paginate
+        $archivedFiles = $filesQuery->get();
+        $archivedFileVersions = $fileVersionsQuery->get();
+        $mergedResults = $archivedFiles->merge($archivedFileVersions)->sortByDesc('updated_at');
     
-        // Update status to 'active'
-        $fileVersion->update(['status' => 'active']);
-    
-        // Insert into file_time_stamps with file_id in event_type
-        FileTimeStamp::create([
-            'file_id' => $fileVersion->file_id,
-            'version_id' => $fileVersion->version_id,
-            'event_type' => 'File ID ' . $fileVersion->file_id . ' Unarchived', // Log unarchive event
-            'timestamp' => now(),
+        // Paginate manually
+        $perPage = 10;
+        $currentPage = request()->input('page', 1);
+        $paginatedResults = $mergedResults->slice(($currentPage - 1) * $perPage, $perPage)->values();
+        $fileVersions = new \Illuminate\Pagination\LengthAwarePaginator($paginatedResults, $mergedResults->count(), $perPage, $currentPage, [
+            'path' => request()->url(),
+            'query' => request()->query(),
         ]);
     
-        return redirect()->back()->with('success', 'File version unarchived successfully!');
+        return view('staff.pages.StaffArchivedFiles', compact('fileVersions'));
     }
+    
+
+    
+    public function StaffunarchiveFile($id)
+    {
+        // Check if the ID exists in file_versions first
+        $fileVersion = FileVersions::where('version_id', $id)->first();
+    
+        if ($fileVersion) {
+            // Update status in file_versions
+            $fileVersion->update(['status' => 'active']);
+    
+            // Log unarchive event
+            FileTimeStamp::create([
+                'file_id' => $fileVersion->file_id,
+                'version_id' => $fileVersion->version_id,
+                'event_type' => 'File Version ID ' . $fileVersion->version_id . ' Unarchived',
+                'timestamp' => now(),
+            ]);
+    
+            return redirect()->back()->with('success', 'File version unarchived successfully!');
+        }
+    
+        // If not found in file_versions, check in files (for original files)
+        $originalFile = File::where('file_id', $id)->first() ?? 0;
+    
+        if ($originalFile) {
+            // Update status in files (original file)
+            $originalFile->update(['status' => 'active']);
+    
+            // Log unarchive event
+            FileTimeStamp::create([
+                'file_id' => $originalFile->file_id,
+                'version_id' => null,
+                'event_type' => 'File ID ' . $originalFile->id . ' Unarchived',
+                'timestamp' => now(),
+            ]);
+    
+            return redirect()->back()->with('success', 'Original file unarchived successfully!');
+        }
+    
+        return redirect()->back()->with('error', 'File not found!');
+    }
+    
 
     public function CountActiveFiles()
     {
@@ -816,7 +876,42 @@ class StaffController extends Controller
         return redirect()->route('staff.update')->with('success', 'File version updated successfully!');
     }
     
-    
+
+    public function checkFileRequests(Request $request)
+    {
+        $user = session('user'); // Get logged-in user from session
+
+        if (!$user) {
+            return response()->json(['error' => 'Unauthorized'], 401);
+        }
+
+        // Get last processed file request timestamp from session
+        $lastProcessedTime = session('last_file_request_time');
+
+        // Fetch the latest approved file request that is newer than the last processed one
+        $approvedRequest = FileRequest::where('requested_by', $user->id)
+            ->where('request_status', 'approved')
+            ->when($lastProcessedTime, function ($query) use ($lastProcessedTime) {
+                return $query->where('updated_at', '>', $lastProcessedTime);
+            })
+            ->orderBy('updated_at', 'desc')
+            ->first();
+
+        // If no new approved request, stop polling
+        if (!$approvedRequest) {
+            return response()->json(['status' => 'pending']);
+        }
+
+        // Store the latest updated_at timestamp in session
+        session(['last_file_request_time' => $approvedRequest->updated_at]);
+
+        return response()->json([
+            'status' => 'approved',
+            'message' => "File ID {$approvedRequest->file_id} successfully accepted to storage. Please check your Active Files Section.",
+        ]);
+    }
+
+
 
 
 }

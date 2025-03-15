@@ -92,7 +92,15 @@
                 <td class=" p-2 category">{{ $file->category ?? 'No Category' }}</td>
                 <td class=" p-2">{{ $file->user ? $file->user->name : 'Unknown' }}</td>
                 <td class=" p-2 filename">{{ $file->created_at->diffForHumans() }}</td>
-                <td class=" p-2 filename">{{ $file->status }}</td>
+                <td class="p-2">
+                    <span class="px-3 py-1 text-white text-sm font-semibold rounded-[12px] 
+                        @if($file->status == 'pending') bg-red-500 
+                        @elseif($file->status == 'approved') bg-green-500 
+                        @elseif($file->status == 'denied') bg-gray-500 
+                        @endif">
+                        {{ ucfirst($file->status) }}
+                    </span>
+                </td>
                 <td class=" p-2">
                     <div class="flex justify-center space-x-4">
                         
@@ -120,8 +128,8 @@
                         <form action="{{ route('staff.files.trash', $file->file_id) }}" method="POST" onsubmit="return confirmTrash(event);">
                             @csrf
                             @method('PUT')
-                            <button type="submit" class="text-blue-500 hover:text-blue-700" title="Add to Trash">
-                                <i class="fas fa-trash"></i>
+                            <button type="submit" class="text-blue-500 hover:text-blue-700" title="Cancel File Storing">
+                                <i class="fas fa-cancel"></i>
                             </button>
                         </form>
 

@@ -22,8 +22,8 @@
 
     <div class="flex justify-between items-center mt-4 p-3 rounded-lg shadow">
         <h1 class="text-4xl font-bold">Active Files</h1>
-        <span class="text-blue-500 text-4xl font-semibold" id="activeFileCount">0</span>
-    </div>
+        <span class="text-white text-4xl font-semibold bg-blue-400 p-4 rounded-lg" id="activeFileCount">0</span>
+        </div>
 
     <br>
 
@@ -53,14 +53,14 @@
         </select>
     </div>
 
-    <div class="mt-2 flex items-center text-red-600 text-sm mb-2">
+    <!-- <div class="mt-2 flex items-center text-red-600 text-sm mb-2">
         <i class="fas fa-info-circle mr-2"></i>
         <span>File versions on this section cannot be downloaded. Go to file versions section to download your selected file version. Thank you.</span>
     </div>
     <div class="mt-2 flex items-center text-red-600 text-sm mb-2">
         <i class="fas fa-info-circle mr-2"></i>
         <span>This section is read-only.</span>
-    </div>
+    </div> -->
 
     <!-- Table View
     <table id="tableView" class="w-full border-collapse border border-gray-300">
@@ -123,51 +123,66 @@
 
     <!-- Card View -->
     <div id="cardView" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 mt-6 mb-12">
-        @foreach($files as $file)
-            @if($file->status == 'active') 
-            <div class="bg-white rounded-lg shadow-lg p-6">
-                <div class="flex justify-between">
-                    <span class="text-lg font-semibold">{{ $file->filename }}</span>
-                </div>
-                <div class="flex items-center mt-2">
-                    @php
-                        $fileType = strtolower($file->file_type);
-                    @endphp
-
-                    @if($fileType == 'pdf')
-                        <i class="fa-solid fa-file-pdf text-red-500 text-2xl"></i>
-                    @elseif($fileType == 'docx' || $fileType == 'doc')
-                        <i class="fa-solid fa-file-word text-blue-500 text-2xl"></i>
-                    @elseif($fileType == 'pptx' || $fileType == 'ppt')
-                        <i class="fa-solid fa-file-powerpoint text-orange-500 text-2xl"></i>
-                    @else
-                        <i class="fa-solid fa-file text-gray-500 text-2xl"></i>
-                    @endif
-                    <span class="ml-2">{{ strtoupper($fileType) }}</span>
-                </div>
-                <div class="flex justify-between items-center mt-4">
-                    <span class="text-sm text-gray-500">{{ $file->created_at->diffForHumans() }}</span>
-                    
-                    <div class="flex space-x-4">
-                        <a href="{{ route('staff.files.download', basename($file->file_path)) }}" class="text-blue-500" title="Download">
-                            <i class="fas fa-download"></i>
-                        </a>
-                        <a href="{{ route('staff.files.editPrimary', ['file_id' => $file->file_id]) }}" class="text-blue-500" title="Edit Primary File">
-                            <i class="fas fa-edit"></i>
-                        </a>
-                        <a href="{{ route('staff.editFile', $file->file_id) }}" class="text-red-500" title="Upload New File Based on this version">
-                            <i class="fas fa-upload"></i>
-                        </a>
-                    </div>
-                </div>
-
+    @foreach($files as $file)
+        @if($file->status == 'active') 
+        <div class="bg-white rounded-lg shadow-lg p-6">
+            <div class="flex justify-between">
+                <span class="text-1xl font-semibold">{{ $file->filename }}</span>
+                <span class="font-semibold">{{ $file->year_published }}</span>
             </div>
-            @endif
-        @endforeach
-    </div>
+            <div class="mt-2 text-sm text-gray-600">
+                <span class="font-semibold">Active File ID: 00{{ $file->file_id }}</span>
+            </div>  
+            <div class="mt-2 text-sm text-gray-600">
+                <span class="font-semibold">Publisher: {{ $file->published_by }}</span>
+            </div>  
 
+            <div class="flex items-center mt-2">
+                @php
+                    $fileType = strtolower($file->file_type);
+                @endphp
+
+                @if($fileType == 'pdf')
+                    <i class="fa-solid fa-file-pdf text-red-500 text-2xl"></i>
+                @elseif($fileType == 'docx' || $fileType == 'doc')
+                    <i class="fa-solid fa-file-word text-blue-500 text-2xl"></i>
+                @elseif($fileType == 'pptx' || $fileType == 'ppt')
+                    <i class="fa-solid fa-file-powerpoint text-orange-500 text-2xl"></i>
+                @else
+                    <i class="fa-solid fa-file text-gray-500 text-2xl"></i>
+                @endif
+                <span class="ml-2">{{ strtoupper($fileType) }}</span>
+            </div>
+
+            <div class="flex justify-between items-center mt-4">
+                <span class="text-sm text-gray-500">{{ $file->created_at->diffForHumans() }}</span>
+                
+                <div class="flex space-x-4">
+                    <a href="{{ route('staff.files.download', basename($file->file_path)) }}" class="text-blue-500" title="Download">
+                        <i class="fas fa-download"></i>
+                    </a>
+                    <a href="{{ route('staff.files.editPrimary', ['file_id' => $file->file_id]) }}" class="text-blue-500" title="Edit Primary File">
+                        <i class="fas fa-edit"></i>
+                    </a>
+                    <a href="{{ route('staff.editFile', $file->file_id) }}" class="text-red-500" title="Upload New File Based on this version">
+                        <i class="fas fa-upload"></i>
+                    </a>
+                    <form action="{{ route('files.archive.active', ['file_id' => $file->file_id]) }}" method="POST" onsubmit="return confirm('Are you sure you want to archive this file?')">
+                        @csrf
+                        <button type="submit" class="text-red-500" title="Archive this file">
+                            <i class="fas fa-archive"></i>
+                        </button>
+                    </form>
+
+                </div>
+            </div>
+        </div>
+        @endif
+    @endforeach
 </div>
 
+
+</div>
 <script>
     document.addEventListener("DOMContentLoaded", function () {
     const searchInput = document.getElementById("searchInput");
@@ -264,5 +279,63 @@
         updateFileCount();
     });
 </script>
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+    function updateFileCount() {
+        const tableRows = document.querySelectorAll(".file-row:not([style*='display: none'])").length;
+        const cardItems = document.querySelectorAll("#cardView > div:not([style*='display: none'])").length;
+        const totalCount = tableRows + cardItems; 
+        document.getElementById("activeFileCount").textContent = totalCount;
+    }
 
+    // Update file count after filtering
+    function setupFilters() {
+        const searchInput = document.getElementById("searchInput");
+        const fileTypeFilter = document.getElementById("fileTypeFilter");
+        const categoryFilter = document.getElementById("categoryFilter");
+
+        function filterFiles() {
+            const searchText = searchInput.value.toLowerCase();
+            const selectedFileType = fileTypeFilter.value.toLowerCase();
+            const selectedCategory = categoryFilter.value.toLowerCase();
+
+            // Filter Table Rows
+            document.querySelectorAll(".file-row").forEach(row => {
+                const filename = row.querySelector(".filename").textContent.toLowerCase();
+                const fileType = row.querySelector(".file-type").textContent.toLowerCase();
+                const category = row.querySelector(".category").textContent.toLowerCase();
+
+                const matchesSearch = filename.includes(searchText);
+                const matchesFileType = selectedFileType === "" || fileType.includes(selectedFileType);
+                const matchesCategory = selectedCategory === "" || category.includes(selectedCategory);
+
+                row.style.display = matchesSearch && matchesFileType && matchesCategory ? "" : "none";
+            });
+
+            // Filter Cards
+            document.querySelectorAll("#cardView > div").forEach(card => {
+                const fileName = card.querySelector("span.font-semibold").textContent.toLowerCase();
+                const fileType = card.querySelector("span.ml-2").textContent.toLowerCase();
+                const category = card.dataset.category ? card.dataset.category.toLowerCase() : "";
+
+                const matchesSearch = fileName.includes(searchText);
+                const matchesFileType = selectedFileType === "" || fileType.includes(selectedFileType);
+                const matchesCategory = selectedCategory === "" || category.includes(selectedCategory);
+
+                card.style.display = matchesSearch && matchesFileType && matchesCategory ? "block" : "none";
+            });
+
+            updateFileCount();
+        }
+
+        searchInput.addEventListener("input", filterFiles);
+        fileTypeFilter.addEventListener("change", filterFiles);
+        categoryFilter.addEventListener("change", filterFiles);
+    }
+
+    setupFilters();
+    updateFileCount(); // Run count on load
+    });
+
+</script>
 @endsection

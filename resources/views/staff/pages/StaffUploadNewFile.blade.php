@@ -13,7 +13,36 @@
         <div class="mb-4 flex flex-col">
             <label for="file" class="block text-1xl font-medium text-gray-700 mb-1">Select File</label>
             <input type="file" name="file" id="file" class="p-2 border rounded w-full" required>
+
+            <!-- File Details Display (Initially Hidden) -->
+            <div id="fileDetails" class="mt-2 text-gray-600 hidden">
+                <p><strong>File Name:</strong> <span id="fileName"></span></p>
+                <p><strong>File Type:</strong> <span id="fileType"></span></p>
+                <p><strong>File Size:</strong> <span id="fileSize"></span></p>
+            </div>
         </div>
+
+        <script>
+            document.getElementById("file").addEventListener("change", function(event) {
+                let file = event.target.files[0]; // Get the selected file
+
+                if (file) {
+                    let fileSizeInMB = (file.size / (1024 * 1024)).toFixed(2); // Convert size to MB
+
+                    // Update file details
+                    document.getElementById("fileName").textContent = file.name;
+                    document.getElementById("fileType").textContent = file.type || "Unknown";
+                    document.getElementById("fileSize").textContent = fileSizeInMB + " MB";
+
+                    // Show the file details section
+                    document.getElementById("fileDetails").classList.remove("hidden");
+                } else {
+                    document.getElementById("fileDetails").classList.add("hidden");
+                }
+            });
+        </script>
+
+
 
         <div class="mb-4">
             <label for="category" class="block text-1xl font-medium text-gray-700">File Category</label>
@@ -33,12 +62,13 @@
 
         <div class="mb-4">
             <label for="year_published" class="block text-1xl font-medium text-gray-700">Year Published</label>
-            <input type="text" name="year_published" id="year_published" class="p-2 border rounded w-full" 
-                required pattern="\d{4}" maxlength="4" placeholder="YYYY">
+            <input type="number" name="year_published" id="year_published" class="p-2 border rounded w-full" 
+            required min="1900" max="{{ date('Y') }}" placeholder="YYYY">
+
         </div>
 
         <div class="mb-4">
-            <label for="description" class="block text-1xl font-medium text-gray-700">Description (Optional)</label>
+            <label for="description" class="block text-1xl font-medium text-gray-700">Description</label>
             <textarea name="description" id="description" class="p-2 border rounded w-full" rows="3" placeholder="Enter file description..."></textarea>
         </div>
 

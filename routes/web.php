@@ -62,6 +62,12 @@ Route::middleware(['staff.auth'])->group(function () {
     Route::get('/staff-dashboard', [StaffController::class, 'CountActiveFiles'])
     ->name('staff.page.dashboard');
 
+    Route::get('/staff-dashboard/check-file-requests', [StaffController::class, 'checkFileRequests'])
+    ->name('staff.check.file.requests');
+
+    Route::post('/active-files/archive/{file_id}', [StaffController::class, 'ActiveFileArchived'])
+    ->name('files.archive.active');
+
     Route::get('/staff-files-requests', [StaffController::class, 'pendingAndDeniedFileRequests'])->name('staff.pending.files');
 
     Route::post('/file-request/retry/{id}', [StaffController::class, 'retryFileRequest'])->name('retry.status');
@@ -103,7 +109,8 @@ Route::middleware(['staff.auth'])->group(function () {
 
     Route::get('/staff-archive-files', [StaffController::class, 'StaffArchivedViewFilesVersions'])->name('staff.archived.files');
 
-    Route::put('/staff/unarchive-file/{version_id}', [StaffController::class, 'StaffunarchiveFile'])->name('staff.unarchiveFile');
+    Route::put('/staff/unarchive-file/{id}', [StaffController::class, 'StaffunarchiveFile'])
+    ->name('staff.unarchiveFile');
 
     Route::get('/staff-trash-files', [StaffController::class, 'StaffTrashViewFilesVersions'])->name('staff.trash.bins');
 
