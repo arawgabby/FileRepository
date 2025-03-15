@@ -59,11 +59,12 @@ Route::middleware(['staff.auth'])->group(function () {
 
     Route::get('/staff-logs', [StaffController::class, 'StaffviewLogs'])->name('staff.logs.view');
 
-    Route::get('/staff-dashboard', function () {
-        return view('staff.pages.StaffDashboardPage');
-    })->name('staff.page.dashboard');
+    Route::get('/staff-dashboard', [StaffController::class, 'CountActiveFiles'])
+    ->name('staff.page.dashboard');
 
-    Route::get('/staff-files-requests', [StaffController::class, 'pendingFileRequests'])->name('staff.pending.files');
+    Route::get('/staff-files-requests', [StaffController::class, 'pendingAndDeniedFileRequests'])->name('staff.pending.files');
+
+    Route::post('/file-request/retry/{id}', [StaffController::class, 'retryFileRequest'])->name('retry.status');
 
     Route::get('/staff-active-files', [StaffController::class, 'activeFiles'])->name('staff.active.files');
 

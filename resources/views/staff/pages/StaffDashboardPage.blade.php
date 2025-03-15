@@ -26,17 +26,18 @@
             <div>
                 <h2 class="text-xl font-semibold text-gray-500">Active Files</h2>
                 <br>
-                <p class="text-6xl font-bold text-gray-900">13</p>
+                <p class="text-6xl font-bold text-gray-900">{{ $activeFilesCount }}</p> <!-- Dynamic Count -->
             </div>
             <i class="fas fa-file-alt text-3xl text-blue-500"></i>
         </div>
+
 
         <!-- Pending Files Card -->
         <div class="bg-white rounded-md shadow-md p-4 flex items-center justify-between border">
             <div>
                 <h2 class="text-xl font-semibold text-gray-500">Pending Files</h2>
                 <br>
-                <p class="text-6xl font-bold text-gray-900">8</p>
+                <p class="text-6xl font-bold text-gray-900">{{ $pendingFilesCount }}</p> <!-- Dynamic Count -->
             </div>
             <i class="fas fa-clock text-3xl text-yellow-500"></i>
         </div>
@@ -46,20 +47,22 @@
             <div>
                 <h2 class="text-xl font-semibold text-gray-500">Total Storage Used</h2>
                 <br>
-                <p class="text-6xl font-bold text-gray-900">25GB</p>
+                <p class="text-6xl font-bold text-gray-900">{{ $formattedStorage }}</p> <!-- Dynamic Storage -->
             </div>
             <i class="fas fa-archive text-3xl text-gray-500"></i>
         </div>
+
 
         <!-- Recent Uploads Card -->
         <div class="bg-white rounded-md shadow-md p-4 flex items-center justify-between border">
             <div>
                 <h2 class="text-xl font-semibold text-gray-500">Recent Uploads</h2>
                 <br>
-                <p class="text-6xl font-bold text-gray-900">5</p>
+                <p class="text-6xl font-bold text-gray-900">{{ $recentUploadsCount }}</p> <!-- Dynamic Recent Uploads -->
             </div>
             <i class="fas fa-upload text-3xl text-green-500"></i>
         </div>
+
 
     </div>
     

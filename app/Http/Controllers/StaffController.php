@@ -10,6 +10,7 @@ use App\Models\FileVersions;
 use App\Models\FileTimeStamp;
 use Illuminate\Support\Facades\Auth;
 use App\Models\FileRequest;
+use Carbon\Carbon;
 
 
 class StaffController extends Controller
@@ -278,23 +279,36 @@ class StaffController extends Controller
         return redirect()->back()->with('success', 'File request submitted successfully.');
     }
 
-    public function pendingFileRequests()
+    public function pendingAndDeniedFileRequests()
     {
-        // Ensure the user is logged in via session
         if (!session()->has('user')) {
             return redirect()->route('staff.upload')->with('error', 'Unauthorized: Please log in.');
         }
-
-        $user = session('user'); // Get the logged-in user
-
-        // Retrieve pending file requests for the logged-in user
-        $fileRequests = FileRequest::where('requested_by', $user->id) // Filter by session user ID
-            ->where('request_status', 'pending')
-            ->with('file') // Load file details using Eloquent relationship
+    
+        $user = session('user');
+    
+        $fileRequests = FileRequest::where('requested_by', $user->id)
+            ->whereIn('request_status', ['pending', 'denied'])
+            ->with('file')
             ->get();
-
+    
         return view('staff.pages.PendingFiles', compact('fileRequests'));
     }
+
+    public function retryFileRequest($id)
+    {
+        $fileRequest = FileRequest::findOrFail($id);
+    
+        if ($fileRequest->request_status === 'denied') {
+            $fileRequest->request_status = 'pending';
+            $fileRequest->save();
+            return redirect()->back()->with('success', 'Request successfully resubmitted.');
+        }
+    
+        return redirect()->back()->with('error', 'Invalid action.');
+    }
+    
+        
 
     public function activeFiles(Request $request)
     {
@@ -615,6 +629,89 @@ class StaffController extends Controller
     
         return redirect()->back()->with('success', 'File version unarchived successfully!');
     }
+
+    public function CountActiveFiles()
+    {
+        $user = session('user'); // Get logged-in user from session
+    
+        if (!$user) {
+            return redirect()->route('login')->with('error', 'Please log in first.');
+        }
+    
+        // Count active files uploaded by this user
+        $activeFilesCount = File::where('uploaded_by', $user->id)
+                                ->where('status', 'active')
+                                ->count();
+    
+        // Count pending files uploaded by this user
+        $pendingFilesCount = File::where('uploaded_by', $user->id)
+                                 ->where('status', 'pending')
+                                 ->count();
+    
+        // Calculate total storage used
+        $uploadPath = storage_path('app/public/uploads'); // Absolute path
+        $totalStorageUsed = $this->getFolderSize($uploadPath); // Get folder size
+        $formattedStorage = $this->formatSizeUnits($totalStorageUsed); // Format size
+    
+        // Count recent uploads (within the last 24 hours)
+        $recentUploadsCount = $this->countRecentUploads($uploadPath);
+    
+        return view('staff.pages.StaffDashboardPage', compact(
+            'activeFilesCount', 
+            'pendingFilesCount', 
+            'formattedStorage',
+            'recentUploadsCount'
+        ));
+    }
+    
+    /**
+     * Get folder size in bytes.
+     */
+    private function getFolderSize($folder)
+    {
+        $size = 0;
+        foreach (glob(rtrim($folder, '/') . '/*', GLOB_NOSORT) as $file) {
+            $size += is_file($file) ? filesize($file) : $this->getFolderSize($file);
+        }
+        return $size;
+    }
+    
+    /**
+     * Convert bytes to human-readable format.
+     */
+    private function formatSizeUnits($bytes)
+    {
+        if ($bytes >= 1073741824) {
+            return number_format($bytes / 1073741824, 2) . ' GB';
+        } elseif ($bytes >= 1048576) {
+            return number_format($bytes / 1048576, 2) . ' MB';
+        } elseif ($bytes >= 1024) {
+            return number_format($bytes / 1024, 2) . ' KB';
+        } else {
+            return $bytes . ' Bytes';
+        }
+    }
+    
+    /**
+     * Count recent uploads based on file timestamps (last 24 hours).
+     */
+    private function countRecentUploads($folder)
+    {
+        $recentUploads = 0;
+        $cutoffTime = Carbon::now()->subHours(24); // Get the time 24 hours ago
+    
+        foreach (glob(rtrim($folder, '/') . '/*') as $file) {
+            if (is_file($file)) {
+                $fileTime = Carbon::createFromTimestamp(filemtime($file)); // Get file modification time
+                if ($fileTime->greaterThanOrEqualTo($cutoffTime)) {
+                    $recentUploads++;
+                }
+            }
+        }
+    
+        return $recentUploads;
+    }
+        
             
     public function StaffTrashViewFilesVersions(Request $request) 
     {
