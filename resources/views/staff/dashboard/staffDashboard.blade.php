@@ -7,23 +7,28 @@
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;700&display=swap" rel="stylesheet">
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <style>
         body {
-            font-family: 'Poppins', sans-serif;
+            font-family: 'Open-Sans', sans-serif;
             zoom: 80%;
         }
     </style>
 </head>
-<body class="bg-gray-50">
+<body class="bg-gray-50 bg-cover bg-center" 
+      style="background: url('{{ asset('storage/uploads/bodybackground.png') }}') no-repeat center center fixed; 
+             background-size: contain;">
     <div class="flex h-screen">
         
-    <div id="sidebar" class="bg-gray-800 text-white w-72 space-y-6 py-7 px-4 transform -translate-x-full md:translate-x-0
+    <div id="sidebar" class="bg-gray-900 text-white w-66 space-y-6 py-7 px-4 transform -translate-x-full md:translate-x-0
      transition-transform duration-300 fixed top-0 bottom-0 z-40 overflow-y-auto">
      
-    <div class="text-2xl font-bold">
-                <img src="{{ asset('storage/csitlogo.jpg') }}" alt="CSIT Logo" class="w-25 h-25">
-                <!-- <p><a href="#" class="text-white">Staff Panel</a></p>  -->
-           </div>
+        <div class="text-2xl font-bold flex justify-center">
+            <img src="{{ asset('storage/csitlogo.jpg') }}" alt="CSIT Logo" class="w-25 h-25">
+            <!-- <p><a href="#" class="text-white">Staff Panel</a></p>  -->
+        </div>
+
 
             <!-- <div class="flex items-center bg-white text-white rounded-lg p-4 space-x-3 w-full">
                 <div class="w-12 h-12 bg-gray-600 flex items-center justify-center rounded-full">
@@ -47,6 +52,9 @@
                 <i class="fas fa-dashboard mr-4"></i> Dashboard
             </a>
 
+            <p class="border-b border-white text-gray-200 pb-2">
+            </p>
+
             <p class="text-white text-1xl font-bold">
                 <i class="fas fa-folder"></i> Request File
             </p>
@@ -68,6 +76,10 @@
                     </span>
                 @endif
             </a>
+
+            <p class="border-b border-white text-gray-200 pb-2">
+            </p>
+
 
 
 
@@ -93,6 +105,10 @@
                 <i class="fas fa-trash-alt mr-4"></i> Trash Files
             </a>
 
+            <p class="border-b border-white text-gray-200 pb-2">
+            </p>
+
+
             <p class="text-white text-1xl font-bold mt-8">
                 <i class="fas fa-file-text"></i> Activity Log
             </p>
@@ -110,6 +126,9 @@
                     <i class="fas fa-file mr-4"></i> Faculty Logs
                 </a>
             @endif
+
+            <p class="border-b border-white text-gray-200 pb-2">
+            </p>
 
 
             <a href="{{ url('/staff-logout') }}" class="flex items-center text-white hover:text-white mr-2" 
@@ -139,9 +158,9 @@
             <div class="flex items-center space-x-6">
         
                 <!-- User Profile (Right End) -->
-                <div class="flex items-center bg-white rounded-lg p-2 space-x-3 shadow-md w-[250px] overflow-hidden">
+                <div class="flex items-center bg-white rounded-lg p-2 space-x-3 shadow-md overflow-hidden">
                     <div class="w-12 h-12 bg-gray-600 flex items-center justify-center rounded-full">
-                        <i class="fas fa-user text-gray-300 text-2xl"></i>
+                        <i class="fas fa-user text-white text-2xl"></i>
                     </div>
                     <div class="flex flex-col">
                         <p class="text-lg font-semibold text-black">{{ session('user')->name }}</p>
@@ -228,48 +247,48 @@
         });
         });
     </script>
-    <script>
-        document.addEventListener("DOMContentLoaded", function () {
-            const navLinks = document.querySelectorAll("#sidebar nav a");
+  <script>
+    document.addEventListener("DOMContentLoaded", function () {
+        const navLinks = document.querySelectorAll("#sidebar nav a");
 
-            // Function to update active link state
-            function setActiveLink(clickedLink) {
-                navLinks.forEach(link => {
-                    link.classList.remove(
-                        "text-black", "bg-white", "shadow-md", "scale-105", 
-                        "font-bold", "p-4", "rounded-lg"
-                    );
-                    link.classList.add("text-gray-300", "hover:text-white"); // Add hover effect back to non-active links
-                });
-
-                clickedLink.classList.add(
+        // Function to update active link state with smooth animation
+        function setActiveLink(clickedLink) {
+            navLinks.forEach(link => {
+                link.classList.remove(
                     "text-black", "bg-white", "shadow-md", "scale-105", 
                     "font-bold", "p-4", "rounded-lg"
                 );
-                clickedLink.classList.remove("text-gray-300", "hover:text-white"); // Remove hover effect from active link
+                link.classList.add("text-gray-300", "hover:text-white", "transition-all", "duration-300", "ease-in-out");
+            });
 
-                // Store the active link in localStorage to persist highlight
-                localStorage.setItem("activeNav", clickedLink.getAttribute("href"));
+            clickedLink.classList.add(
+                "text-black", "bg-white", "shadow-md", "scale-105", 
+                "font-bold", "p-4", "rounded-lg", "transition-all", "duration-300", "ease-in-out"
+            );
+            clickedLink.classList.remove("text-gray-300", "hover:text-white"); 
+
+            // Store the active link in localStorage to persist highlight
+            localStorage.setItem("activeNav", clickedLink.getAttribute("href"));
+        }
+
+        // Check if there is a stored active link in localStorage
+        const storedActiveLink = localStorage.getItem("activeNav");
+        if (storedActiveLink) {
+            const activeElement = [...navLinks].find(link => link.getAttribute("href") === storedActiveLink);
+            if (activeElement) {
+                setActiveLink(activeElement);
             }
+        }
 
-
-            // Check if there is a stored active link in localStorage
-            const storedActiveLink = localStorage.getItem("activeNav");
-            if (storedActiveLink) {
-                const activeElement = [...navLinks].find(link => link.getAttribute("href") === storedActiveLink);
-                if (activeElement) {
-                    setActiveLink(activeElement);
-                }
-            }
-
-            // Add click event listener to each nav link
-            navLinks.forEach(link => {
-                link.addEventListener("click", function () {
-                    setActiveLink(this);
-                });
+        // Add click event listener to each nav link
+        navLinks.forEach(link => {
+            link.addEventListener("click", function () {
+                setActiveLink(this);
             });
         });
-    </script>
+    });
+</script>
+
     <script>
         function toggleDropdown() {
             const dropdown = document.getElementById('dropdownMenu');

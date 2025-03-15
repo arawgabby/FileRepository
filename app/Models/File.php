@@ -20,6 +20,9 @@ class File extends Model
         'file_type',
         'uploaded_by',
         'category',
+        'published_by',
+        'uploaded_by',
+        'description',
         'status',
     ];
 

@@ -33,46 +33,52 @@ class StaffController extends Controller
         $request->validate([
             'file' => 'required|file|max:502400', 
             'category' => 'required|in:capstone,thesis,faculty_request,accreditation,admin_docs',
+            'published_by' => 'required|string|max:255',
+            'year_published' => 'required|integer|min:1900|max:' . date('Y'),
+            'description' => 'nullable|string|max:1000',
         ]);
 
-        // Ensure the user is logged in via session
         if (!session()->has('user')) {
-            return redirect()->route('staff.upload')->with('error', 'Unauthorized: Please log in.');
+            return response()->json(['message' => 'Unauthorized: Please log in.'], 403);
         }
 
-        $user = session('user'); // Get user data from session
+        $user = session('user');
 
         if ($request->hasFile('file')) {
             $file = $request->file('file');
             $filename = $file->getClientOriginalName();
             $filePath = $file->storeAs('uploads', $filename, 'public');
 
-            // ✅ Insert the file first
             $fileEntry = File::create([
                 'filename' => $filename,
                 'file_path' => $filePath,
                 'file_size' => $file->getSize(),
                 'file_type' => $file->getClientOriginalExtension(),
-                'uploaded_by' => $user->id, // Use session user ID
+                'uploaded_by' => $user->id,
                 'category' => $request->category,
-                'status' => 'pending', // Set the file status to pending
+                'published_by' => $request->published_by,
+                'year_published' => $request->year_published,
+                'description' => $request->description ?? null,
+                'status' => 'pending',
             ]);
 
-            // ✅ Log this action ONLY if fileEntry is successfully created
             if ($fileEntry) {
                 AccessLog::create([
-                    'file_id' => $fileEntry->id ?? 0, // If no file ID, store NULL
+                    'file_id' => $fileEntry->id ?? 0,
                     'accessed_by' => $user->id,
                     'action' => 'Uploaded file - Pending approval',
                     'access_time' => now(),
                 ]);
+
+                return response()->json(['message' => 'File uploaded successfully!'], 200);
             }
 
-            return redirect()->route('staff.upload')->with('success', 'File uploaded successfully and marked as pending!');
+            return response()->json(['message' => 'File upload failed.'], 500);
         }
 
-        return redirect()->route('staff.upload')->with('error', 'File upload failed.');
+        return response()->json(['message' => 'No file detected.'], 400);
     }
+
 
     public function StaffviewLogs()
     {
