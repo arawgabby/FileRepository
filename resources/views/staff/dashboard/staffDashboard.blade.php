@@ -101,9 +101,9 @@
             </a>
 
             
-            <a href="{{ route('staff.trash.bins') }}" class="flex items-center text-gray-300 hover:text-white ml-4">
+            <!-- <a href="{{ route('staff.trash.bins') }}" class="flex items-center text-gray-300 hover:text-white ml-4">
                 <i class="fas fa-trash-alt mr-4"></i> Trash Files
-            </a>
+            </a> -->
 
             <p class="border-b border-white text-gray-200 pb-2">
             </p>
@@ -122,7 +122,7 @@
                     <i class="fas fa-file mr-4"></i> Staff Logs
                 </a>
             @elseif (session('user')->role === 'faculty')
-                <a href="#" class="flex items-center text-gray-300 hover:text-white ml-4">
+                <a href="{{ route('staff.logs.view') }}" class="flex items-center text-gray-300 hover:text-white ml-4">
                     <i class="fas fa-file mr-4"></i> Faculty Logs
                 </a>
             @endif
@@ -164,7 +164,9 @@
                     </div>
                     <div class="flex flex-col">
                         <p class="text-lg font-semibold text-black">{{ session('user')->name }}</p>
-                        <p class="text-lg font-semibold text-black">Role: {{ session('user')->role }}</p>
+                        <p class="text-lg font-semibold text-black">
+                            <span class="text-lg font-bold text-green-600">ONLINE: </span> {{ session('user')->role }}
+                        </p>
                     </div>
 
                    <!-- Notification Bell with Modal Trigger -->

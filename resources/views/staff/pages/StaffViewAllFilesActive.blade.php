@@ -51,6 +51,15 @@
             <option value="accreditation">Accreditation</option>
             <option value="admin_docs">Admin Docs</option>
         </select>
+
+        <label for="yearFilter" class="font-semibold mt-2">Filter by Year:</label>
+        <select id="yearFilter" class="border rounded p-2">
+            <option value="all">All Years</option>
+            @foreach($files->unique('year_published') as $file)
+                <option value="{{ $file->year_published }}">{{ $file->year_published }}</option>
+            @endforeach
+        </select>
+
     </div>
 
     <!-- <div class="mt-2 flex items-center text-red-600 text-sm mb-2">
@@ -123,66 +132,87 @@
 
     <!-- Card View -->
     <div id="cardView" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 mt-6 mb-12">
-    @foreach($files as $file)
-        @if($file->status == 'active') 
-        <div class="bg-white rounded-lg shadow-lg p-6">
-            <div class="flex justify-between">
-                <span class="text-1xl font-semibold">{{ $file->filename }}</span>
+        @foreach($files as $file)
+            @if($file->status == 'active') 
+            <div class="bg-white rounded-lg shadow-lg p-6">
+                <div class="flex justify-between">
+                <span class="text-2xl font-semibold break-words w-full block">{{ $file->filename }}</span>
                 <span class="font-semibold">{{ $file->year_published }}</span>
-            </div>
-            <div class="mt-2 text-sm text-gray-600">
-                <span class="font-semibold">Active File ID: 00{{ $file->file_id }}</span>
-            </div>  
-            <div class="mt-2 text-sm text-gray-600">
-                <span class="font-semibold">Publisher: {{ $file->published_by }}</span>
-            </div>  
+                </div>
+                <div class="mt-2 text-sm text-gray-600">
+                    <span class="font-semibold">Active File ID: 00{{ $file->file_id }}</span>
+                </div>  
+                <div class="mt-2 text-sm text-gray-600">
+                    <span class="font-semibold">Publisher: {{ $file->published_by }}</span>
+                </div>  
 
-            <div class="flex items-center mt-2">
-                @php
-                    $fileType = strtolower($file->file_type);
-                @endphp
+                <div class="flex items-center mt-2">
+                    @php
+                        $fileType = strtolower($file->file_type);
+                    @endphp
 
-                @if($fileType == 'pdf')
-                    <i class="fa-solid fa-file-pdf text-red-500 text-2xl"></i>
-                @elseif($fileType == 'docx' || $fileType == 'doc')
-                    <i class="fa-solid fa-file-word text-blue-500 text-2xl"></i>
-                @elseif($fileType == 'pptx' || $fileType == 'ppt')
-                    <i class="fa-solid fa-file-powerpoint text-orange-500 text-2xl"></i>
-                @else
-                    <i class="fa-solid fa-file text-gray-500 text-2xl"></i>
-                @endif
-                <span class="ml-2">{{ strtoupper($fileType) }}</span>
-            </div>
+                    @if($fileType == 'pdf')
+                        <i class="fa-solid fa-file-pdf text-red-500 text-2xl"></i>
+                    @elseif($fileType == 'docx' || $fileType == 'doc')
+                        <i class="fa-solid fa-file-word text-blue-500 text-2xl"></i>
+                    @elseif($fileType == 'pptx' || $fileType == 'ppt')
+                        <i class="fa-solid fa-file-powerpoint text-orange-500 text-2xl"></i>
+                    @else
+                        <i class="fa-solid fa-file text-gray-500 text-2xl"></i>
+                    @endif
+                    <span class="ml-2">{{ strtoupper($fileType) }}</span>
+                </div>
 
-            <div class="flex justify-between items-center mt-4">
-                <span class="text-sm text-gray-500">{{ $file->created_at->diffForHumans() }}</span>
-                
-                <div class="flex space-x-4">
-                    <a href="{{ route('staff.files.download', basename($file->file_path)) }}" class="text-blue-500" title="Download">
-                        <i class="fas fa-download"></i>
-                    </a>
-                    <a href="{{ route('staff.files.editPrimary', ['file_id' => $file->file_id]) }}" class="text-blue-500" title="Edit Primary File">
-                        <i class="fas fa-edit"></i>
-                    </a>
-                    <a href="{{ route('staff.editFile', $file->file_id) }}" class="text-red-500" title="Upload New File Based on this version">
-                        <i class="fas fa-upload"></i>
-                    </a>
-                    <form action="{{ route('files.archive.active', ['file_id' => $file->file_id]) }}" method="POST" onsubmit="return confirm('Are you sure you want to archive this file?')">
-                        @csrf
-                        <button type="submit" class="text-red-500" title="Archive this file">
-                            <i class="fas fa-archive"></i>
-                        </button>
-                    </form>
+                <div class="flex justify-between items-center mt-4">
+                    <span class="text-sm text-gray-500">{{ $file->created_at->diffForHumans() }}</span>
+                    
+                    <div class="flex space-x-4">
+                        <a href="{{ route('staff.files.download', basename($file->file_path)) }}" class="text-blue-500" title="Download">
+                            <i class="fas fa-download"></i>
+                        </a>
+                        <a href="{{ route('staff.files.editPrimary', ['file_id' => $file->file_id]) }}" class="text-blue-500" title="Edit Primary File">
+                            <i class="fas fa-edit"></i>
+                        </a>
+                        <a href="{{ route('staff.editFile', $file->file_id) }}" class="text-red-500" title="Upload New File Based on this version">
+                            <i class="fas fa-upload"></i>
+                        </a>
+                        <form action="{{ route('files.archive.active', ['file_id' => $file->file_id]) }}" method="POST" onsubmit="return confirm('Are you sure you want to archive this file?')">
+                            @csrf
+                            <button type="submit" class="text-red-500" title="Archive this file">
+                                <i class="fas fa-archive"></i>
+                            </button>
+                        </form>
 
+                    </div>
                 </div>
             </div>
-        </div>
-        @endif
-    @endforeach
-</div>
+            @endif
+        @endforeach
+    </div>
 
 
 </div>
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        const yearFilter = document.getElementById("yearFilter");
+        const cards = document.querySelectorAll("#cardView > div");
+
+        yearFilter.addEventListener("change", function () {
+            const selectedYear = this.value;
+
+            cards.forEach(card => {
+                const yearElement = card.querySelector("div.flex.justify-between span:nth-child(2)");
+                const fileYear = yearElement ? yearElement.textContent.trim() : "";
+
+                if (selectedYear === "all" || fileYear === selectedYear) {
+                    card.style.display = "block";
+                } else {
+                    card.style.display = "none";
+                }
+            });
+        });
+    });
+</script>
 <script>
     document.addEventListener("DOMContentLoaded", function () {
     const searchInput = document.getElementById("searchInput");

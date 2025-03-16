@@ -1,6 +1,7 @@
 @extends('staff.dashboard.staffDashboard')
 
 @section('content')
+@if(session('user')) 
 <meta name="csrf-token" content="{{ csrf_token() }}">
 
 <div class="container mx-auto p-6 bg-white rounded-xl shadow-lg">
@@ -24,7 +25,7 @@
             </thead>
             <tbody id="logsTable">
                 @foreach($accessLogs as $log)
-                    @if($log->user->role === 'staff') {{-- Ensure Only Staff --}}
+                    @if($log->uploaded_by === session('user')->id || in_array(session('user')->role, ['faculty', 'staff']))
                         <tr class="border-b border-gray-300 text-center">
                             <td class="py-2 px-4">{{ ucfirst($log->file_id) }}</td>
                             <td class="py-2 px-4">{{ ucfirst($log->user->role) }}</td> <!-- Display role based on accessed_by -->
@@ -50,5 +51,5 @@
         });
     });
 </script>
-
+@endif
 @endsection

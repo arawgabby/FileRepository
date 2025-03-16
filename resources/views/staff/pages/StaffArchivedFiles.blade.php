@@ -13,7 +13,7 @@
 
     <h1 class="text-[30px] font-bold mb-3 flex items-center">
         <i class="fas fa-archive w-[30px] h-[30px] mr-2"></i>
-        Staff Archived File Versions
+        Archived File Versions
     </h1>
 
     <!-- Search & Filters -->
@@ -85,8 +85,8 @@
                         @method('PUT')
                     </form>
 
-                    {{-- Trash Link --}}
-                    <a href="{{ route('staff.trash', $file->version_id ?: $file->file_id) }}" 
+                    <!-- {{-- Trash Link --}} -->
+                    <!-- <a href="{{ route('staff.trash', $file->version_id ?: $file->file_id) }}" 
                         class="text-blue-500 hover:text-blue-700" 
                         title="Add to Trash"
                         onclick="confirmTrash(event, '{{ $file->version_id ?: $file->file_id }}')">
@@ -99,7 +99,7 @@
                         style="display: none;">
                         @csrf
                         @method('PUT')
-                    </form>
+                    </form> -->
                 </div>
             </td>
         </tr>

@@ -95,7 +95,8 @@
                                 <a href="{{ route('staff.editFileVersion', $fileVersion->version_id) }}" class="text-red-500 hover:text-red-700" title="Edit">
                                     <i class="fas fa-edit"></i>
                                 </a>
-                                <a href="{{
+                                
+                                <!-- <a href="{{
                                  route('staff.trash', $fileVersion->version_id) }}" 
                                     class="text-blue-500 hover:text-blue-700" 
                                     title="Add to Trash"
@@ -109,7 +110,7 @@
                                     style="display: none;">
                                     @csrf
                                     @method('PUT')
-                                </form>
+                                </form> -->
                             </div>
                         </td>
                     </tr>

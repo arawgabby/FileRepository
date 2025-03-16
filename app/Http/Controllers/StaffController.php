@@ -379,6 +379,9 @@ class StaffController extends Controller
         $request->validate([
             'filename' => 'required|string|max:255',
             'category' => 'required|string|max:50',
+            'year_published' => 'nullable|integer|min:1900|max:' . date('Y'),
+            'published_by' => 'nullable|string|max:255',
+            'description' => 'nullable|string',
             'status' => 'required|string|in:active,inactive,pending,deactivated',
             'file' => 'nullable|file|max:5120', // Optional file upload, max 5MB
         ]);
@@ -386,11 +389,7 @@ class StaffController extends Controller
         // Check if a new file is uploaded
         if ($request->hasFile('file')) {
             $uploadedFile = $request->file('file');
-    
-            // Use the original filename
             $newFileName = $uploadedFile->getClientOriginalName();
-            
-            // Store the new file in 'uploads/primaryFiles' directory
             $filePath = $uploadedFile->storeAs('uploads/primaryFiles', $newFileName, 'public');
     
             // Delete old file if it exists
@@ -398,38 +397,35 @@ class StaffController extends Controller
                 Storage::disk('public')->delete($file->file_path);
             }
     
-            // Update file path & size
             $file->file_path = $filePath;
             $file->file_size = $uploadedFile->getSize();
         } else {
-            // If no new file is uploaded, rename the existing file
-            $oldFilePath = $file->file_path; // Get the existing file path
+            // Rename the existing file
+            $oldFilePath = $file->file_path;
     
             if ($oldFilePath && str_starts_with($oldFilePath, 'uploads/')) {
-                // Extract the directory and get the file extension
                 $directory = dirname($oldFilePath);
                 $oldExtension = pathinfo($oldFilePath, PATHINFO_EXTENSION);
-                
-                // Ensure the filename doesn't already contain the extension
                 $newFileName = pathinfo($request->filename, PATHINFO_FILENAME) . '.' . $oldExtension;
                 $newFilePath = $directory . '/' . $newFileName;
     
-                // Rename the file in storage
                 Storage::disk('public')->move($oldFilePath, $newFilePath);
-    
-                // Update the file path in the database
                 $file->file_path = $newFilePath;
             }
         }
     
         // Update file details
-        $file->filename = pathinfo($request->filename, PATHINFO_FILENAME); // Save filename without extension
+        $file->filename = pathinfo($request->filename, PATHINFO_FILENAME);
         $file->category = $request->category;
+        $file->year_published = $request->year_published;
+        $file->published_by = $request->published_by;
+        $file->description = $request->description;
         $file->status = $request->status;
         $file->save();
     
         return redirect()->route('staff.active.files', $file_id)->with('success', 'File updated successfully!');
     }
+    
 
     public function StaffeditFile($file_id)
     {
@@ -698,29 +694,39 @@ class StaffController extends Controller
             return redirect()->route('login')->with('error', 'Please log in first.');
         }
     
-        // Count active files uploaded by this user
+        // ✅ Count active files uploaded by this user
         $activeFilesCount = File::where('uploaded_by', $user->id)
                                 ->where('status', 'active')
                                 ->count();
     
-        // Count pending files uploaded by this user
+        // ✅ Count pending files uploaded by this user
         $pendingFilesCount = File::where('uploaded_by', $user->id)
                                  ->where('status', 'pending')
                                  ->count();
     
-        // Calculate total storage used
+        // ✅ Count recent uploads (e.g., last 7 days)
+        $recentUploadsCount = File::where('uploaded_by', $user->id)
+                                  ->where('created_at', '>=', now()->subDays(7))
+                                  ->count();
+    
+        // ✅ Get total storage used
         $uploadPath = storage_path('app/public/uploads'); // Absolute path
         $totalStorageUsed = $this->getFolderSize($uploadPath); // Get folder size
         $formattedStorage = $this->formatSizeUnits($totalStorageUsed); // Format size
     
-        // Count recent uploads (within the last 24 hours)
-        $recentUploadsCount = $this->countRecentUploads($uploadPath);
+        // ✅ Fetch recent file activities (latest updated files)
+        $recentFiles = File::where('uploaded_by', $user->id)
+                            ->orderBy('updated_at', 'desc')
+                            ->limit(10)
+                            ->get();
     
+        // ✅ Return all necessary data to the view
         return view('staff.pages.StaffDashboardPage', compact(
             'activeFilesCount', 
             'pendingFilesCount', 
+            'recentUploadsCount', 
             'formattedStorage',
-            'recentUploadsCount'
+            'recentFiles'
         ));
     }
     

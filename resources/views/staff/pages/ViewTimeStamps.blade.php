@@ -2,6 +2,7 @@
 
 @section('content')
 
+@if(session('user')) 
 <meta name="csrf-token" content="{{ csrf_token() }}">
 
 <style>
@@ -26,7 +27,6 @@
         <input type="text" id="searchInput" placeholder="Search..." class="w-1/2 border border-gray-300">
         <input type="date" id="dateFilter" class="border border-gray-300">
 
-
         <div class="overflow-x-auto">
             <table class="w-full border-collapse">
                 <thead>
@@ -45,7 +45,8 @@
                     @endphp
 
                     @foreach ($timestamps as $timestamp)
-                        @if (!in_array($timestamp->file_id, $filteredFiles))
+                        @if (!in_array($timestamp->file_id, $filteredFiles) && 
+                             $timestamp->file->uploaded_by === session('user')->id)
                             @php
                                 $filteredFiles[] = $timestamp->file_id;
                             @endphp
@@ -97,5 +98,7 @@ document.addEventListener("DOMContentLoaded", function() {
     dateFilter.addEventListener("change", filterTable);
 });
 </script>
+
+@endif 
 
 @endsection
