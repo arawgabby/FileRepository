@@ -141,7 +141,7 @@ class StaffController extends Controller
             $files->where('category', $request->category);
         }
     
-        $files = $files->paginate(10); // Paginate results
+        $files = $files->paginate(20); // Paginate results
     
         // Fetch file versions separately and link to files
         $fileVersions = FileVersions::whereIn('file_id', $files->pluck('file_id'))->get();
@@ -355,7 +355,7 @@ class StaffController extends Controller
         }
 
         // Paginate results
-        $files = $files->paginate(10);
+        $files = $files->paginate(20);
 
         // Fetch file versions linked to the filtered files
         $fileVersions = FileVersions::whereIn('file_id', $files->pluck('file_id'))->get();
