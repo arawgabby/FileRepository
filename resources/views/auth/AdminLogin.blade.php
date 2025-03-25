@@ -5,8 +5,14 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Admin Login</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body {
+            font-family: 'Open-Sans', sans-serif;
+        }
+    </style>
 </head>
-<body class="bg-gray-100 flex items-center justify-center min-h-screen">
+<body class="flex items-center justify-center min-h-screen bg-gray-100 bg-contain bg-no-repeat bg-center"
+      style="background-image: url('{{ asset('storage/uploads/loginbackground.png') }}');">
 
     <!-- Success/Error Alerts -->
     @if(session('success'))
@@ -22,7 +28,7 @@
     @endif
 
     <div class="bg-white p-8 rounded-xl shadow-md w-full max-w-md">
-        <h2 class="text-2xl font-bold text-center mb-6">Admin Login</h2>
+        <h2 class="text-2xl font-bold text-center mb-6">ADMINISTRATOR LOGIN</h2>
 
         <form action="{{ url('/admin-login') }}" method="POST" class="space-y-4">
             @csrf
@@ -44,7 +50,7 @@
             <!-- Submit Button -->
             <div>
                 <button type="submit"
-                        class="w-full bg-indigo-600 text-white py-2 px-4 rounded-lg hover:bg-indigo-700 transition">
+                        class="w-full bg-indigo-800 text-white py-2 px-4 rounded-lg hover:bg-indigo-700 transition">
                     Login
                 </button>
             </div>

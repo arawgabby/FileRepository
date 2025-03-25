@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Admin Login</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <style>
         body {
             font-family: 'Open-Sans', sans-serif;
@@ -28,7 +29,7 @@
     @endif
 
     <div class="bg-white p-10 rounded-xl shadow-md backdrop-blur-md" style="width: 360px">
-        <h2 class="text-2xl font-bold text-center mb-6">Staff/Faculty Login</h2>
+        <h2 class="text-2xl font-bold text-center mb-6">CSIT LOGIN</h2>
 
         <form action="{{ url('/staff-login') }}" method="POST" class="space-y-4">
             @csrf
@@ -50,7 +51,7 @@
             <!-- Submit Button -->
             <div>
                 <button type="submit"
-                        class="w-full bg-indigo-600 text-white py-2 px-4 rounded-lg hover:bg-indigo-700 transition">
+                        class="w-full bg-indigo-800 text-white py-2 px-4 rounded-lg hover:bg-indigo-700 transition">
                     Login
                 </button>
             </div>
@@ -62,8 +63,22 @@
         </p>
         <p class="mt-4 text-center text-sm text-gray-600">
             Forgot Password?
-            <a href="#" class="text-indigo-600 hover:underline">Click Here</a>
+            <a href="#" id="forgot-password" class="text-indigo-600 hover:underline">Click Here</a>
         </p>
+
+        <script>
+            document.getElementById("forgot-password").addEventListener("click", function (event) {
+                event.preventDefault(); // Prevent default link action
+
+                Swal.fire({
+                    title: "Forgot Password?",
+                    text: "Please contact your administrator at +639123456789 to change your password.",
+                    icon: "info",
+                    confirmButtonText: "OK"
+                });
+            });
+        </script>
+
 
     </div>
 

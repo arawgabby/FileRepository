@@ -6,7 +6,8 @@
     <title>Admin Login</title>
     <script src="https://cdn.tailwindcss.com"></script>
 </head>
-<body class="bg-gray-100 flex items-center justify-center min-h-screen">
+<body class="flex items-center justify-center min-h-screen bg-gray-100 bg-contain bg-no-repeat bg-center"
+      style="background-image: url('{{ asset('storage/uploads/loginbackground.png') }}');">
 
     <!-- Alert Handling (This will show browser alerts based on session message) -->
     @if(session('success'))
@@ -70,7 +71,7 @@
         <!-- Back to login -->
         <p class="mt-4 text-center text-sm text-gray-600">
             Already have an account?
-            <a href="{{ url('admin.logout') }}" class="text-indigo-600 hover:underline">Login</a>
+            <a href="{{ url('/admin-login') }}" class="text-indigo-600 hover:underline">Login</a>
         </p>
     </div>
 

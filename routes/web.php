@@ -45,7 +45,12 @@ Route::get('/admin-logout', [AdminAuthController::class, 'logout'])->name('admin
 
 Route::get('/staff-logout', [AdminAuthController::class, 'Stafflogout'])->name('staff.logout');
 
-
+Route::post('/forgot-password-request', function (Request $request) {
+    
+    return response()->json([
+        'message' => 'Request received. Admin will contact you soon!',
+    ]);
+})->name('forgotPasswordRequest');
 
 
 //For Staff Middleware
