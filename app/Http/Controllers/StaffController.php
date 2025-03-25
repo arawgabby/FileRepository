@@ -60,18 +60,18 @@ class StaffController extends Controller
                 'published_by' => $request->published_by,
                 'year_published' => (string) $request->year_published, // ✅ Ensure it's stored as a string
                 'description' => $request->description ?? null,
-                'status' => 'pending',
+                'status' => 'active', // ✅ Directly set to active
             ]);
 
             if ($fileEntry) {
                 AccessLog::create([
                     'file_id' => $fileEntry->id ?? 0,
                     'accessed_by' => $user->id,
-                    'action' => 'Uploaded file - Pending approval',
+                    'action' => 'Uploaded file - Successful', // ✅ Modified action log
                     'access_time' => now(),
                 ]);
 
-                return response()->json(['message' => 'File uploaded successfully!'], 200);
+                return response()->json(['message' => 'File uploaded successfully and marked as active!'], 200);
             }
 
             return response()->json(['message' => 'File upload failed.'], 500);
@@ -80,36 +80,41 @@ class StaffController extends Controller
         return response()->json(['message' => 'No file detected.'], 400);
     }
 
+
     public function ActiveFileArchived($file_id)
     {
         // Find the file
         $file = File::find($file_id);
-
+    
         if (!$file) {
             return redirect()->back()->with('error', 'File not found');
         }
-
+    
         // Update the status to archived
         $file->status = 'archived';
         $file->save();
-
+    
+        // Insert into file_time_stamps to log the event
+        FileTimeStamp::create([
+            'file_id' => $file->file_id,
+            'event_type' => 'File ID ' . $file->id . ' Archived', // Log archive event
+            'timestamp' => now(),
+        ]);
+    
         return redirect()->back()->with('success', 'File successfully archived');
     }
+    
 
 
 
     public function StaffviewLogs()
     {
-        // Get logged-in user from session
-        $user = session('user');
-    
-        // Fetch logs where accessed_by matches the logged-in user's ID
-        $accessLogs = AccessLog::where('accessed_by', $user->id)
-                        ->with(['user', 'file']) // Load related user and file
+        // Fetch all access logs with pagination
+        $accessLogs = AccessLog::with(['user', 'file']) // Load related user and file
                         ->latest()
-                        ->get();
+                        ->paginate(12); // Set pagination to 15 per page
     
-        return view('staff.pages.StaffLogsView', compact('accessLogs', 'user'));
+        return view('staff.pages.StaffLogsView', compact('accessLogs'));
     }
     
 
@@ -329,39 +334,32 @@ class StaffController extends Controller
 
     public function activeFiles(Request $request)
     {
-        // Ensure the user is logged in via session
-        if (!session()->has('user')) {
-            return redirect()->route('staff.upload')->with('error', 'Unauthorized: Please log in.');
-        }
-
-        $user = session('user'); // Get logged-in user from session
-
-        // Fetch primary files uploaded by the logged-in user
-        $files = File::where('uploaded_by', $user->id); // Use session user ID
-        
+        // Fetch all primary files without filtering by session user
+        $files = File::query();
+    
         // Apply search filter
         if ($request->has('search') && !empty($request->search)) {
             $files->where('filename', 'LIKE', '%' . $request->search . '%');
         }
-
+    
         // Apply file type filter
         if ($request->has('file_type') && !empty($request->file_type)) {
             $files->where('file_type', $request->file_type);
         }
-
+    
         // Apply category filter
         if ($request->has('category') && !empty($request->category)) {
             $files->where('category', $request->category);
         }
-
+    
         // Paginate results
         $files = $files->paginate(20);
-
+    
         // Fetch file versions linked to the filtered files
         $fileVersions = FileVersions::whereIn('file_id', $files->pluck('file_id'))->get();
-
+    
         return view('staff.pages.StaffViewAllFilesActive', compact('fileVersions', 'files'));
-    }
+    }    
 
     public function StaffeditPrimaryFile($file_id)
     {
@@ -513,15 +511,8 @@ class StaffController extends Controller
 
     public function StaffViewFilesVersions(Request $request) 
     {
-        // Ensure the user is logged in via session
-        if (!session()->has('user')) {
-            return redirect()->route('staff.upload')->with('error', 'Unauthorized: Please log in.');
-        }
-
-        $user = session('user'); // Get the logged-in user
-
-        // Only fetch file versions uploaded by the logged-in user
-        $query = FileVersions::where('uploaded_by', $user->id);
+        // Fetch all file versions
+        $query = FileVersions::query();
 
         // Apply search filter
         if ($request->has('search') && !empty($request->search)) {
@@ -543,6 +534,7 @@ class StaffController extends Controller
 
         return view('staff.pages.StaffEditFilesOverview', compact('fileVersions')); // Pass data to view
     }
+
 
     public function StaffarchiveFile($version_id)
     {
@@ -592,20 +584,11 @@ class StaffController extends Controller
 
     public function StaffArchivedViewFilesVersions(Request $request) 
     {
-        // Ensure the user is logged in via session
-        if (!session()->has('user')) {
-            return redirect()->route('staff.upload')->with('error', 'Unauthorized: Please log in.');
-        }
+        // Fetch all archived file versions
+        $fileVersionsQuery = FileVersions::where('status', 'archived');
     
-        $user = session('user'); // Get the logged-in user
-    
-        // Fetch archived file versions uploaded by the user
-        $fileVersionsQuery = FileVersions::where('uploaded_by', $user->id)
-            ->where('status', 'archived');
-    
-        // Fetch archived files uploaded by the user
-        $filesQuery = File::where('uploaded_by', $user->id)
-            ->where('status', 'archived');
+        // Fetch all archived files
+        $filesQuery = File::where('status', 'archived');
     
         // Apply search filter
         if ($request->has('search') && !empty($request->search)) {
@@ -641,6 +624,7 @@ class StaffController extends Controller
     
         return view('staff.pages.StaffArchivedFiles', compact('fileVersions'));
     }
+    
     
 
     
@@ -688,26 +672,14 @@ class StaffController extends Controller
 
     public function CountActiveFiles()
     {
-        $user = session('user'); // Get logged-in user from session
+        // ✅ Count all active files
+        $activeFilesCount = File::where('status', 'active')->count();
     
-        if (!$user) {
-            return redirect()->route('login')->with('error', 'Please log in first.');
-        }
-    
-        // ✅ Count active files uploaded by this user
-        $activeFilesCount = File::where('uploaded_by', $user->id)
-                                ->where('status', 'active')
-                                ->count();
-    
-        // ✅ Count pending files uploaded by this user
-        $pendingFilesCount = File::where('uploaded_by', $user->id)
-                                 ->where('status', 'pending')
-                                 ->count();
+        // ✅ Count all pending files
+        $pendingFilesCount = File::where('status', 'pending')->count();
     
         // ✅ Count recent uploads (e.g., last 7 days)
-        $recentUploadsCount = File::where('uploaded_by', $user->id)
-                                  ->where('created_at', '>=', now()->subDays(7))
-                                  ->count();
+        $recentUploadsCount = File::where('created_at', '>=', now()->subDays(7))->count();
     
         // ✅ Get total storage used
         $uploadPath = storage_path('app/public/uploads'); // Absolute path
@@ -715,10 +687,7 @@ class StaffController extends Controller
         $formattedStorage = $this->formatSizeUnits($totalStorageUsed); // Format size
     
         // ✅ Fetch recent file activities (latest updated files)
-        $recentFiles = File::where('uploaded_by', $user->id)
-                            ->orderBy('updated_at', 'desc')
-                            ->limit(10)
-                            ->get();
+        $recentFiles = File::orderBy('updated_at', 'desc')->limit(10)->get();
     
         // ✅ Return all necessary data to the view
         return view('staff.pages.StaffDashboardPage', compact(
@@ -729,6 +698,7 @@ class StaffController extends Controller
             'recentFiles'
         ));
     }
+    
     
     /**
      * Get folder size in bytes.

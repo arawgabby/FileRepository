@@ -20,7 +20,7 @@
 
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
 
-    <div class="flex justify-between items-center mt-4 p-3 rounded-lg shadow">
+    <div class="flex justify-between items-center p-2">
         <h1 class="text-4xl font-bold">Active Files</h1>
         <span class="text-white text-4xl font-semibold bg-blue-400 p-4 rounded-lg" id="activeFileCount">0</span>
         </div>
@@ -136,12 +136,25 @@
             @if($file->status == 'active') 
             <div class="bg-white rounded-lg shadow-lg p-6">
                 <div class="flex justify-between">
-                <span class="text-2xl font-semibold break-words w-full block">{{ $file->filename }}</span>
-                <span class="font-semibold">{{ $file->year_published }}</span>
+                    <span class="text-1xl font-semibold break-words w-full block">{{ $file->filename }}</span>
+                    <span class="font-semibold">{{ $file->year_published }}</span>
                 </div>
-                <div class="mt-2 text-sm text-gray-600">
+                <!-- <div class="mt-2 text-sm text-gray-600">
                     <span class="font-semibold">Active File ID: 00{{ $file->file_id }}</span>
-                </div>  
+                </div>   -->
+
+                <!-- Display File Size -->
+                <div class="mt-2 text-sm text-gray-600">
+                    <span class="font-semibold">
+                        Size: 
+                        @if($file->file_size >= 1024 * 1024)
+                            {{ number_format($file->file_size / (1024 * 1024), 2) }} MB
+                        @else
+                            {{ number_format($file->file_size / 1024, 2) }} KB
+                        @endif
+                    </span>
+                </div>
+
                 <div class="mt-2 text-sm text-gray-600">
                     <span class="font-semibold">Publisher: {{ $file->published_by }}</span>
                 </div>  
@@ -173,22 +186,19 @@
                         <a href="{{ route('staff.files.editPrimary', ['file_id' => $file->file_id]) }}" class="text-blue-500" title="Edit Primary File">
                             <i class="fas fa-edit"></i>
                         </a>
-                        <a href="{{ route('staff.editFile', $file->file_id) }}" class="text-red-500" title="Upload New File Based on this version">
-                            <i class="fas fa-upload"></i>
-                        </a>
                         <form action="{{ route('files.archive.active', ['file_id' => $file->file_id]) }}" method="POST" onsubmit="return confirm('Are you sure you want to archive this file?')">
                             @csrf
                             <button type="submit" class="text-red-500" title="Archive this file">
                                 <i class="fas fa-archive"></i>
                             </button>
                         </form>
-
                     </div>
                 </div>
             </div>
             @endif
         @endforeach
     </div>
+
 
     <div class="mt-4">
         {{ $files->links() }}

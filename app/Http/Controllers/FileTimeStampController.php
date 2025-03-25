@@ -10,9 +10,9 @@ class FileTimeStampController extends Controller
 {
     public function ViewIndex()
     {
-        $timestamps = FileTimeStamp::with(['file', 'fileVersion'])->get();
+        $timestamps = FileTimeStamp::with(['file', 'fileVersion'])->paginate(10); // Paginate with 10 records per page
         return view('staff.pages.ViewTimeStamps', compact('timestamps'));
-    }
+    }    
 
     public function show($file_id)
     {

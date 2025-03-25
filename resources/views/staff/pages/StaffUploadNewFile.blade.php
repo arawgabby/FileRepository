@@ -10,39 +10,23 @@
     <form id="uploadForm" enctype="multipart/form-data">
         @csrf
         
-        <div class="mb-4 flex flex-col">
-            <label for="file" class="block text-1xl font-medium text-gray-700 mb-1">Select File</label>
-            <input type="file" name="file" id="file" class="p-2 border rounded w-full" required>
-
-            <!-- File Details Display (Initially Hidden) -->
-            <div id="fileDetails" class="mt-2 text-gray-600 hidden">
-                <p><strong>File Name:</strong> <span id="fileName"></span></p>
-                <p><strong>File Type:</strong> <span id="fileType"></span></p>
-                <p><strong>File Size:</strong> <span id="fileSize"></span></p>
-            </div>
+        <!-- Drag and Drop Area -->
+        <div id="dropArea" class="mb-4 flex flex-col items-center justify-center border-2 border-dashed border-gray-400 p-6 rounded-lg cursor-pointer bg-gray-100">
+            <p class="text-gray-600">Drag & Drop your file here or click to select</p>
+            <input type="file" name="file" id="file" class="hidden" required>
         </div>
 
-        <script>
-            document.getElementById("file").addEventListener("change", function(event) {
-                let file = event.target.files[0]; // Get the selected file
-
-                if (file) {
-                    let fileSizeInMB = (file.size / (1024 * 1024)).toFixed(2); // Convert size to MB
-
-                    // Update file details
-                    document.getElementById("fileName").textContent = file.name;
-                    document.getElementById("fileType").textContent = file.type || "Unknown";
-                    document.getElementById("fileSize").textContent = fileSizeInMB + " MB";
-
-                    // Show the file details section
-                    document.getElementById("fileDetails").classList.remove("hidden");
-                } else {
-                    document.getElementById("fileDetails").classList.add("hidden");
-                }
-            });
-        </script>
+        <div class="mb-2 text-gray-600 text-sm mb-4">
+            <p><strong>Allowed files:</strong> PPT, DOCX, JPG, PNG, SVG, PDF</p>
+        </div>
 
 
+        <!-- File Details Display (Initially Hidden) -->
+        <div id="fileDetails" class="mt-4 text-gray-600 hidden">
+            <p><strong>File Name:</strong> <span id="fileName"></span></p>
+            <p><strong>File Type:</strong> <span id="fileType"></span></p>
+            <p><strong>File Size:</strong> <span id="fileSize"></span></p>
+        </div>
 
         <div class="mb-4">
             <label for="category" class="block text-1xl font-medium text-gray-700">File Category</label>
@@ -64,7 +48,6 @@
             <label for="year_published" class="block text-1xl font-medium text-gray-700">Year Published</label>
             <input type="number" name="year_published" id="year_published" class="p-2 border rounded w-full" 
             required min="1900" max="{{ date('Y') }}" placeholder="YYYY">
-
         </div>
 
         <div class="mb-4">
@@ -76,14 +59,57 @@
     </form>
 </div>
 
-
 <script>
-    $(document).ready(function() {
-        $('#uploadForm').submit(function(e) {
-            e.preventDefault(); // Prevent default form submission
+    document.addEventListener("DOMContentLoaded", function() {
+        const dropArea = document.getElementById("dropArea");
+        const fileInput = document.getElementById("file");
+        const fileDetails = document.getElementById("fileDetails");
 
-            let formData = new FormData(this); // Create FormData object
-            let uploadUrl = "{{ route('staff.uploadFile') }}"; // Laravel route
+        // Click on drop area triggers file selection
+        dropArea.addEventListener("click", () => fileInput.click());
+
+        // File selection event
+        fileInput.addEventListener("change", handleFileSelect);
+
+        // Drag over event
+        dropArea.addEventListener("dragover", (e) => {
+            e.preventDefault();
+            dropArea.classList.add("border-blue-500");
+        });
+
+        // Drag leave event
+        dropArea.addEventListener("dragleave", () => dropArea.classList.remove("border-blue-500"));
+
+        // Drop event
+        dropArea.addEventListener("drop", (e) => {
+            e.preventDefault();
+            dropArea.classList.remove("border-blue-500");
+
+            let files = e.dataTransfer.files;
+            if (files.length > 0) {
+                fileInput.files = files;
+                handleFileSelect();
+            }
+        });
+
+        function handleFileSelect() {
+            let file = fileInput.files[0];
+            if (file) {
+                let fileSizeInMB = (file.size / (1024 * 1024)).toFixed(2); // Convert size to MB
+
+                document.getElementById("fileName").textContent = file.name;
+                document.getElementById("fileType").textContent = file.type || "Unknown";
+                document.getElementById("fileSize").textContent = fileSizeInMB + " MB";
+
+                fileDetails.classList.remove("hidden");
+            }
+        }
+
+        $('#uploadForm').submit(function(e) {
+            e.preventDefault();
+
+            let formData = new FormData(this);
+            let uploadUrl = "{{ route('staff.uploadFile') }}"; 
 
             $.ajax({
                 url: uploadUrl,
@@ -112,7 +138,7 @@
                         confirmButtonColor: "#3085d6",
                         confirmButtonText: "OK"
                     }).then(() => {
-                        location.reload(); // Reload page after success
+                        location.reload();
                     });
                 },
                 error: function(xhr) {

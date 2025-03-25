@@ -2,7 +2,6 @@
 
 @section('content')
 
-@if(session('user')) 
 <meta name="csrf-token" content="{{ csrf_token() }}">
 
 <style>
@@ -40,37 +39,31 @@
                     </tr>
                 </thead>
                 <tbody id="fileTableBody">
-                    @php
-                        $filteredFiles = [];
-                    @endphp
-
                     @foreach ($timestamps as $timestamp)
-                        @if (!in_array($timestamp->file_id, $filteredFiles) && 
-                             $timestamp->file->uploaded_by === session('user')->id)
-                            @php
-                                $filteredFiles[] = $timestamp->file_id;
-                            @endphp
-                            <tr>
-                                <td class="p-3">00{{ $timestamp->timestamp_id }}</td>
-                                <td class="p-3">00{{ $timestamp->file_id }}</td>
-                                <td class="p-3">00{{ $timestamp->fileVersion->version_number ?? 'N/A' }}</td>
-                                <td class="p-3">{{ $timestamp->event_type }}</td>
-                                <td class="p-3 created-at" data-date="{{ \Carbon\Carbon::parse($timestamp->timestamp)->format('Y-m-d') }}">
-                                    {{ \Carbon\Carbon::parse($timestamp->timestamp)->diffForHumans() }}
-                                </td>
-                                <td class="p-3">
-                                    <a href="{{ route('file.timestamps.details', ['file_id' => $timestamp->file_id]) }}" 
-                                    class="bg-blue-500 text-white px-4 py-2 rounded-lg">
-                                    View
-                                    </a>
-                                </td>
-                            </tr>
-                        @endif
+                        <tr>
+                            <td class="p-3">00{{ $timestamp->timestamp_id }}</td>
+                            <td class="p-3">00{{ $timestamp->file_id }}</td>
+                            <td class="p-3">00{{ $timestamp->fileVersion->version_number ?? 'N/A' }}</td>
+                            <td class="p-3">{{ $timestamp->event_type }}</td>
+                            <td class="p-3 created-at" data-date="{{ \Carbon\Carbon::parse($timestamp->timestamp)->format('Y-m-d') }}">
+                                {{ \Carbon\Carbon::parse($timestamp->timestamp)->diffForHumans() }}
+                            </td>
+                            <td class="p-3">
+                                <a href="{{ route('file.timestamps.details', ['file_id' => $timestamp->file_id]) }}" 
+                                class="bg-blue-500 text-white px-4 py-2 rounded-lg">
+                                View
+                                </a>
+                            </td>
+                        </tr>
                     @endforeach
                 </tbody>
             </table>
         </div>
     </div>
+    <div class="mt-4">
+    {{ $timestamps->links() }}
+</div>
+
 </div>
 
 <script>
@@ -98,7 +91,5 @@ document.addEventListener("DOMContentLoaded", function() {
     dateFilter.addEventListener("change", filterTable);
 });
 </script>
-
-@endif 
 
 @endsection

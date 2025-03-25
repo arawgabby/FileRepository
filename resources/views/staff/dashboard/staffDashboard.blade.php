@@ -42,13 +42,13 @@
             </div> -->
 
 
-            <nav class="space-y-6">
+            <nav class="space-y-8">
 
-            <p class="text-white text-1xl font-bold">
-                <i class="fas fa-folder-open"></i> Main
-            </p>
+            <!-- <p class="text-white text-1xl font-bold">
+                <i class="fas fa-folder-open"></i> MAIN
+            </p> -->
 
-            <a href="{{ route('staff.page.dashboard') }}" class="flex items-center text-gray-300 hover:text-white ml-4">
+            <a href="{{ route('staff.page.dashboard') }}" class="flex items-center text-gray-300 hover:text-white ">
                 <i class="fas fa-dashboard mr-4"></i> Dashboard
             </a>
 
@@ -56,18 +56,18 @@
             </p>
 
             <p class="text-white text-1xl font-bold">
-                <i class="fas fa-folder"></i> Request File
+                <i class="fas fa-folder"></i> FILES
             </p>
 
-            <a href="{{ route('staff.upload') }}" class="flex items-center text-gray-300 hover:text-white ml-4">
+            <a href="{{ route('staff.upload') }}" class="flex items-center text-gray-300 hover:text-white ">
                 <i class="fas fa-upload mr-4"></i> Upload New File
             </a>
 
-            <a href="{{ route('staff.files') }}" class="flex items-center text-gray-300 hover:text-white ml-4">
+            <!-- <a href="{{ route('staff.files') }}" class="flex items-center text-gray-300 hover:text-white ">
                 <i class="fas fa-file-alt mr-4"></i>  My Uploads
             </a>
 
-            <a href="{{ route('staff.pending.files') }}" class="flex items-center text-gray-300 hover:text-white ml-4 relative">
+            <a href="{{ route('staff.pending.files') }}" class="flex items-center text-gray-300 hover:text-white  relative">
                 <i class="fas fa-file-alt mr-4"></i> Pending File Request
 
                 @if($pendingRequestCount > 0)
@@ -75,33 +75,29 @@
                         {{ $pendingRequestCount }}
                     </span>
                 @endif
-            </a>
+            </a> -->
 
-            <p class="border-b border-white text-gray-200 pb-2">
-            </p>
+            <!-- <p class="border-b border-white text-gray-200 pb-2">
+            </p> -->
 
-
-
-
-
-            <p class="text-white text-1xl font-bold">
+            <!-- <p class="text-white text-1xl font-bold">
                 <i class="fas fa-folder-open"></i> Manage Files
-            </p>
+            </p> -->
 
-            <a href="{{ route('staff.active.files') }}" class="flex items-center text-gray-300 hover:text-white ml-4">
-                <i class="fas fa-file-alt mr-4"></i> My Active Files
+            <a href="{{ route('staff.active.files') }}" class="flex items-center text-gray-300 hover:text-white ">
+                <i class="fas fa-file-alt mr-5"></i> Files
             </a>
 
-            <a href="{{ route('staff.update') }}" class="flex items-center text-gray-300 hover:text-white ml-4">
+            <!-- <a href="{{ route('staff.update') }}" class="flex items-center text-gray-300 hover:text-white ">
                 <i class="fas fa-history mr-4"></i> File Versions
-            </a>
+            </a> -->
 
-            <a href="{{ route('staff.archived.files') }}" class="flex items-center text-gray-300 hover:text-white ml-4">
+            <a href="{{ route('staff.archived.files') }}" class="flex items-center text-gray-300 hover:text-white ">
                 <i class="fas fa-archive mr-4"></i> Archived Files
             </a>
 
             
-            <!-- <a href="{{ route('staff.trash.bins') }}" class="flex items-center text-gray-300 hover:text-white ml-4">
+            <!-- <a href="{{ route('staff.trash.bins') }}" class="flex items-center text-gray-300 hover:text-white ">
                 <i class="fas fa-trash-alt mr-4"></i> Trash Files
             </a> -->
 
@@ -110,22 +106,22 @@
 
 
             <p class="text-white text-1xl font-bold mt-8">
-                <i class="fas fa-file-text"></i> Activity Log
+                <i class="fas fa-file-text"></i> ACTIVITY
             </p>
 
-            <a href="{{ route ('timestamps.index')}}" class="flex items-center text-gray-300 hover:text-white ml-4">
-                <i class="fas fa-file mr-4"></i> File Manage Timestamps
+            <a href="{{ route ('timestamps.index')}}" class="flex items-center text-gray-300 hover:text-white ">
+                <i class="fas fa-file mr-4"></i> File Timestamps
             </a>
 
-            @if (session('user')->role === 'staff')
-                <a href="{{ route('staff.logs.view') }}" class="flex items-center text-gray-300 hover:text-white ml-4">
-                    <i class="fas fa-file mr-4"></i> Staff Logs
+            <!-- @if (session('user')->role === 'staff') -->
+                <a href="{{ route('staff.logs.view') }}" class="flex items-center text-gray-300 hover:text-white ">
+                    <i class="fas fa-file mr-4"></i> Activity Logs
                 </a>
-            @elseif (session('user')->role === 'faculty')
-                <a href="{{ route('staff.logs.view') }}" class="flex items-center text-gray-300 hover:text-white ml-4">
+            <!-- @elseif (session('user')->role === 'faculty') -->
+                <!-- <a href="{{ route('staff.logs.view') }}" class="flex items-center text-gray-300 hover:text-white ">
                     <i class="fas fa-file mr-4"></i> Faculty Logs
-                </a>
-            @endif
+                </a> -->
+            <!-- @endif -->
 
             <p class="border-b border-white text-gray-200 pb-2">
             </p>
@@ -205,7 +201,7 @@
         </div>
 
 
-            <main class="p-8 sm: pt-7">
+            <main class="p-4 sm: pt-7">
                 @yield('content')
             </main>
         </div>

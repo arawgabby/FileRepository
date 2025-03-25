@@ -1,7 +1,7 @@
 @extends('staff.dashboard.staffDashboard')
 
 @section('content')
-@if(session('user')) 
+
 <meta name="csrf-token" content="{{ csrf_token() }}">
 
 <div class="container mx-auto p-6 bg-white rounded-xl shadow-lg">
@@ -25,18 +25,21 @@
             </thead>
             <tbody id="logsTable">
                 @foreach($accessLogs as $log)
-                    @if($log->uploaded_by === session('user')->id || in_array(session('user')->role, ['faculty', 'staff']))
-                        <tr class="border-b border-gray-300 text-center">
-                            <td class="py-2 px-4">{{ ucfirst($log->file_id) }}</td>
-                            <td class="py-2 px-4">{{ ucfirst($log->user->role) }}</td> <!-- Display role based on accessed_by -->
-                            <td class="py-2 px-4">{{ ucfirst($log->action) }}</td>
-                            <td class="py-2 px-4 text-gray-500">{{ $log->access_time }}</td>
-                        </tr>
-                    @endif
+                    <tr class="border-b border-gray-300 text-center">
+                        <td class="py-2 px-4">{{ ucfirst($log->file_id) }}</td>
+                        <td class="py-2 px-4">{{ ucfirst($log->user->role) }}</td> <!-- Display role based on accessed_by -->
+                        <td class="py-2 px-4">{{ ucfirst($log->action) }}</td>
+                        <td class="py-2 px-4 text-gray-500">
+                            {{ \Carbon\Carbon::parse($log->access_time)->format('F d, Y h:i A') }}
+                        </td>
+                    </tr>
                 @endforeach
             </tbody>
         </table>
     </div>
+    <div class="mt-4">
+    {{ $accessLogs->links() }}
+</div>
 </div>
 
 <!-- JavaScript for Search Filtering -->
@@ -51,5 +54,5 @@
         });
     });
 </script>
-@endif
+
 @endsection
