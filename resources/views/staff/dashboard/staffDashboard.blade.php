@@ -4,14 +4,14 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Staff</title>
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Lato:wght@400;700&display=swap" rel="stylesheet">
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <style>
         body {
-            font-family: 'Open-Sans', sans-serif;
+            font-family: 'Lato', sans-serif;
             zoom: 80%;
         }
     </style>
@@ -21,7 +21,7 @@
              background-size: contain;">
     <div class="flex h-screen">
         
-    <div id="sidebar" class="bg-gray-900 text-white w-66 space-y-6 py-7 px-4 transform -translate-x-full md:translate-x-0
+    <div id="sidebar" class="bg-gray-900 text-white w-66 space-y-6 py-8 px-6 transform -translate-x-full md:translate-x-0
      transition-transform duration-300 fixed top-0 bottom-0 z-40 overflow-y-auto">
      
         <div class="text-2xl font-bold flex justify-center">
@@ -48,27 +48,28 @@
                 <i class="fas fa-folder-open"></i> MAIN
             </p> -->
 
-            <a href="{{ route('staff.page.dashboard') }}" class="flex items-center text-gray-300 hover:text-white ">
-                <i class="fas fa-dashboard mr-4"></i> Dashboard
+            <a href="{{ route('staff.page.dashboard') }}" class="flex items-center text-gray-300 hover:text-white relative top-4">
+                <i class="fas fa-dashboard mr-5"></i> Dashboard
             </a>
 
-            <p class="border-b border-white text-gray-200 pb-2">
+
+            <p class=" -m-6 mb-6 border-b border-white text-gray-200 pb-2">
             </p>
 
             <p class="text-white text-1xl font-bold">
-                <i class="fas fa-folder"></i> FILES
+                <i class="fas fa-folder mr-5"></i> FILES
             </p>
 
             <a href="{{ route('staff.upload') }}" class="flex items-center text-gray-300 hover:text-white ">
-                <i class="fas fa-upload mr-4"></i> Upload New File
+                <i class="fas fa-upload mr-5"></i> Upload New File
             </a>
 
             <!-- <a href="{{ route('staff.files') }}" class="flex items-center text-gray-300 hover:text-white ">
-                <i class="fas fa-file-alt mr-4"></i>  My Uploads
+                <i class="fas fa-file-alt mr-5"></i>  My Uploads
             </a>
 
             <a href="{{ route('staff.pending.files') }}" class="flex items-center text-gray-300 hover:text-white  relative">
-                <i class="fas fa-file-alt mr-4"></i> Pending File Request
+                <i class="fas fa-file-alt mr-5"></i> Pending File Request
 
                 @if($pendingRequestCount > 0)
                     <span class="ml-2 bg-red-500 text-white text-xs font-bold px-2 py-1 rounded-full absolute -top-2 -right-1">
@@ -85,45 +86,45 @@
             </p> -->
 
             <a href="{{ route('staff.active.files') }}" class="flex items-center text-gray-300 hover:text-white ">
-                <i class="fas fa-file-alt mr-5"></i> Files
+                <i class="fas fa-file-alt mr-6"></i> Files
             </a>
 
             <!-- <a href="{{ route('staff.update') }}" class="flex items-center text-gray-300 hover:text-white ">
-                <i class="fas fa-history mr-4"></i> File Versions
+                <i class="fas fa-history mr-5"></i> File Versions
             </a> -->
 
             <a href="{{ route('staff.archived.files') }}" class="flex items-center text-gray-300 hover:text-white ">
-                <i class="fas fa-archive mr-4"></i> Archived Files
+                <i class="fas fa-archive mr-5"></i> Archived Files
             </a>
 
             
             <!-- <a href="{{ route('staff.trash.bins') }}" class="flex items-center text-gray-300 hover:text-white ">
-                <i class="fas fa-trash-alt mr-4"></i> Trash Files
+                <i class="fas fa-trash-alt mr-5"></i> Trash Files
             </a> -->
 
-            <p class="border-b border-white text-gray-200 pb-2">
+            <p class="-m-6 mb-6 border-b border-white text-gray-200 pb-2">
             </p>
 
 
             <p class="text-white text-1xl font-bold mt-8">
-                <i class="fas fa-file-text"></i> ACTIVITY
+                <i class="fas fa-file-text mr-5"></i> ACTIVITY
             </p>
 
             <a href="{{ route ('timestamps.index')}}" class="flex items-center text-gray-300 hover:text-white ">
-                <i class="fas fa-file mr-4"></i> File Timestamps
+                <i class="fas fa-file mr-5"></i> File Timestamps
             </a>
 
             <!-- @if (session('user')->role === 'staff') -->
                 <a href="{{ route('staff.logs.view') }}" class="flex items-center text-gray-300 hover:text-white ">
-                    <i class="fas fa-file mr-4"></i> Activity Logs
+                    <i class="fas fa-file mr-5"></i> Activity Logs
                 </a>
             <!-- @elseif (session('user')->role === 'faculty') -->
                 <!-- <a href="{{ route('staff.logs.view') }}" class="flex items-center text-gray-300 hover:text-white ">
-                    <i class="fas fa-file mr-4"></i> Faculty Logs
+                    <i class="fas fa-file mr-5"></i> Faculty Logs
                 </a> -->
             <!-- @endif -->
 
-            <p class="border-b border-white text-gray-200 pb-2">
+            <p class="-m-6 mb-6 border-b border-white text-gray-200 pb-2">
             </p>
 
 
@@ -154,7 +155,7 @@
             <div class="flex items-center space-x-6">
         
                 <!-- User Profile (Right End) -->
-                <div class="flex items-center bg-white rounded-lg p-2 space-x-3 shadow-md overflow-hidden">
+                <div class="flex items-center bg-white p-2 space-x-3 shadow-md overflow-hidden">
                     <div class="w-12 h-12 bg-gray-600 flex items-center justify-center rounded-full">
                         <i class="fas fa-user text-white text-2xl"></i>
                     </div>

@@ -21,7 +21,7 @@
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
 
     <div class="flex justify-between items-center p-2">
-        <h1 class="text-4xl font-bold">Active Files</h1>
+        <h1 class="-m-6 mb-6 pb-2 text-4xl font-bold border-b border-gray-300 p-6">Active Files</h1>
         <span class="text-white text-4xl font-semibold bg-blue-400 p-4 rounded-lg" id="activeFileCount">0</span>
         </div>
 

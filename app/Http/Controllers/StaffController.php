@@ -614,7 +614,7 @@ class StaffController extends Controller
         $mergedResults = $archivedFiles->merge($archivedFileVersions)->sortByDesc('updated_at');
     
         // Paginate manually
-        $perPage = 10;
+        $perPage = 6;
         $currentPage = request()->input('page', 1);
         $paginatedResults = $mergedResults->slice(($currentPage - 1) * $perPage, $perPage)->values();
         $fileVersions = new \Illuminate\Pagination\LengthAwarePaginator($paginatedResults, $mergedResults->count(), $perPage, $currentPage, [

@@ -11,7 +11,7 @@
 
 <div class="container mx-auto p-6 bg-white rounded-xl" style="box-shadow: 4px 4px 10px rgba(0, 0, 0, 0.1);">
 
-    <h1 class="text-[30px] font-bold mb-3 flex items-center">
+    <h1 class="text-[30px] font-bold mb-3 flex items-center border-b border-gray pb-2 -mx-4 px-4">
         <i class="fas fa-archive w-[30px] h-[30px] mr-2"></i>
         Archived File Versions
     </h1>
@@ -38,7 +38,7 @@
                 <th class=" p-5">Filename</th>
                 <th class=" p-5">File Size</th>
                 <th class=" p-5">User</th>
-                <th class=" p-5">Updated_at</th>
+                <th class=" p-5">Created</th>
                 <th class=" p-5">Actions</th>
             </tr>
         </thead>
@@ -75,15 +75,15 @@
                         {{ $sizeFormatted }}
                     </td>
                     <td class="p-4">{{ optional($file->user)->name ?? 'Unknown' }}</td>
-                    <td class="p-4 filename">{{ $file->updated_at }}</td>
+                    <td class="p-4 filename">{{ $file->created_at->format('F j, Y g:i A') }}</td>
                     <td class="p-4 text-center">
                         <div class="flex justify-center space-x-4">
-                            <a href="{{ route('staff.unarchiveFile', $file->version_id ?: $file->file_id) }}" 
-                                class="text-blue-500 hover:text-blue-700" 
-                                title="Unarchive"
-                                onclick="confirmArchive(event, '{{ $file->version_id ?: $file->file_id }}')">
-                                <i class="fas fa-box-open"></i>
-                            </a>
+                        <a href="{{ route('staff.unarchiveFile', $file->version_id ?: $file->file_id) }}" 
+                        class="bg-blue-700 text-white px-4 py-2 rounded-lg flex items-center justify-center hover:bg-blue-800 transition"
+                        title="Unarchive"
+                        onclick="confirmArchive(event, '{{ $file->version_id ?: $file->file_id }}')">
+                        <i class="fas fa-box-open text-white text-lg"></i>
+                        </a>
 
                             <form id="archive-form-{{ $file->version_id ?: $file->file_id }}" 
                                 action="{{ route('staff.unarchiveFile', $file->version_id ?: $file->file_id) }}" 
