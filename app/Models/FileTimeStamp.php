@@ -24,7 +24,7 @@ class FileTimeStamp extends Model
 
     public function file()
     {
-        return $this->belongsTo(File::class, 'file_id');
+        return $this->belongsTo(Files::class, 'file_id');
     }
 
     public function fileVersion()

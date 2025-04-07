@@ -23,7 +23,7 @@ class FileRequest extends Model
 
     public function file()
     {
-        return $this->belongsTo(File::class, 'file_id', 'file_id');
+        return $this->belongsTo(Files::class, 'file_id', 'file_id');
     }
 
     // Relationship to User Model

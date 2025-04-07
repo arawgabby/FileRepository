@@ -62,6 +62,10 @@ Route::middleware(['staff.auth'])->group(function () {
         return view('staff.pages.StaffUploadNewFile');
     })->name('staff.upload');
 
+    Route::get('/staff-folders/{subfolder?}', [StaffController::class, 'showFolders'])->name('staff.folders');
+
+    Route::post('/staff-folders/create', [StaffController::class, 'createFolder'])->name('staff.folders.create');
+
     Route::get('/staff-logs', [StaffController::class, 'StaffviewLogs'])->name('staff.logs.view');
 
     Route::get('/staff-dashboard', [StaffController::class, 'CountActiveFiles'])

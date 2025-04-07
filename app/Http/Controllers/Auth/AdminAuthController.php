@@ -9,7 +9,7 @@ use App\Models\FileVersions;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Storage;
-use App\Models\File;
+use App\Models\Files;
 use Symfony\Component\HttpFoundation\Response;
 
 
@@ -141,7 +141,7 @@ class AdminAuthController extends Controller
             $filename = $file->getClientOriginalName();
             $filePath = $file->storeAs('uploads', $filename, 'public');
     
-            File::create([
+            Files::create([
                 'filename' => $filename,
                 'file_path' => $filePath,
                 'file_size' => $file->getSize(),
@@ -159,7 +159,7 @@ class AdminAuthController extends Controller
     public function viewFiles(Request $request)
     {
         // Fetch primary files
-        $files = File::query();
+        $files = Files::query();
 
         // Apply filters to primary files
         if ($request->has('search') && !empty($request->search)) {
@@ -264,7 +264,7 @@ class AdminAuthController extends Controller
         $file_id = (int) $file_id;
 
         // Check if the file exists
-        $file = File::findOrFail($file_id);
+        $file = Files::findOrFail($file_id);
 
         // Ensure auth user is logged in before logging
         if (auth()->check()) {
@@ -293,7 +293,7 @@ class AdminAuthController extends Controller
         }
     
         $user = session('user'); // Get user from session
-        $file = File::findOrFail($file_id);
+        $file = Files::findOrFail($file_id);
     
         // Validate input
         $request->validate([

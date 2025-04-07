@@ -28,7 +28,7 @@ class FileVersions extends Model
     // Relationship to the main File model
     public function file()
     {
-        return $this->belongsTo(File::class, 'file_id');
+        return $this->belongsTo(Files::class, 'file_id');
     }
 
     // Relationship to the User who uploaded the version

@@ -42,7 +42,7 @@
             </div> -->
 
 
-            <nav class="space-y-8">
+            <nav class="space-y-6">
 
             <!-- <p class="text-white text-1xl font-bold">
                 <i class="fas fa-folder-open"></i> MAIN
@@ -59,6 +59,10 @@
             <p class="text-white text-1xl font-bold">
                 <i class="fas fa-folder mr-5"></i> FILES
             </p>
+
+            <a href="{{ route('staff.folders') }}" class="flex items-center text-gray-300 hover:text-white ">
+                <i class="fas fa-folder mr-5"></i> Folders
+            </a>
 
             <a href="{{ route('staff.upload') }}" class="flex items-center text-gray-300 hover:text-white ">
                 <i class="fas fa-upload mr-5"></i> Upload New File

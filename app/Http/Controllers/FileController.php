@@ -5,7 +5,7 @@ use Illuminate\Support\Facades\Storage;
 use Illuminate\Http\Request;
 use Symfony\Component\HttpFoundation\Response;
 use App\Models\FileVersions;
-use App\Models\File;
+use App\Models\Files;
 
 
 class FileController extends Controller
@@ -125,7 +125,7 @@ class FileController extends Controller
     public function moveToTrash(Request $request, $id)
     {
         // Find the file by file_id
-        $file = File::where('file_id', $id)->first();
+        $file = Files::where('file_id', $id)->first();
     
         if ($file) {
             $file->status = 'deleted';
@@ -169,7 +169,7 @@ class FileController extends Controller
             return redirect()->route('admin.upload')->with('error', 'Unauthorized: Please log in.');
         }
 
-        $file = File::findOrFail($file_id);
+        $file = Files::findOrFail($file_id);
 
         if ($file->status === 'archived') {
             return redirect()->back()->with('error', 'This file is already archived.');
@@ -188,7 +188,7 @@ class FileController extends Controller
     public function editPrimaryFile($file_id)
     {
         // Fetch the file using the provided ID
-        $file = File::findOrFail($file_id);
+        $file = Files::findOrFail($file_id);
 
         return view('admin.pages.EditPrimaryFile', compact('file'));
     }
@@ -196,7 +196,7 @@ class FileController extends Controller
 
     public function updatePrimaryFile(Request $request, $file_id)
     {
-        $file = File::findOrFail($file_id);
+        $file = Files::findOrFail($file_id);
     
         // Validate input
         $request->validate([

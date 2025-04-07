@@ -5,16 +5,67 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\AccessLog;
 use Illuminate\Support\Facades\Storage;
-use App\Models\File;
+use App\Models\Files;
 use App\Models\FileVersions;
 use App\Models\FileTimeStamp;
 use Illuminate\Support\Facades\Auth;
 use App\Models\FileRequest;
 use Carbon\Carbon;
+use Illuminate\Support\Facades\File;
+use Illuminate\Support\Str;
 
 
 class StaffController extends Controller
 {
+
+    public function showFolders(Request $request)
+    {
+        $basePath = $request->get('path', 'uploads'); // Default to 'uploads'
+    
+        $directories = Storage::disk('public')->directories($basePath);
+    
+        $folderNames = array_map(function ($dir) use ($basePath) {
+            return Str::after($dir, $basePath . '/');
+        }, $directories);
+    
+        // Determine parent path for "Back" navigation
+        $parentPath = dirname($basePath);
+        if ($parentPath === '.' || $basePath === '') {
+            $parentPath = null;
+        }
+    
+        return view('staff.pages.Folders', compact('folderNames', 'basePath', 'parentPath'));
+    }
+    
+    public function createFolder(Request $request)
+    {
+        $request->validate([
+            'folderName' => 'required|string',
+            'basePath' => 'nullable|string'
+        ]);
+
+        $basePath = $request->input('basePath', 'uploads');
+        $folderName = $request->input('folderName');
+        $newPath = $basePath . '/' . $folderName;
+
+        if (Storage::disk('public')->exists($newPath)) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Folder already exists.'
+            ]);
+        }
+
+        try {
+            Storage::disk('public')->makeDirectory($newPath);
+            return response()->json(['success' => true]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to create folder: ' . $e->getMessage()
+            ]);
+        }
+    }
+
 
     public function dashboard()
     {
@@ -50,7 +101,7 @@ class StaffController extends Controller
             $filename = $file->getClientOriginalName();
             $filePath = $file->storeAs('uploads', $filename, 'public');
 
-            $fileEntry = File::create([
+            $fileEntry = Files::create([
                 'filename' => $filename,
                 'file_path' => $filePath,
                 'file_size' => $file->getSize(),
@@ -84,7 +135,7 @@ class StaffController extends Controller
     public function ActiveFileArchived($file_id)
     {
         // Find the file
-        $file = File::find($file_id);
+        $file = Files::find($file_id);
     
         if (!$file) {
             return redirect()->back()->with('error', 'File not found');
@@ -116,7 +167,7 @@ class StaffController extends Controller
     
         return view('staff.pages.StaffLogsView', compact('accessLogs'));
     }
-    
+
 
 
     public function StaffviewFiles(Request $request)
@@ -129,7 +180,7 @@ class StaffController extends Controller
         $user = session('user'); // Get logged-in user from session
     
         // Fetch primary files uploaded by the logged-in user
-        $files = File::where('uploaded_by', $user->id); // Use session user ID
+        $files = Files::where('uploaded_by', $user->id); // Use session user ID
     
         // Apply search filter
         if ($request->has('search') && !empty($request->search)) {
@@ -157,7 +208,7 @@ class StaffController extends Controller
     public function MyUploads(Request $request)
     {
         // Fetch primary files
-        $files = File::query();
+        $files = Files::query();
 
         // Apply filters to primary files
         if ($request->has('search') && !empty($request->search)) {
@@ -211,7 +262,7 @@ class StaffController extends Controller
         $user = session('user'); // Get logged-in user from session
 
         // Find the file by file_id
-        $file = File::where('file_id', $id)->first();
+        $file = Files::where('file_id', $id)->first();
 
         if (!$file) {
             return redirect()->back()->with('error', 'File not found.');
@@ -266,7 +317,7 @@ class StaffController extends Controller
         $user = session('user'); // Get logged-in user
     
         // Check if the file exists before proceeding
-        $file = File::find($file_id);
+        $file = Files::find($file_id);
         if (!$file) {
             return redirect()->back()->with('error', 'File not found.');
         }
@@ -335,7 +386,7 @@ class StaffController extends Controller
     public function activeFiles(Request $request)
     {
         // Fetch all primary files without filtering by session user
-        $files = File::query();
+        $files = Files::query();
     
         // Apply search filter
         if ($request->has('search') && !empty($request->search)) {
@@ -364,14 +415,14 @@ class StaffController extends Controller
     public function StaffeditPrimaryFile($file_id)
     {
         // Fetch the file using the provided ID
-        $file = File::findOrFail($file_id);
+        $file = Files::findOrFail($file_id);
 
         return view('staff.pages.StaffEditPrimaryFile', compact('file'));
     }
 
     public function StaffupdatePrimaryFile(Request $request, $file_id)
     {
-        $file = File::findOrFail($file_id);
+        $file = Files::findOrFail($file_id);
     
         // Validate input
         $request->validate([
@@ -431,7 +482,7 @@ class StaffController extends Controller
         $file_id = (int) $file_id;
 
         // Check if the file exists
-        $file = File::findOrFail($file_id);
+        $file = Files::findOrFail($file_id);
 
         // Ensure auth user is logged in before logging
         if (auth()->check()) {
@@ -458,7 +509,7 @@ class StaffController extends Controller
         }
     
         $user = session('user'); // Get user from session
-        $file = File::findOrFail($file_id);
+        $file = Files::findOrFail($file_id);
     
         // Validate input
         $request->validate([
@@ -588,7 +639,7 @@ class StaffController extends Controller
         $fileVersionsQuery = FileVersions::where('status', 'archived');
     
         // Fetch all archived files
-        $filesQuery = File::where('status', 'archived');
+        $filesQuery = Files::where('status', 'archived');
     
         // Apply search filter
         if ($request->has('search') && !empty($request->search)) {
@@ -649,7 +700,7 @@ class StaffController extends Controller
         }
     
         // If not found in file_versions, check in files (for original files)
-        $originalFile = File::where('file_id', $id)->first() ?? 0;
+        $originalFile = Files::where('file_id', $id)->first() ?? 0;
     
         if ($originalFile) {
             // Update status in files (original file)
@@ -673,13 +724,13 @@ class StaffController extends Controller
     public function CountActiveFiles()
     {
         // ✅ Count all active files
-        $activeFilesCount = File::where('status', 'active')->count();
+        $activeFilesCount = Files::where('status', 'active')->count();
     
         // ✅ Count all pending files
-        $pendingFilesCount = File::where('status', 'pending')->count();
+        $pendingFilesCount = Files::where('status', 'pending')->count();
     
         // ✅ Count recent uploads (e.g., last 7 days)
-        $recentUploadsCount = File::where('created_at', '>=', now()->subDays(7))->count();
+        $recentUploadsCount = Files::where('created_at', '>=', now()->subDays(7))->count();
     
         // ✅ Get total storage used
         $uploadPath = storage_path('app/public/uploads'); // Absolute path
@@ -687,7 +738,7 @@ class StaffController extends Controller
         $formattedStorage = $this->formatSizeUnits($totalStorageUsed); // Format size
     
         // ✅ Fetch recent file activities (latest updated files)
-        $recentFiles = File::orderBy('updated_at', 'desc')->limit(10)->get();
+        $recentFiles = Files::orderBy('updated_at', 'desc')->limit(10)->get();
     
         // ✅ Return all necessary data to the view
         return view('staff.pages.StaffDashboardPage', compact(
