@@ -16,7 +16,7 @@
                 @csrf
 
                 <div class="mb-4">
-                    <label for="category" class="block text-lg font-medium text-gray-700">File Category</label>
+                    <label for="category" class="block text-lg font-bold text-gray-700">Enter File Category Type</label>
                     <select name="category" id="category" class="mt-1 p-2 border rounded w-full" required>
                         <option value="capstone">Capstone</option>
                         <option value="thesis">Thesis</option>
@@ -27,18 +27,29 @@
                 </div>
 
                 <div class="mb-4">
-                    <label for="published_by" class="block text-lg font-medium text-gray-700">Published By</label>
-                    <input type="text" name="published_by" id="published_by" class="p-2 border rounded w-full" required>
+                    <label for="folder" class="block text-lg font-bold text-gray-700">Select Folder Category To Save File</label>
+                    <select name="folder" id="folder" class="mt-1 p-2 border rounded w-full">
+                        <option value="">Root (uploads/)</option>
+                        @foreach($subfolders as $subfolder)
+                            <option value="{{ $subfolder }}">{{ $subfolder }}</option>
+                        @endforeach
+                    </select>
                 </div>
 
                 <div class="mb-4">
-                    <label for="year_published" class="block text-lg font-medium text-gray-700">Year Published</label>
+                    <label for="published_by" class="block text-lg font-bold text-gray-700">Published By</label>
+                    <input type="text" name="published_by" id="published_by" class="p-2 border rounded w-full" value="{{ session('user')->name }}" readonly>
+                </div>
+
+
+                <div class="mb-4">
+                    <label for="year_published" class="block text-lg font-bold text-gray-700">Year Published</label>
                     <input type="number" name="year_published" id="year_published" class="p-2 border rounded w-full"
                         required min="1900" max="{{ date('Y') }}" placeholder="YYYY">
                 </div>
 
                 <div class="mb-4">
-                    <label for="description" class="block text-lg font-medium text-gray-700">Description</label>
+                    <label for="description" class="block text-lg font-bold text-gray-700">Description</label>
                     <textarea name="description" id="description" class="p-2 border rounded w-full" rows="3"
                         placeholder="Enter file description..."></textarea>
                 </div>
@@ -56,10 +67,11 @@
              rounded-lg cursor-pointer bg-gray-100 w-full h-64">
             <p class="text-gray-600">Drag & Drop your file here or click to select</p>
             <input type="file" name="file" id="file" class="hidden" required>
-        </div>
+            </div>
 
-        <div class="text-gray-600 text-sm mb-4">
+        <div class="text-gray-600 text-1xl mb-4 text-center">
             <p><strong>Allowed files:</strong> PPT, DOCX, JPG, PNG, SVG, PDF</p>
+            <p>File Upload limited to <strong>500MB only</strong></p>
         </div>
 
         <!-- File Details Display (Initially Hidden) -->
@@ -118,6 +130,20 @@
             e.preventDefault();
 
             let formData = new FormData(this);
+            let fileInput = document.getElementById("file");
+
+            if (fileInput.files.length === 0) {
+                Swal.fire({
+                    title: "No file selected",
+                    text: "Please choose a file to upload.",
+                    icon: "warning",
+                    confirmButtonText: "OK"
+                });
+                return;
+            }
+
+            formData.append("file", fileInput.files[0]);
+
             let uploadUrl = "{{ route('staff.uploadFile') }}";
 
             $.ajax({

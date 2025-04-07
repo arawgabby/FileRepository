@@ -54,7 +54,7 @@
                         {{ ucfirst($log->file->file_type ?? 'N/A') }}
                     </td>
                         <!-- <td class="py-2 px-4">{{ ucfirst($log->file_id) }}</td> -->
-                        <td class="py-2 px-4">{{ ucfirst($log->user->role) }}</td> <!-- Display role based on accessed_by -->
+                        <td class="py-2 px-4">{{ ucfirst($log->user->name) }}</td> <!-- Display role based on accessed_by -->
                         <td class="py-2 px-4">{{ ucfirst($log->action) }}</td>
                         <td class="py-2 px-4 text-gray-500">
                             {{ \Carbon\Carbon::parse($log->access_time)->format('F d, Y h:i A') }}

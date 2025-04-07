@@ -6,6 +6,7 @@ use App\Http\Controllers\FileController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\StaffController;
 use App\Http\Controllers\FileTimeStampController;
+use Illuminate\Support\Facades\Storage;
 
 Route::get('/', function () {
     return view('welcome');
@@ -59,7 +60,9 @@ Route::middleware(['staff.auth'])->group(function () {
     Route::get('/staff-main', [StaffController::class, 'dashboard'])->name('staff.dashboard');
 
     Route::get('/staff-upload', function () {
-        return view('staff.pages.StaffUploadNewFile');
+        $subfolders = Storage::disk('public')->directories('uploads');
+        $subfolders = array_map(fn($dir) => Str::after($dir, 'uploads/'), $subfolders);
+        return view('staff.pages.StaffUploadNewFile', compact('subfolders'));
     })->name('staff.upload');
 
     Route::get('/staff-folders/{subfolder?}', [StaffController::class, 'showFolders'])->name('staff.folders');

@@ -35,30 +35,39 @@
     </div> -->
 
     <!-- Search & Filters -->
-    <div class="mb-4 flex gap-4">
-        <input type="text" id="searchInput" placeholder="Search files..." class="border rounded p-2 w-1/3">
-        <select id="fileTypeFilter" class="border rounded p-2">
+    <div class="mb-4 flex gap-4 border-b border-gray pb-4">
+
+        <label for="subfolderFilter" class="block text-1xl font-medium text-gray-700 mt-2">File Type</label>
+        <select id="fileTypeFilter" class="border rounded p-1">
             <option value="">All Types</option>
             <option value="pdf">Pdf</option>
             <option value="docx">Docx</option>
             <option value="pptx">Pptx</option>
         </select>
-        <select id="categoryFilter" class="border rounded p-2">
-            <option value="">All Categories</option>
-            <option value="capstone">Capstone</option>
-            <option value="thesis">Thesis</option>
-            <option value="faculty_request">Faculty Request</option>
-            <option value="accreditation">Accreditation</option>
-            <option value="admin_docs">Admin Docs</option>
+
+
+        <label for="subfolderFilter" class="block text-1xl font-medium text-gray-700 mt-2">Select Subfolder</label>
+        <select id="subfolderFilter" class="border rounded p-1">
+            <option value="">All files outside root folder</option>
+            @foreach ($subfolders as $folder)
+                <option value="{{ $folder }}">{{ ucfirst($folder) }}</option>
+            @endforeach
         </select>
 
-        <label for="yearFilter" class="font-semibold mt-2">Filter by Year:</label>
-        <select id="yearFilter" class="border rounded p-2">
+
+        <label for="yearFilter" class="font-medium text-gray-700 mt-2">Filter by Year:</label>
+        <select id="yearFilter" class="border rounded p-1">
             <option value="all">All Years</option>
             @foreach($files->unique('year_published') as $file)
                 <option value="{{ $file->year_published }}">{{ $file->year_published }}</option>
             @endforeach
         </select>
+
+        <label for="dateFilter" class="font-medium mt-2 text-gray-700 text-sm">Filter by Date Created:</label>
+        <input type="date" id="dateFilter" class="border rounded p-1">
+
+        <input type="text" id="searchInput" placeholder="Search files..." class="border rounded p-1 w-1/4">
+
 
     </div>
 
@@ -130,81 +139,127 @@
         </tbody>
     </table> -->
 
-    <!-- Card View -->
+
+  <!-- Card View -->
     <div id="cardView" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 mt-6 mb-12">
         @foreach($files as $file)
-            @if($file->status == 'active') 
-            <div class="bg-white rounded-lg shadow-lg p-6">
-                <div class="flex justify-between">
-                    <span class="text-1xl font-semibold break-words w-full block">{{ $file->filename }}</span>
-                    <span class="font-semibold">{{ $file->year_published }}</span>
-                </div>
-                <!-- <div class="mt-2 text-sm text-gray-600">
-                    <span class="font-semibold">Active File ID: 00{{ $file->file_id }}</span>
-                </div>   -->
+            @if($file->status == 'active')
+                @php
+                    $folderName = explode('/', $file->file_path)[1] ?? 'unknown';
+                @endphp
 
-                <!-- Display File Size -->
-                <div class="mt-2 text-sm text-gray-600">
-                    <span class="font-semibold">
-                        Size: 
-                        @if($file->file_size >= 1024 * 1024)
-                            {{ number_format($file->file_size / (1024 * 1024), 2) }} MB
+                <div class="bg-white rounded-lg shadow-lg p-6" data-subfolder="{{ $folderName }}">
+                    <div class="flex justify-between">
+                        <span class="text-1xl font-semibold break-words w-full block">{{ $file->filename }}</span>
+                        <span class="font-semibold">{{ $file->year_published }}</span>
+                    </div>
+
+                    <div class="mt-2 text-sm text-gray-600">
+                        <span class="font-semibold">
+                            Size: 
+                            @if($file->file_size >= 1024 * 1024)
+                                {{ number_format($file->file_size / (1024 * 1024), 2) }} MB
+                            @else
+                                {{ number_format($file->file_size / 1024, 2) }} KB
+                            @endif
+                        </span>
+                    </div>
+
+                    <div class="mt-2 text-sm text-gray-600">
+                        <span class="font-semibold">Publisher: {{ $file->published_by }}</span>
+                    </div>  
+
+                    <div class="flex items-center mt-2">
+                        @php
+                            $fileType = strtolower($file->file_type);
+                        @endphp
+
+                        @if($fileType == 'pdf')
+                            <i class="fa-solid fa-file-pdf text-red-500 text-2xl"></i>
+                        @elseif($fileType == 'docx' || $fileType == 'doc')
+                            <i class="fa-solid fa-file-word text-blue-500 text-2xl"></i>
+                        @elseif($fileType == 'pptx' || $fileType == 'ppt')
+                            <i class="fa-solid fa-file-powerpoint text-orange-500 text-2xl"></i>
                         @else
-                            {{ number_format($file->file_size / 1024, 2) }} KB
+                            <i class="fa-solid fa-file text-gray-500 text-2xl"></i>
                         @endif
-                    </span>
-                </div>
+                        <span class="ml-2">{{ strtoupper($fileType) }}</span>
+                    </div>
 
-                <div class="mt-2 text-sm text-gray-600">
-                    <span class="font-semibold">Publisher: {{ $file->published_by }}</span>
-                </div>  
-
-                <div class="flex items-center mt-2">
-                    @php
-                        $fileType = strtolower($file->file_type);
-                    @endphp
-
-                    @if($fileType == 'pdf')
-                        <i class="fa-solid fa-file-pdf text-red-500 text-2xl"></i>
-                    @elseif($fileType == 'docx' || $fileType == 'doc')
-                        <i class="fa-solid fa-file-word text-blue-500 text-2xl"></i>
-                    @elseif($fileType == 'pptx' || $fileType == 'ppt')
-                        <i class="fa-solid fa-file-powerpoint text-orange-500 text-2xl"></i>
-                    @else
-                        <i class="fa-solid fa-file text-gray-500 text-2xl"></i>
-                    @endif
-                    <span class="ml-2">{{ strtoupper($fileType) }}</span>
-                </div>
-
-                <div class="flex justify-between items-center mt-4">
-                    <span class="text-sm text-gray-500">{{ $file->created_at->diffForHumans() }}</span>
-                    
-                    <div class="flex space-x-4">
-                        <a href="{{ route('staff.files.download', basename($file->file_path)) }}" class="text-blue-500" title="Download">
-                            <i class="fas fa-download"></i>
-                        </a>
-                        <a href="{{ route('staff.files.editPrimary', ['file_id' => $file->file_id]) }}" class="text-blue-500" title="Edit Primary File">
-                            <i class="fas fa-edit"></i>
-                        </a>
-                        <form action="{{ route('files.archive.active', ['file_id' => $file->file_id]) }}" method="POST" onsubmit="return confirm('Are you sure you want to archive this file?')">
-                            @csrf
-                            <button type="submit" class="text-red-500" title="Archive this file">
-                                <i class="fas fa-archive"></i>
-                            </button>
-                        </form>
+                    <div class="flex justify-between items-center mt-4">
+                        <span class="text-sm text-gray-500">{{ $file->created_at->diffForHumans() }}</span>
+                        
+                        <div class="flex space-x-4">
+                            <a href="{{ route('staff.files.download', basename($file->file_path)) }}" class="text-blue-500" title="Download">
+                                <i class="fas fa-download"></i>
+                            </a>
+                            <a href="{{ route('staff.files.editPrimary', ['file_id' => $file->file_id]) }}" class="text-blue-500" title="Edit Primary File">
+                                <i class="fas fa-edit"></i>
+                            </a>
+                            <form action="{{ route('files.archive.active', ['file_id' => $file->file_id]) }}" method="POST" onsubmit="return confirm('Are you sure you want to archive this file?')">
+                                @csrf
+                                <button type="submit" class="text-red-500" title="Archive this file">
+                                    <i class="fas fa-archive"></i>
+                                </button>
+                            </form>
+                        </div>
                     </div>
                 </div>
-            </div>
             @endif
         @endforeach
     </div>
 
-
+    <!-- Pagination -->
     <div class="mt-4">
         {{ $files->links() }}
     </div>
 
 </div>
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        const searchInput = document.getElementById("searchInput");
+        const fileTypeFilter = document.getElementById("fileTypeFilter");
+        const subfolderFilter = document.getElementById("subfolderFilter");
+        const yearFilter = document.getElementById("yearFilter");
+        const dateFilter = document.getElementById("dateFilter");
+        const cards = document.querySelectorAll("#cardView > div");
+
+        function filterCards() {
+            const searchText = searchInput.value.toLowerCase();
+            const selectedFileType = fileTypeFilter.value.toLowerCase();
+            const selectedSubfolder = subfolderFilter.value.toLowerCase();
+            const selectedYear = yearFilter.value;
+            const selectedDate = dateFilter.value;
+
+            cards.forEach(card => {
+                const fileName = card.querySelector("span.font-semibold").textContent.toLowerCase();
+                const fileType = card.querySelector("span.ml-2").textContent.toLowerCase();
+                const folder = card.dataset.subfolder ? card.dataset.subfolder.toLowerCase() : "";
+                const year = card.querySelector("span.font-semibold:last-child").textContent;
+                const createdDate = card.querySelector(".text-sm.text-gray-500").textContent.trim();
+
+                const matchesSearch = fileName.includes(searchText);
+                const matchesFileType = selectedFileType === "" || fileType.includes(selectedFileType);
+                const matchesSubfolder = selectedSubfolder === "" || folder.includes(selectedSubfolder);
+                const matchesYear = selectedYear === "all" || year === selectedYear;
+                const matchesDate = selectedDate === "" || createdDate.includes(selectedDate);
+
+                if (matchesSearch && matchesFileType && matchesSubfolder && matchesYear && matchesDate) {
+                    card.style.display = "block";
+                } else {
+                    card.style.display = "none";
+                }
+            });
+        }
+
+        searchInput.addEventListener("input", filterCards);
+        fileTypeFilter.addEventListener("change", filterCards);
+        subfolderFilter.addEventListener("change", filterCards);
+        yearFilter.addEventListener("change", filterCards);
+        dateFilter.addEventListener("change", filterCards);
+    });
+</script>
+
 <script>
     document.addEventListener("DOMContentLoaded", function () {
         const yearFilter = document.getElementById("yearFilter");
@@ -227,40 +282,23 @@
     });
 </script>
 <script>
-    document.addEventListener("DOMContentLoaded", function () {
-    const searchInput = document.getElementById("searchInput");
-    const fileTypeFilter = document.getElementById("fileTypeFilter");
-    const categoryFilter = document.getElementById("categoryFilter");
-    const cards = document.querySelectorAll("#cardView > div");
+    const subfolderFilter = document.getElementById("subfolderFilter");
 
-    function filterCards() {
-        const searchText = searchInput.value.toLowerCase().trim();
-        const selectedType = fileTypeFilter.value.toLowerCase();
-        const selectedCategory = categoryFilter.value.toLowerCase();
+    subfolderFilter.addEventListener("change", function () {
+        const selectedSubfolder = this.value.toLowerCase();
 
-        cards.forEach(card => {
-            const fileName = card.querySelector("span.font-semibold").textContent.toLowerCase();
-            const fileType = card.querySelector("span.ml-2").textContent.toLowerCase();
-            const category = card.dataset.category ? card.dataset.category.toLowerCase() : "";
+        document.querySelectorAll("#cardView > div").forEach(card => {
+            const subfolder = card.dataset.subfolder ? card.dataset.subfolder.toLowerCase() : "";
 
-            // Check conditions for visibility
-            const matchesSearch = fileName.includes(searchText);
-            const matchesType = selectedType === "" || fileType.includes(selectedType);
-            const matchesCategory = selectedCategory === "" || category.includes(selectedCategory);
-
-            if (matchesSearch && matchesType && matchesCategory) {
+            if (selectedSubfolder === "" || subfolder === selectedSubfolder) {
                 card.style.display = "block";
             } else {
                 card.style.display = "none";
             }
         });
-    }
 
-    searchInput.addEventListener("input", filterCards);
-    fileTypeFilter.addEventListener("change", filterCards);
-    categoryFilter.addEventListener("change", filterCards);
+        updateFileCount && updateFileCount();
     });
-
 </script>
 <script>
     function toggleView() {

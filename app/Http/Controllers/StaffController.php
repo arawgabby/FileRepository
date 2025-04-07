@@ -88,6 +88,7 @@ class StaffController extends Controller
             'published_by' => 'required|string|max:255',
             'year_published' => 'required|string|regex:/^\d{4}$/', // ✅ Ensure it’s a 4-digit year
             'description' => 'nullable|string|max:1000',
+            'folder' => 'nullable|string|max:255', 
         ]);
 
         if (!session()->has('user')) {
@@ -99,7 +100,11 @@ class StaffController extends Controller
         if ($request->hasFile('file')) {
             $file = $request->file('file');
             $filename = $file->getClientOriginalName();
-            $filePath = $file->storeAs('uploads', $filename, 'public');
+
+            $folder = trim($request->input('folder'));
+            $uploadPath = 'uploads' . ($folder ? '/' . $folder : '');
+
+            $filePath = $file->storeAs($uploadPath, $filename, 'public');
 
             $fileEntry = Files::create([
                 'filename' => $filename,
@@ -233,24 +238,29 @@ class StaffController extends Controller
 
     public function StaffdownloadFile($filePath)
     {
-        // Ensure that the file path doesn't start with 'uploads/' (because it could break the path)
-        $storagePath = 'uploads/' . $filePath;  // Full path to the file inside 'uploads'
+        $storagePath = 'uploads/' . $filePath;
     
-        // Check if the file exists in the 'uploads' folder
         if (Storage::disk('public')->exists($storagePath)) {
-            // Generate the correct path to be used for download
             return response()->download(storage_path("app/public/$storagePath"));
         }
     
-        // Check if the file exists in 'uploads/primaryFiles' folder
         $primaryFilePath = 'uploads/primaryFiles/' . $filePath;
         if (Storage::disk('public')->exists($primaryFilePath)) {
             return response()->download(storage_path("app/public/$primaryFilePath"));
         }
     
-        // If not found, return an error
+        $subfolders = ['capstone', 'files'];
+    
+        foreach ($subfolders as $subfolder) {
+            $subfolderPath = 'uploads/' . $subfolder . '/' . $filePath;
+    
+            if (Storage::disk('public')->exists($subfolderPath)) {
+                return response()->download(storage_path("app/public/$subfolderPath"));
+            }
+        }
+    
         return back()->with('error', 'File not found.');
-    }
+    }    
 
     public function StaffmoveToTrash(Request $request, $id)
     {
@@ -382,35 +392,39 @@ class StaffController extends Controller
     }
     
         
-
     public function activeFiles(Request $request)
     {
-        // Fetch all primary files without filtering by session user
         $files = Files::query();
     
-        // Apply search filter
         if ($request->has('search') && !empty($request->search)) {
             $files->where('filename', 'LIKE', '%' . $request->search . '%');
         }
     
-        // Apply file type filter
         if ($request->has('file_type') && !empty($request->file_type)) {
             $files->where('file_type', $request->file_type);
         }
     
-        // Apply category filter
-        if ($request->has('category') && !empty($request->category)) {
-            $files->where('category', $request->category);
+        if ($request->has('subfolder') && !empty($request->subfolder)) {
+            $files->where('file_path', 'LIKE', 'uploads/' . $request->subfolder . '/%');
         }
     
-        // Paginate results
         $files = $files->paginate(20);
     
-        // Fetch file versions linked to the filtered files
         $fileVersions = FileVersions::whereIn('file_id', $files->pluck('file_id'))->get();
     
-        return view('staff.pages.StaffViewAllFilesActive', compact('fileVersions', 'files'));
-    }    
+        // 🔥 Get subfolders from uploads directory
+        $uploadPath = public_path('storage/uploads');
+        $subfolders = [];
+    
+        if (File::exists($uploadPath)) {
+            $subfolders = collect(File::directories($uploadPath))->map(function ($path) {
+                return basename($path); // Just get the folder name
+            });
+        }
+    
+        return view('staff.pages.StaffViewAllFilesActive', compact('fileVersions', 'files', 'subfolders'));
+    }
+    
 
     public function StaffeditPrimaryFile($file_id)
     {
