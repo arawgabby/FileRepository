@@ -6,7 +6,7 @@
 
     <h1 class="text-[30px] font-bold mb-3 flex items-center border-b border-gray pb-2 -mx-4 px-4">
         <i class="fas fa-folder w-[30px] h-[30px] mr-2"></i>
-        Folders
+        Root Folder (Admin side)
     </h1>
 
     <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
@@ -16,7 +16,7 @@
             <!-- Root Label -->
             <div class="flex items-center space-x-2 mb-4">
                 <div class="w-4 h-4 bg-blue-700 rounded-full"></div>
-                <h2 class="font-semibold text-lg">Folder: {{ $basePath }}</h2>
+                <h2 class="font-semibold text-lg">Root: /{{ $basePath }}</h2>
             </div>
 
             <!-- Back Button -->
@@ -47,14 +47,88 @@
         </div>
 
         <!-- Right Column: Action Button -->
-        <div class="flex items-start justify-end">
+        <div class="flex items-start justify-end gap-2">
+
         <button
             onclick="createSubfolder()"
             class="bg-blue-600 hover:bg-blue-700 text-white font-semibold px-6 py-3 rounded-xl shadow-md transition duration-200"
         >
             + Add Subfolder
         </button>
-</div>
+
+        <button
+            onclick="deleteSubfolder()"
+            class="bg-red-600 hover:bg-red-700 text-white font-semibold px-6 py-3 rounded-xl shadow-md transition duration-200"
+        >
+            🗑️ Delete Subfolder
+        </button>
+
+        </div>
+
+<script>
+    function createSubfolder() {
+        const folderName = prompt("Enter subfolder name:");
+        if (folderName) {
+            fetch("{{ route('staff.folders.create') }}", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    "X-CSRF-TOKEN": "{{ csrf_token() }}"
+                },
+                body: JSON.stringify({
+                    folderName: folderName,
+                    basePath: "{{ $basePath }}"
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    alert("Folder created successfully!");
+                    location.reload();
+                } else {
+                    alert("Error: " + data.message);
+                }
+            })
+            .catch(error => {
+                alert("An error occurred.");
+                console.error(error);
+            });
+        }
+    }
+
+    function deleteSubfolder() {
+        const folderName = prompt("Enter the exact name of the subfolder to delete:");
+        if (!folderName) return;
+
+        const confirmDelete = confirm(`Are you sure you want to delete the folder "${folderName}"? This cannot be undone.`);
+        if (!confirmDelete) return;
+
+        fetch("{{ route('staff.folders.delete') }}", {
+            method: "DELETE",
+            headers: {
+                "Content-Type": "application/json",
+                "X-CSRF-TOKEN": "{{ csrf_token() }}"
+            },
+            body: JSON.stringify({
+                folderName: folderName,
+                basePath: "{{ $basePath }}"
+            })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                alert("Folder deleted successfully.");
+                location.reload();
+            } else {
+                alert("Error: " + data.message);
+            }
+        })
+        .catch(error => {
+            alert("An error occurred.");
+            console.error(error);
+        });
+    }
+</script>
 
 <script>
     function createSubfolder() {

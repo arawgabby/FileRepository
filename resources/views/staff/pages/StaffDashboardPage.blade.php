@@ -53,15 +53,23 @@
         </div>
 
 
-        <!-- Recent Uploads Card -->
-        <div class="bg-white rounded-md shadow-md p-4 flex items-center justify-between border">
+        <div class="bg-white rounded-md shadow-md p-2 flex items-center justify-between border">
             <div>
                 <h2 class="text-xl font-semibold text-gray-500">Recent Uploads</h2>
                 <br>
+
+                <div class="flex space-x-2 pb-2">
+                    <a href="{{ route('staff.page.dashboard', ['filter' => 'daily']) }}" class="text-sm bg-blue-100 text-blue-600 hover:bg-blue-200 hover:text-blue-700 px-4 py-2 rounded-md">Daily</a>
+                    <a href="{{ route('staff.page.dashboard', ['filter' => 'monthly']) }}" class="text-sm bg-green-100 text-green-600 hover:bg-green-200 hover:text-green-700 px-4 py-2 rounded-md">Monthly</a>
+                    <a href="{{ route('staff.page.dashboard', ['filter' => 'yearly']) }}" class="text-sm bg-yellow-100 text-yellow-600 hover:bg-yellow-200 hover:text-yellow-700 px-4 py-2 rounded-md">Yearly</a>
+                    <a href="{{ route('staff.page.dashboard', ['filter' => 'all']) }}" class="text-sm bg-gray-100 text-gray-600 hover:bg-gray-200 hover:text-gray-700 px-4 py-2 rounded-md">All</a>
+                </div>
+
                 <p class="text-6xl font-bold text-gray-900">{{ $recentUploadsCount }}</p> <!-- Dynamic Recent Uploads -->
             </div>
             <i class="fas fa-upload text-3xl text-green-500"></i>
         </div>
+
 
 
     </div>

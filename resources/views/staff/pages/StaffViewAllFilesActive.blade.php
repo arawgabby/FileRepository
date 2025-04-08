@@ -47,12 +47,17 @@
 
 
         <label for="subfolderFilter" class="block text-1xl font-medium text-gray-700 mt-2">Select Subfolder</label>
-        <select id="subfolderFilter" class="border rounded p-1">
-            <option value="">All files outside root folder</option>
-            @foreach ($subfolders as $folder)
-                <option value="{{ $folder }}">{{ ucfirst($folder) }}</option>
-            @endforeach
-        </select>
+        <form method="GET" action="{{ route('staff.active.files') }}">
+            <select id="subfolderFilter" name="subfolder" class="border rounded p-1" onchange="this.form.submit()">
+                <option value="">All files outside root folder</option>
+                @foreach ($subfolders as $folder)
+                    <option value="{{ $folder }}" {{ request('subfolder') === $folder ? 'selected' : '' }}>
+                        {{ ucfirst($folder) }}
+                    </option>
+                @endforeach
+            </select>
+        </form>
+
 
 
         <label for="yearFilter" class="font-medium text-gray-700 mt-2">Filter by Year:</label>
@@ -80,64 +85,71 @@
         <span>This section is read-only.</span>
     </div> -->
 
-    <!-- Table View
-    <table id="tableView" class="w-full border-collapse border border-gray-300">
-        <thead>
-            <tr class="bg-gray-200">
-                <th class="p-2">File ID</th>
-                <th class="p-2">Filename</th>
-                <th class="p-2">File Type</th>
-                <th class="p-2">Category</th>
-                <th class="p-2">Uploaded By</th>
-                <th class="p-2">Created At</th>
-                <th class="p-2">Request Status</th>
-                <th class="p-2">Actions</th>
-            </tr>
-        </thead>
-        <tbody id="fileTableBody">
-        @foreach($files as $file)
-            @if($file->status == 'active') 
-            <tr class="file-row">
-                <td class="p-2 filename">00{{ $file->file_id }}</td>
-                <td class="p-2 filename">{{ $file->filename }}</td>
-                <td class="p-2 file-type">
-                    @php
-                        $fileType = strtolower($file->file_type);
-                    @endphp
-
-                    @if($fileType == 'pdf')
-                        <i class="fa-solid fa-file-pdf text-red-500"></i>
-                    @elseif($fileType == 'docx' || $fileType == 'doc')
-                        <i class="fa-solid fa-file-word text-blue-500"></i>
-                    @elseif($fileType == 'pptx' || $fileType == 'ppt')
-                        <i class="fa-solid fa-file-powerpoint text-orange-500"></i>
-                    @else
-                        <i class="fa-solid fa-file text-gray-500"></i>
+    <!-- Table View -->
+    <!-- <div class="overflow-x-aut mb-12">
+        <table class="min-w-full table-auto bg-white rounded-lg shadow-lg border">
+            <thead class="bg-gray-100">
+                <tr>
+                    <th class="px-4 py-2 text-left text-sm font-semibold text-gray-600">Filename</th>
+                    <th class="px-4 py-2 text-left text-sm font-semibold text-gray-600">Year Published</th>
+                    <th class="px-4 py-2 text-left text-sm font-semibold text-gray-600">Size</th>
+                    <th class="px-4 py-2 text-left text-sm font-semibold text-gray-600">Publisher</th>
+                    <th class="px-4 py-2 text-left text-sm font-semibold text-gray-600">File Type</th>
+                    <th class="px-4 py-2 text-left text-sm font-semibold text-gray-600">Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach($files as $file)
+                    @if($file->status == 'active')
+                        @php
+                            $folderName = explode('/', $file->file_path)[1] ?? 'unknown';
+                            $fileType = strtolower($file->file_type);
+                        @endphp
+                        <tr class="border-t">
+                            <td class="px-4 py-3 text-sm text-gray-800">{{ $file->filename }}</td>
+                            <td class="px-4 py-3 text-sm text-gray-600">{{ $file->year_published }}</td>
+                            <td class="px-4 py-3 text-sm text-gray-600">
+                                @if($file->file_size >= 1024 * 1024)
+                                    {{ number_format($file->file_size / (1024 * 1024), 2) }} MB
+                                @else
+                                    {{ number_format($file->file_size / 1024, 2) }} KB
+                                @endif
+                            </td>
+                            <td class="px-4 py-3 text-sm text-gray-600">{{ $file->published_by }}</td>
+                            <td class="px-4 py-3 text-sm text-gray-600">
+                                @if($fileType == 'pdf')
+                                    <i class="fa-solid fa-file-pdf text-red-500 text-xl"></i>
+                                @elseif($fileType == 'docx' || $fileType == 'doc')
+                                    <i class="fa-solid fa-file-word text-blue-500 text-xl"></i>
+                                @elseif($fileType == 'pptx' || $fileType == 'ppt')
+                                    <i class="fa-solid fa-file-powerpoint text-orange-500 text-xl"></i>
+                                @else
+                                    <i class="fa-solid fa-file text-gray-500 text-xl"></i>
+                                @endif
+                                {{ strtoupper($fileType) }}
+                            </td>
+                            <td class="px-4 py-3 text-sm text-gray-600">
+                                <div class="flex space-x-4">
+                                    <a href="{{ route('staff.files.download', basename($file->file_path)) }}" class="text-blue-500" title="Download">
+                                        <i class="fas fa-download"></i>
+                                    </a>
+                                    <a href="{{ route('staff.files.editPrimary', ['file_id' => $file->file_id]) }}" class="text-blue-500" title="Edit Primary File">
+                                        <i class="fas fa-edit"></i>
+                                    </a>
+                                    <form action="{{ route('files.archive.active', ['file_id' => $file->file_id]) }}" method="POST" onsubmit="return confirm('Are you sure you want to archive this file?')">
+                                        @csrf
+                                        <button type="submit" class="text-red-500" title="Archive this file">
+                                            <i class="fas fa-archive"></i>
+                                        </button>
+                                    </form>
+                                </div>
+                            </td>
+                        </tr>
                     @endif
-                    {{ strtoupper($fileType) }}
-                </td>         
-                <td class="p-2 category">{{ $file->category ?? 'No Category' }}</td>
-                <td class="p-2">{{ $file->user ? $file->user->name : 'Unknown' }}</td>
-                <td class="p-2 filename">{{ $file->created_at->diffForHumans() }}</td>
-                <td class="p-2 filename">{{ $file->status }}</td>
-                <td class="p-2">
-                    <div class="flex justify-center space-x-4">
-                        <a href="{{ route('staff.files.download', basename($file->file_path)) }}" class="text-blue-500" title="Download">
-                            <i class="fas fa-download"></i>
-                        </a>
-                        <a href="{{ route('staff.files.editPrimary', ['file_id' => $file->file_id]) }}" class="text-blue-500" title="Edit Primary File">
-                            <i class="fas fa-edit"></i>
-                        </a>
-                        <a href="{{ route('staff.editFile', $file->file_id) }}" class="text-red-500" title="Upload New File Based on this version">
-                            <i class="fas fa-upload"></i>
-                        </a>
-                    </div>
-                </td>   
-            </tr>
-            @endif
-        @endforeach
-        </tbody>
-    </table> -->
+                @endforeach
+            </tbody>
+        </table>
+    </div> -->
 
 
   <!-- Card View -->
@@ -215,6 +227,8 @@
     </div>
 
 </div>
+
+<!--For subfolder filter category-->
 <script>
     document.addEventListener("DOMContentLoaded", function () {
         const searchInput = document.getElementById("searchInput");
@@ -281,6 +295,7 @@
         });
     });
 </script>
+
 <script>
     const subfolderFilter = document.getElementById("subfolderFilter");
 
@@ -300,6 +315,7 @@
         updateFileCount && updateFileCount();
     });
 </script>
+
 <script>
     function toggleView() {
         document.getElementById("tableView").classList.toggle("hidden");

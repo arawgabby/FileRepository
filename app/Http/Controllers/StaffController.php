@@ -8,6 +8,7 @@ use Illuminate\Support\Facades\Storage;
 use App\Models\Files;
 use App\Models\FileVersions;
 use App\Models\FileTimeStamp;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Auth;
 use App\Models\FileRequest;
 use Carbon\Carbon;
@@ -36,6 +37,45 @@ class StaffController extends Controller
     
         return view('staff.pages.Folders', compact('folderNames', 'basePath', 'parentPath'));
     }
+
+    public function deleteFolder(Request $request)
+    {
+        $request->validate([
+            'folderName' => 'required|string',
+            'basePath' => 'required|string',
+        ]);
+    
+        $fullPath = $request->basePath . '/' . $request->folderName;
+    
+        if (!Storage::disk('public')->exists($fullPath)) {
+            Log::warning("Attempted to delete non-existent folder: {$fullPath} by user ID " . Auth::id());
+    
+            return response()->json(['success' => false, 'message' => 'Folder does not exist.']);
+        }
+    
+        try {
+            Storage::disk('public')->deleteDirectory($fullPath);
+    
+            $user = session('user');
+    
+            // Access log database entry
+            AccessLog::create([
+                'file_id' => 0, // No file ID since it's a folder
+                'accessed_by' => $user->id,
+                'action' => "Deleted subfolder '{$request->folderName}' under '{$request->basePath}' - Successful",
+                'access_time' => now(),
+            ]);
+    
+            // Laravel log
+            Log::info("User ID {$user->id} successfully deleted folder: {$fullPath}");
+    
+            return response()->json(['success' => true]);
+        } catch (\Exception $e) {
+            Log::error("Failed to delete folder: {$fullPath} - Error: " . $e->getMessage());
+    
+            return response()->json(['success' => false, 'message' => 'Failed to delete folder.']);
+        }
+    }
     
     public function createFolder(Request $request)
     {
@@ -43,22 +83,40 @@ class StaffController extends Controller
             'folderName' => 'required|string',
             'basePath' => 'nullable|string'
         ]);
-
+    
         $basePath = $request->input('basePath', 'uploads');
         $folderName = $request->input('folderName');
         $newPath = $basePath . '/' . $folderName;
-
+    
         if (Storage::disk('public')->exists($newPath)) {
             return response()->json([
                 'success' => false,
                 'message' => 'Folder already exists.'
             ]);
         }
-
+    
         try {
+            // Create the new folder
             Storage::disk('public')->makeDirectory($newPath);
+    
+            // Access log entry for folder creation
+            $user = session('user'); // Retrieve the user from session
+    
+            AccessLog::create([
+                'file_id' => 0, // No file ID since it's a folder
+                'accessed_by' => $user->id, // Use session user's ID
+                'action' => "Created folder '{$folderName}' under '{$basePath}' - Successful",
+                'access_time' => now(),
+            ]);
+    
+            // Log the action for auditing
+            Log::info("User ID {$user->id} successfully created folder: {$newPath}");
+    
             return response()->json(['success' => true]);
         } catch (\Exception $e) {
+            // Log the error for debugging
+            Log::error("Failed to create folder: {$newPath} - Error: " . $e->getMessage());
+    
             return response()->json([
                 'success' => false,
                 'message' => 'Failed to create folder: ' . $e->getMessage()
@@ -408,7 +466,7 @@ class StaffController extends Controller
             $files->where('file_path', 'LIKE', 'uploads/' . $request->subfolder . '/%');
         }
     
-        $files = $files->paginate(20);
+        $files = $files->paginate(20)->appends(['subfolder' => $request->subfolder]);
     
         $fileVersions = FileVersions::whereIn('file_id', $files->pluck('file_id'))->get();
     
@@ -735,16 +793,32 @@ class StaffController extends Controller
     }
     
 
-    public function CountActiveFiles()
+    public function CountActiveFiles(Request $request)
     {
         // ✅ Count all active files
         $activeFilesCount = Files::where('status', 'active')->count();
-    
+        
         // ✅ Count all pending files
         $pendingFilesCount = Files::where('status', 'pending')->count();
     
-        // ✅ Count recent uploads (e.g., last 7 days)
-        $recentUploadsCount = Files::where('created_at', '>=', now()->subDays(7))->count();
+        // ✅ Get filter type from request, default to 'all' (count all uploads)
+        $filter = $request->get('filter', 'all'); 
+    
+        // ✅ Apply the filter for recent uploads count
+        switch ($filter) {
+            case 'daily':
+                $recentUploadsCount = Files::whereDate('created_at', today())->count();
+                break;
+            case 'monthly':
+                $recentUploadsCount = Files::whereMonth('created_at', now()->month)->count();
+                break;
+            case 'yearly':
+                $recentUploadsCount = Files::whereYear('created_at', now()->year)->count();
+                break;
+            default: // 'all' or no filter
+                $recentUploadsCount = Files::count();  // Count all uploads
+                break;
+        }
     
         // ✅ Get total storage used
         $uploadPath = storage_path('app/public/uploads'); // Absolute path
@@ -760,9 +834,11 @@ class StaffController extends Controller
             'pendingFilesCount', 
             'recentUploadsCount', 
             'formattedStorage',
-            'recentFiles'
+            'recentFiles',
+            'filter' // Pass the filter to the view
         ));
     }
+    
     
     
     /**

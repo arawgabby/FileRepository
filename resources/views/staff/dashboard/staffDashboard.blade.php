@@ -49,7 +49,7 @@
             </p> -->
 
             <a href="{{ route('staff.page.dashboard') }}" class="flex items-center text-gray-300 hover:text-white relative top-4">
-                <i class="fas fa-dashboard mr-5"></i> Dashboard
+                <i class="fas fa-thumbtack mr-5"></i> Dashboard
             </a>
 
 
@@ -61,11 +61,11 @@
             </p>
 
             <a href="{{ route('staff.folders') }}" class="flex items-center text-gray-300 hover:text-white ">
-                <i class="fas fa-folder mr-5"></i> Folders
+                <i class="fas fa-folder-open mr-5"></i> Folders
             </a>
 
             <a href="{{ route('staff.upload') }}" class="flex items-center text-gray-300 hover:text-white ">
-                <i class="fas fa-upload mr-5"></i> Upload New File
+                <i class="fas fa-upload mr-5"></i> Upload 
             </a>
 
             <!-- <a href="{{ route('staff.files') }}" class="flex items-center text-gray-300 hover:text-white ">
@@ -98,7 +98,7 @@
             </a> -->
 
             <a href="{{ route('staff.archived.files') }}" class="flex items-center text-gray-300 hover:text-white ">
-                <i class="fas fa-archive mr-5"></i> Archived Files
+                <i class="fas fa-bookmark mr-5"></i> Archived Files
             </a>
 
             
@@ -115,12 +115,12 @@
             </p>
 
             <a href="{{ route ('timestamps.index')}}" class="flex items-center text-gray-300 hover:text-white ">
-                <i class="fas fa-file mr-5"></i> File Timestamps
+                <i class="fas fa-list mr-5"></i> File Timestamps
             </a>
 
             <!-- @if (session('user')->role === 'staff') -->
                 <a href="{{ route('staff.logs.view') }}" class="flex items-center text-gray-300 hover:text-white ">
-                    <i class="fas fa-file mr-5"></i> Activity Logs
+                    <i class="fas fa-inbox mr-5"></i> Activity Logs
                 </a>
             <!-- @elseif (session('user')->role === 'faculty') -->
                 <!-- <a href="{{ route('staff.logs.view') }}" class="flex items-center text-gray-300 hover:text-white ">

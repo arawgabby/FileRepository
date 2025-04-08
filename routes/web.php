@@ -67,6 +67,8 @@ Route::middleware(['staff.auth'])->group(function () {
 
     Route::get('/staff-folders/{subfolder?}', [StaffController::class, 'showFolders'])->name('staff.folders');
 
+    Route::delete('/staff-folders/delete', [StaffController::class, 'deleteFolder'])->name('staff.folders.delete');
+
     Route::post('/staff-folders/create', [StaffController::class, 'createFolder'])->name('staff.folders.create');
 
     Route::get('/staff-logs', [StaffController::class, 'StaffviewLogs'])->name('staff.logs.view');
