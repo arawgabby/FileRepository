@@ -19,6 +19,7 @@
 <body class="bg-gray-50 bg-cover bg-center" 
       style="background: url('{{ asset('storage/uploads/bodybackground.png') }}') no-repeat center center fixed; 
              background-size: contain;">
+             
     <div class="flex h-screen">
         
     <div id="sidebar" class="bg-gray-900 text-white w-66 space-y-6 py-8 px-6 transform -translate-x-full md:translate-x-0

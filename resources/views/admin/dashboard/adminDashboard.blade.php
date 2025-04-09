@@ -14,68 +14,116 @@
         }
     </style>
 </head>
-<body class="bg-gray-50">
+<body class="bg-gray-50 bg-cover bg-center" 
+      style="background: url('{{ asset('storage/uploads/bodybackground.png') }}') no-repeat center center fixed; 
+             background-size: contain;">
+
     <div class="flex h-screen">
         
-        <div id="sidebar" class="bg-gray-800 text-white w-64 space-y-6 py-7 px-4 transform -translate-x-full md:translate-x-0 transition-transform duration-300 fixed top-0 bottom-0 z-40">
+    <div id="sidebar" class="bg-gray-900 text-white w-66 space-y-6 py-8 px-6 transform -translate-x-full md:translate-x-0
+    transition-transform duration-300 fixed top-0 bottom-0 z-40 overflow-y-auto">
+
+    <div class="text-2xl font-bold flex justify-center">
+            <img src="{{ asset('storage/csitlogo.jpg') }}" alt="CSIT Logo" class="w-25 h-25">
+            <!-- <p><a href="#" class="text-white">Staff Panel</a></p>  -->
+        </div>
+
+        
             <!-- @if(session()->has('user'))
                 <p>Welcome, {{ session('user')->name }}!</p>
             @endif -->
+
             <div class="text-2xl font-bold">
-            <!-- <img src="{{ asset('product-images/efvlogo.png') }}" alt="EFV Logo" class="w-25 h-25"> -->
-            <p style="margin-top: 8px; text-align: center"><a href="#" class="text-white">Admin</a></p>
-        </div>
+                <!-- <img src="{{ asset('product-images/efvlogo.png') }}" alt="EFV Logo" class="w-25 h-25"> -->
+                <p style="margin-top: 4px; text-align: center"><a href="#" class="text-white">Admin</a></p>
+            </div>
+
             <nav class="space-y-6">
 
-            <p class="text-white text-1xl font-bold">
-                <i class="fas fa-folder-open"></i> Manage Files
+            <p class="text-white text-sm font-bold">
+                </i> Main
             </p>
 
-            <a href="{{ route('admin.upload') }}" class="flex items-center text-gray-300 hover:text-white ml-4">
-                <i class="fas fa-upload mr-4"></i> Upload New File
+            <a href="{{ route('admin.page.dashboard') }}" class="flex items-center text-gray-300 hover:text-white relative text-sm">
+                <i class="fas fa-thumbtack mr-4"></i> Dashboard
             </a>
 
-            <a href="{{ route('admin.files') }}" class="flex items-center text-gray-300 hover:text-white ml-4">
-                <i class="fas fa-file-alt mr-4"></i> View Files
+
+            <p class=" -m-5 mb-6 border-b border-white text-gray-200 pb-2">
+            </p>
+
+            
+
+
+            <p class="text-white text-sm font-bold">
+                 Files
+            </p>
+
+            
+            <a href="{{ route('admin.folders') }}" class="flex items-center text-gray-300 hover:text-white text-sm ">
+                <i class="fas fa-folder-open mr-4 "></i> Folders
             </a>
 
-            <a href="#" class="flex items-center text-gray-300 hover:text-white ml-4">
+            <a href="{{ route('admin.uploadFiles') }}" class="flex items-center text-gray-300 hover:text-white text-sm">
+                <i class="fas fa-upload mr-4"></i> Upload
+            </a>
+
+            <a href="{{ route('admin.active.files') }}" class="flex items-center text-gray-300 hover:text-white mr-2 text-sm">
+                <i class="fas fa-file-alt mr-5"></i> Files
+            </a>
+
+            <!-- <a href="#" class="flex items-center text-gray-300 hover:text-white ">
                 <i class="fas fa-info mr-4"></i> View File Request
-            </a>
+            </a> -->
 
 
-            <a href="{{ route('admin.update') }}" class="flex items-center text-gray-300 hover:text-white ml-4">
+            <!-- <a href="{{ route('admin.update') }}" class="flex items-center text-gray-300 hover:text-white ">
                 <i class="fas fa-history mr-4"></i> File Versions
-            </a>
+            </a> -->
 
-            <a href="{{ route('admin.archived.files') }}" class="flex items-center text-gray-300 hover:text-white ml-4">
+            <a href="{{ route('admin.archived.files') }}" class="flex items-center text-gray-300 hover:text-white text-sm">
                 <i class="fas fa-archive mr-4"></i> Archived Files
             </a>
 
             
-            <a href="{{ route('admin.trash.bins') }}" class="flex items-center text-gray-300 hover:text-white ml-4">
-                <i class="fas fa-trash-alt mr-4"></i> Trash Files
+            <a href="{{ route('admin.trash.bins') }}" class="flex items-center text-gray-300 hover:text-white text-sm">
+                <i class="fas fa-trash-alt mr-4"></i> Trash 
             </a>
 
-            <p class="text-white text-1xl font-bold mt-8">
-                <i class="fas fa-folder-open"></i> User Management 
+               <!-- <a href="{{ route('admin.trash.bins') }}" class="flex items-center text-gray-300 hover:text-white ">
+                <i class="fas fa-trash-alt mr-4"></i> Trash Files
+            </a> -->
+
+            <p class=" -m-5 mb-6 border-b border-white text-gray-200 pb-2">
             </p>
 
-            <a href="{{ route('admin.users') }}" class="flex items-center text-gray-300 hover:text-white ml-4">
+            <p class="text-white text-sm font-bold mt-8 text-sm">
+                 Accounts
+            </p>
+            
+
+            <a href="{{ route('admin.users') }}" class="flex items-center text-gray-300 hover:text-white text-sm">
                 <i class="fas fa-user mr-4"></i> Users
             </a>
 
-            <p class="text-white text-1xl font-bold mt-8">
-                <i class="fas fa-folder-open"></i> Activity Log
+            
+            <p class=" -m-5 mb-6 border-b border-white text-gray-200 pb-2">
             </p>
 
-            <a href="#" class="flex items-center text-gray-300 hover:text-white ml-4">
-                <i class="fas fa-file mr-4"></i> Logs
+            <p class="text-white text-sm font-bold mt-8">
+                Activity 
+            </p>
+
+            <a href="#" class="flex items-center text-gray-300 hover:text-white text-sm">
+                <i class="fas fa-file mr-4"></i> Activity Logs
             </a>
 
-            <a href="{{ url('/admin-logout') }}" class="flex items-center text-white hover:text-white" 
+            <p class=" -m-5 mb-6 border-b border-white text-gray-200 pb-2">
+            </p>
+
+            <a href="{{ url('/admin-logout') }}" class="flex items-center text-white hover:text-white text-sm" 
             style="font-weight: bold" onclick="return confirmLogout();">
-            Logout
+            <i class="fas fa-bookmark mr-4"></i>  Logout
             </a>
 
             <script>
@@ -91,6 +139,59 @@
         <div id="sidebarOverlay" class="fixed inset-0 bg-black opacity-50 hidden md:hidden" onclick="toggleSidebar()"></div>
 
         <div class="flex-1 flex flex-col ml-0 md:ml-64">
+
+            <div class="flex justify-between items-center">
+                <!-- Page Title -->
+                <h1 class="text-2xl font-bold text-gray-800"></h1>
+
+                <div class="flex items-center space-x-6">
+            
+                    <!-- User Profile (Right End) -->
+                    <div class="flex items-center bg-white p-2 space-x-3 shadow-md overflow-hidden">
+                        <div class="w-12 h-12 bg-gray-600 flex items-center justify-center rounded-full">
+                            <i class="fas fa-user text-white text-2xl"></i>
+                        </div>
+                        <div class="flex flex-col">
+                            <p class="text-sm font-semibold text-black">{{ session('user')->name }}</p>
+                            <p class="text-sm font-semibold text-black">
+                                <span class="text-sm font-bold text-green-600">ONLINE: </span> {{ session('user')->role }}
+                            </p>
+                        </div>
+
+                    <!-- Notification Bell with Modal Trigger -->
+                        <!-- <button id="bellButton" class="text-gray-600 text-4xl focus:outline-none relative">
+                            <i class="fas fa-bell"></i>
+                            <span class="absolute top-0 right-0 bg-red-500 text-white text-xs font-bold rounded-full px-1.5 py-0.5">
+                                3
+                            </span>
+                        </button> -->
+
+                        <!-- Notification Modal (Hidden Initially) -->
+                        <!-- <div id="notificationModal" 
+                            class="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center hidden transition-all duration-300 ease-in-out">
+                            
+                            <div class="bg-white w-166 p-6 rounded-lg shadow-lg transform scale-95 opacity-0 transition-all duration-300 ease-in-out">
+                                <div class="flex justify-between items-center border-b pb-2">
+                                    <h2 class="text-xl font-bold text-gray-800">Notifications</h2>
+                                    <button id="closeModal" class="text-gray-600 text-2xl focus:outline-none">
+                                        <i class="fas fa-times"></i>
+                                    </button>
+                                </div>
+                                
+                                <div class="mt-4">
+                                    <p class="text-gray-600">🔔 You have new notifications!</p>
+                                    <ul class="mt-2 space-y-2">
+                                        <li class="p-2 bg-gray-100 rounded">📢 System Update: New features added!</li>
+                                        <li class="p-2 bg-gray-100 rounded">📌 Reminder: Meeting at 3 PM.</li>
+                                        <li class="p-2 bg-gray-100 rounded">✉️ Message from Admin: Check your inbox.</li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div> -->
+
+                    </div>
+                </div>
+            </div>
            
 
             <main class="p-8 sm: pt-7">
@@ -109,15 +210,21 @@
         document.addEventListener("DOMContentLoaded", function () {
             const navLinks = document.querySelectorAll("#sidebar nav a");
 
-            // Function to update active link state
+            // Function to update active link state with smooth animation
             function setActiveLink(clickedLink) {
                 navLinks.forEach(link => {
-                    link.classList.remove("text-black", "bg-white", "shadow-md", "scale-105", "font-bold", "p-4");
-                    link.classList.add("text-gray-300", "hover:text-white"); // Add hover effect back to non-active links
+                    link.classList.remove(
+                        "text-black", "bg-white", "shadow-md", "scale-105", 
+                        "font-bold", "p-4", "rounded-lg"
+                    );
+                    link.classList.add("text-gray-300", "hover:text-white", "transition-all", "duration-300", "ease-in-out");
                 });
 
-                clickedLink.classList.add("text-black", "bg-white", "shadow-md", "scale-105", "font-bold", "p-4");
-                clickedLink.classList.remove("text-gray-300", "hover:text-white"); // Remove hover effect from active link
+                clickedLink.classList.add(
+                    "text-black", "bg-white", "shadow-md", "scale-105", 
+                    "font-bold", "p-4", "rounded-lg", "transition-all", "duration-300", "ease-in-out"
+                );
+                clickedLink.classList.remove("text-gray-300", "hover:text-white"); 
 
                 // Store the active link in localStorage to persist highlight
                 localStorage.setItem("activeNav", clickedLink.getAttribute("href"));

@@ -838,6 +838,53 @@ class StaffController extends Controller
             'filter' // Pass the filter to the view
         ));
     }
+
+    public function AdminCountActiveFiles(Request $request)
+    {
+        // ✅ Count all active files
+        $activeFilesCount = Files::where('status', 'active')->count();
+        
+        // ✅ Count all pending files
+        $pendingFilesCount = Files::where('status', 'pending')->count();
+    
+        // ✅ Get filter type from request, default to 'all' (count all uploads)
+        $filter = $request->get('filter', 'all'); 
+    
+        // ✅ Apply the filter for recent uploads count
+        switch ($filter) {
+            case 'daily':
+                $recentUploadsCount = Files::whereDate('created_at', today())->count();
+                break;
+            case 'monthly':
+                $recentUploadsCount = Files::whereMonth('created_at', now()->month)->count();
+                break;
+            case 'yearly':
+                $recentUploadsCount = Files::whereYear('created_at', now()->year)->count();
+                break;
+            default: // 'all' or no filter
+                $recentUploadsCount = Files::count();  // Count all uploads
+                break;
+        }
+    
+        // ✅ Get total storage used
+        $uploadPath = storage_path('app/public/uploads'); // Absolute path
+        $totalStorageUsed = $this->getFolderSize($uploadPath); // Get folder size
+        $formattedStorage = $this->formatSizeUnits($totalStorageUsed); // Format size
+    
+        // ✅ Fetch recent file activities (latest updated files)
+        $recentFiles = Files::orderBy('updated_at', 'desc')->limit(10)->get();
+    
+        // ✅ Return all necessary data to the view
+        return view('admin.pages.adminDashboardPage', compact(
+            'activeFilesCount', 
+            'pendingFilesCount', 
+            'recentUploadsCount', 
+            'formattedStorage',
+            'recentFiles',
+            'filter' // Pass the filter to the view
+        ));
+    }
+    
     
     
     

@@ -151,7 +151,7 @@ Route::middleware(['staff.auth'])->group(function () {
 //For Admin Middleware
 Route::middleware(['admin.auth'])->group(function () {
 
-    Route::get('/admin-dashboard', function () {
+    Route::get('/admin-dashboard-view', function () {
         return view('admin.dashboard.adminDashboard');
     })->name('admin.dashboard');
 
@@ -159,7 +159,62 @@ Route::middleware(['admin.auth'])->group(function () {
         return view('admin.pages.UploadNewFile');
     })->name('admin.upload');
 
-    Route::post('/admin-upload', [AdminAuthController::class, 'uploadFile'])->name('admin.uploadFile');
+
+    //
+    Route::get('/admin-dashboard', [FileController::class, 'AdminCountActiveFiles'])
+    ->name('admin.page.dashboard');
+
+    Route::get('/admin-folders/{subfolder?}', [FileController::class, 'AdminshowFolders'])->name('admin.folders');
+
+    Route::delete('/admin-folders/delete', [FileController::class, 'AdmindeleteFolder'])->name('admin.folders.delete');
+
+    Route::post('/admin-folders/create', [FileController::class, 'AdmincreateFolder'])->name('admin.folders.create');
+    
+    Route::get('/admin-upload', function () {
+        $subfolders = Storage::disk('public')->directories('uploads');
+        $subfolders = array_map(fn($dir) => Str::after($dir, 'uploads/'), $subfolders);
+        return view('admin.pages.AdminUploadNewFile', compact('subfolders'));
+    })->name('admin.upload');
+
+    Route::post('/admin-upload', [FileController::class, 'AdminuploadFile'])->name('admin.uploadFiles');
+
+    Route::get('/admin-active-files', [FileController::class, 'AdminactiveFiles'])->name('admin.active.files');
+    
+    Route::get('/admin-files/download/{file}', [FileController::class, 'AdmindownloadFile'])->name('admin.files.download');
+
+    Route::get('/admin/files/{file_id}/edit-primary', [FileController::class, 'AdmineditPrimaryFile'])
+    ->name('admin.files.editPrimary');
+
+    Route::post('/admin-active-files/archive/{file_id}', [FileController::class, 'AdminActiveFileArchived'])
+    ->name('admin.files.archive.active');
+
+    Route::post('/admin/files/{file_id}/update-primary', [FileController::class, 'AdminupdatePrimaryFile'])
+    ->name('admin.files.updatePrimary');
+
+    Route::put('/overview/trash-file/{version_id}', [FileController::class, 'OverviewTrashFile'])->name('admin.overview.trash');
+
+    Route::post('/admin-trash-file/{file_id}', [FileController::class, 'TrashActiveFile'])->name('admin.trash.files');
+
+    Route::get('/admin-archive-view', [FileController::class, 'AdminArchivedViewFilesVersions'])->name('admin.archived.view');
+
+    Route::put('/admin/unarchive-file/{id}', [FileController::class, 'AdminunarchiveFile'])
+    ->name('admin.unarchive.file');
+
+    Route::get('/admin-archive-files', [FileController::class, 'AdminArchivedViewFilesVersions'])->name('admin.archived.files');
+
+    Route::get('/admin-trash-files', [FileController::class, 'AdminTrashViewFilesVersions'])->name('admin.trash.bins');
+
+    Route::put('/admin/restore-file/{file_id}', [FileController::class, 'AdminRestoreFile'])->name('admin.restore');
+
+
+
+
+
+
+
+    //
+
+    // Route::post('/admin-upload', [AdminAuthController::class, 'uploadFile'])->name('admin.uploadFile');
 
     Route::get('/admin-files', [AdminAuthController::class, 'viewFiles'])->name('admin.files');
 
@@ -167,9 +222,7 @@ Route::middleware(['admin.auth'])->group(function () {
 
     Route::get('/admin-update-files', [AdminAuthController::class, 'ViewFilesVersions'])->name('admin.update');
 
-    Route::get('/admin-archive-files', [AdminAuthController::class, 'ArchivedViewFilesVersions'])->name('admin.archived.files');
-
-    Route::get('/admin-trash-files', [AdminAuthController::class, 'TrashViewFilesVersions'])->name('admin.trash.bins');
+    // Route::get('/admin-archive-files', [AdminAuthController::class, 'ArchivedViewFilesVersions'])->name('admin.archived.files');
 
     Route::put('/admin/files/trash-view/{id}', [FileController::class, 'moveToTrash'])->name('admin.files.trash');
 
@@ -195,8 +248,6 @@ Route::middleware(['admin.auth'])->group(function () {
 
     Route::put('/admin-view/trash-file/{version_id}', [FileController::class, 'TrashFile'])->name('admin.trash');
 
-    Route::put('/overview/trash-file/{version_id}', [FileController::class, 'OverviewTrashFile'])->name('admin.overview.trash');
-
     Route::put('/admin/archive-primary-file/{file_id}', [FileController::class, 'archiveFileAdmin'])->name('admin.archiveFileV');
 
     Route::get('/admin/users', [UserController::class, 'index'])->name('admin.users');
@@ -212,11 +263,11 @@ Route::middleware(['admin.auth'])->group(function () {
     
     Route::put('/admin/users/{id}/update', [UserController::class, 'updateUser'])->name('admin.users.update');
 
-    Route::get('/admin/files/{file_id}/edit-primary', [FileController::class, 'editPrimaryFile'])
-    ->name('admin.files.editPrimary');
+    // Route::get('/admin/files/{file_id}/edit-primary', [FileController::class, 'editPrimaryFile'])
+    // ->name('admin.files.editPrimary');
 
-    Route::post('/admin/files/{file_id}/update-primary', [FileController::class, 'updatePrimaryFile'])
-    ->name('admin.files.updatePrimary');
+    // Route::post('/admin/files/{file_id}/update-primary', [FileController::class, 'updatePrimaryFile'])
+    // ->name('admin.files.updatePrimary');
 
 
 });
