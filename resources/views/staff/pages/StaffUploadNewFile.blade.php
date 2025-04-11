@@ -70,7 +70,7 @@
             </div>
 
         <div class="text-gray-600 text-1xl mb-4 text-center">
-            <p><strong>Allowed files:</strong> PPT, DOCX, JPG, PNG, SVG, PDF</p>
+            <p><strong>Allowed files:</strong> PPT, DOCX, PNG, SVG, PDF</p>
             <p>File Upload limited to <strong>500MB only</strong></p>
         </div>
 

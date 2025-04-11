@@ -22,23 +22,16 @@
 
     <div class="flex justify-between items-center p-2">
         <h1 class="-m-6 mb-6 pb-2 text-4xl font-bold border-b border-gray-300 p-6">Active Files</h1>
-        <span class="text-white text-4xl font-semibold bg-blue-400 p-4 rounded-lg" id="activeFileCount">0</span>
+        <span class="text-white text-2xl font-semibold bg-blue-400 p-4 rounded-lg" id="activeFileCount">0</span>
         </div>
 
     <br>
 
-    <!-- Toggle Button -->
-    <!-- <div class="mb-4 flex gap-4">
-        <button onclick="toggleView()" class="bg-blue-500 text-white px-4 py-2 rounded">
-            Toggle View
-        </button>
-    </div> -->
-
     <!-- Search & Filters -->
     <div class="mb-4 flex gap-4 border-b border-gray pb-4">
 
-        <label for="subfolderFilter" class="block text-1xl font-medium text-gray-700 mt-2">File Type</label>
-        <select id="fileTypeFilter" class="border rounded p-1">
+        <label for="subfolderFilter" class="block text-sm font-medium text-gray-700 mt-2"> Type</label>
+        <select id="fileTypeFilter" class="border rounded p-1\ text-sm">
             <option value="">All Types</option>
             <option value="pdf">Pdf</option>
             <option value="docx">Docx</option>
@@ -46,9 +39,10 @@
         </select>
 
 
-        <label for="subfolderFilter" class="block text-1xl font-medium text-gray-700 mt-2">Select Subfolder</label>
-        <form method="GET" action="{{ route('staff.active.files') }}">
-            <select id="subfolderFilter" name="subfolder" class="border rounded p-1" onchange="this.form.submit()">
+        <label for="subfolderFilter" class="block text-sm font-medium text-gray-700 mt-2">Subfolder</label>
+
+        <form method="GET" action="{{ route('staff.active.files') }}" id="subfolderForm">
+            <select id="subfolderFilter" name="subfolder" class="border rounded p-1 text-sm mt-2" onchange="document.getElementById('subfolderForm').submit()">
                 <option value="">All files outside root folder</option>
                 @foreach ($subfolders as $folder)
                     <option value="{{ $folder }}" {{ request('subfolder') === $folder ? 'selected' : '' }}>
@@ -58,10 +52,15 @@
             </select>
         </form>
 
+        <!-- @if (session('unauthorized_alert'))
+            <script>
+                alert("{{ session('unauthorized_alert') }}");
+            </script>
+        @endif -->
 
 
-        <label for="yearFilter" class="font-medium text-gray-700 mt-2">Filter by Year:</label>
-        <select id="yearFilter" class="border rounded p-1">
+        <label for="yearFilter" class="font-medium text-gray-700 mt-2 text-sm">Filter by Year:</label>
+        <select id="yearFilter" class="border rounded p-1 text-sm">
             <option value="all">All Years</option>
             @foreach($files->unique('year_published') as $file)
                 <option value="{{ $file->year_published }}">{{ $file->year_published }}</option>
@@ -69,9 +68,9 @@
         </select>
 
         <label for="dateFilter" class="font-medium mt-2 text-gray-700 text-sm">Filter by Date Created:</label>
-        <input type="date" id="dateFilter" class="border rounded p-1">
+        <input type="date" id="dateFilter" class="border rounded p-1 text-sm">
 
-        <input type="text" id="searchInput" placeholder="Search files..." class="border rounded p-1 w-1/4">
+        <input type="text" id="searchInput" placeholder="Search files..." class="border rounded p-1 w-1/4 text-sm">
 
 
     </div>
@@ -79,14 +78,14 @@
     <!-- <div class="mt-2 flex items-center text-red-600 text-sm mb-2">
         <i class="fas fa-info-circle mr-2"></i>
         <span>File versions on this section cannot be downloaded. Go to file versions section to download your selected file version. Thank you.</span>
-    </div>
-    <div class="mt-2 flex items-center text-red-600 text-sm mb-2">
-        <i class="fas fa-info-circle mr-2"></i>
-        <span>This section is read-only.</span>
-    </div> -->
+        </div>
+        <div class="mt-2 flex items-center text-red-600 text-sm mb-2">
+            <i class="fas fa-info-circle mr-2"></i>
+            <span>This section is read-only.</span>
+        </div> -->
 
-    <!-- Table View -->
-    <!-- <div class="overflow-x-aut mb-12">
+        <!-- Table View -->
+        <!-- <div class="overflow-x-aut mb-12">
         <table class="min-w-full table-auto bg-white rounded-lg shadow-lg border">
             <thead class="bg-gray-100">
                 <tr>
@@ -154,6 +153,23 @@
 
   <!-- Card View -->
     <div id="cardView" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 mt-6 mb-12">
+
+
+        @if (session('unauthorized_alert'))
+        <div class="col-span-full flex justify-center">
+            <div class="bg-red-50 border border-red-200 text-red-700 rounded-lg shadow-lg p-6 w-full max-w-md text-center">
+                <div class="text-lg font-semibold mb-2">
+                    🚫 Unauthorized Access
+                </div>
+                <div class="text-sm">
+                    You do not have permission to access this folder. Please request access from the administrator.
+                </div>
+            </div>
+        </div>
+        @endif
+
+
+
         @foreach($files as $file)
             @if($file->status == 'active')
                 @php
@@ -162,8 +178,8 @@
 
                 <div class="bg-white rounded-lg shadow-lg p-6" data-subfolder="{{ $folderName }}">
                     <div class="flex justify-between">
-                        <span class="text-1xl font-semibold break-words w-full block">{{ $file->filename }}</span>
-                        <span class="font-semibold">{{ $file->year_published }}</span>
+                        <span class="text-sm font-semibold break-words w-full block">{{ $file->filename }}</span>
+                        <span class="font-semibold text-sm">{{ $file->year_published }}</span>
                     </div>
 
                     <div class="mt-2 text-sm text-gray-600">
@@ -187,13 +203,13 @@
                         @endphp
 
                         @if($fileType == 'pdf')
-                            <i class="fa-solid fa-file-pdf text-red-500 text-2xl"></i>
+                            <i class="fa-solid fa-file-pdf text-red-500 text-1xl"></i>
                         @elseif($fileType == 'docx' || $fileType == 'doc')
-                            <i class="fa-solid fa-file-word text-blue-500 text-2xl"></i>
+                            <i class="fa-solid fa-file-word text-blue-500 text-1xl"></i>
                         @elseif($fileType == 'pptx' || $fileType == 'ppt')
-                            <i class="fa-solid fa-file-powerpoint text-orange-500 text-2xl"></i>
+                            <i class="fa-solid fa-file-powerpoint text-orange-500 text-1xl"></i>
                         @else
-                            <i class="fa-solid fa-file text-gray-500 text-2xl"></i>
+                            <i class="fa-solid fa-file text-gray-500 text-1xl"></i>
                         @endif
                         <span class="ml-2">{{ strtoupper($fileType) }}</span>
                     </div>
@@ -203,22 +219,24 @@
                         
                         <div class="flex space-x-4">
                             <a href="{{ route('staff.files.download', basename($file->file_path)) }}" class="text-blue-500" title="Download">
-                                <i class="fas fa-download"></i>
+                                <i class="fas fa-download text-sm"></i>
                             </a>
                             <a href="{{ route('staff.files.editPrimary', ['file_id' => $file->file_id]) }}" class="text-blue-500" title="Edit Primary File">
-                                <i class="fas fa-edit"></i>
+                                <i class="fas fa-edit text-sm"></i>
                             </a>
                             <form action="{{ route('files.archive.active', ['file_id' => $file->file_id]) }}" method="POST" onsubmit="return confirm('Are you sure you want to archive this file?')">
                                 @csrf
                                 <button type="submit" class="text-red-500" title="Archive this file">
-                                    <i class="fas fa-archive"></i>
+                                    <i class="fas fa-archive text-sm"></i>
                                 </button>
                             </form>
+                            
                         </div>
                     </div>
                 </div>
             @endif
         @endforeach
+        
     </div>
 
     <!-- Pagination -->
@@ -228,7 +246,35 @@
 
 </div>
 
-<!--For subfolder filter category-->
+
+<script>
+    document.getElementById('subfolderFilter').addEventListener('change', function () {
+        const selectedFolder = this.value;
+
+        if (selectedFolder !== "") {
+            fetch(`{{ route('staff.active.files') }}?subfolder=${selectedFolder}`, {
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest'
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.unauthorized) {
+                    alert(data.message);
+                } else {
+                    // Redirect if allowed
+                    window.location.href = `{{ route('staff.active.files') }}?subfolder=${selectedFolder}`;
+                }
+            })
+            .catch(error => {
+                // console.error('Error:', error);
+                // alert('Something went wrong.');
+            });
+        }
+    });
+</script>
+
+
 <script>
     document.addEventListener("DOMContentLoaded", function () {
         const searchInput = document.getElementById("searchInput");
@@ -274,6 +320,7 @@
     });
 </script>
 
+ <!--For year filter-->
 <script>
     document.addEventListener("DOMContentLoaded", function () {
         const yearFilter = document.getElementById("yearFilter");
@@ -322,6 +369,7 @@
         document.getElementById("cardView").classList.toggle("hidden");
     }
 </script>
+
 <script>
     function confirmTrash(fileId) {
         if (confirm("Are you sure you want to put this on trash this file?")) {
@@ -329,6 +377,7 @@
         }
     }
 </script>
+
 <script>
     document.addEventListener("DOMContentLoaded", function () {
         const searchInput = document.getElementById("searchInput");
@@ -363,6 +412,7 @@
         categoryFilter.addEventListener("change", filterTable);
     });
 </script>
+
 <script>
     document.addEventListener("DOMContentLoaded", function () {
         // Count the visible file rows
@@ -376,6 +426,7 @@
         updateFileCount();
     });
 </script>
+
 <script>
     document.addEventListener("DOMContentLoaded", function () {
     function updateFileCount() {

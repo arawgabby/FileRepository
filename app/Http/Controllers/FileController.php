@@ -14,6 +14,7 @@ use App\Models\FileRequest;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Str;
+use App\Models\Folder; 
 
 
 class FileController extends Controller
@@ -42,23 +43,38 @@ class FileController extends Controller
     
     public function AdminshowFolders(Request $request)
     {
-        $basePath = $request->get('path', 'uploads'); // Default to 'uploads'
+        $basePath = $request->get('path', 'uploads');
     
+        // Get folder paths from disk
         $directories = Storage::disk('public')->directories($basePath);
     
+        // Map to folder names only
         $folderNames = array_map(function ($dir) use ($basePath) {
             return Str::after($dir, $basePath . '/');
         }, $directories);
     
-        // Determine parent path for "Back" navigation
+        // Get folders from DB with status
+        $dbFolders = Folder::where('path', 'like', $basePath . '/%')->get(['name', 'status']);
+    
+        // Map db folders into a key-value array: name => status
+        $folderStatusMap = $dbFolders->pluck('status', 'name')->toArray();
+    
+        // Build final list of folders with status
+        $folders = collect($folderNames)->map(function ($folderName) use ($folderStatusMap) {
+            return (object)[
+                'name' => $folderName,
+                'status' => $folderStatusMap[$folderName] ?? 'unknown',
+            ];
+        });
+    
         $parentPath = dirname($basePath);
         if ($parentPath === '.' || $basePath === '') {
             $parentPath = null;
         }
     
-        return view('admin.pages.AdminFolders', compact('folderNames', 'basePath', 'parentPath'));
+        return view('admin.pages.AdminFolders', compact('folders', 'basePath', 'parentPath'));
     }
-
+    
     public function AdminuploadFile(Request $request)
     {
         $request->validate([
@@ -155,51 +171,118 @@ class FileController extends Controller
     }
 
     public function AdmincreateFolder(Request $request)
+        {
+            $request->validate([
+                'folderName' => 'required|string',
+                'basePath' => 'nullable|string',
+                'status' => 'nullable|in:public,private',
+                'password' => 'nullable|string'
+            ]);
+        
+            $basePath = $request->input('basePath', 'uploads');
+            $folderName = $request->input('folderName');
+            $newPath = $basePath . '/' . $folderName;
+            $status = $request->input('status', 'private');
+            $password = $request->input('password');
+        
+            if (Storage::disk('public')->exists($newPath)) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Folder already exists.'
+                ]);
+            }
+        
+            try {
+                // Create the new folder
+                Storage::disk('public')->makeDirectory($newPath);
+        
+                // Retrieve user from session
+                $user = session('user');
+        
+                // Insert into folders table
+                Folder::create([
+                    'name' => $folderName,
+                    'path' => $newPath,
+                    'status' => $status,
+                    'password' => $password ? bcrypt($password) : null,
+                    'user_id' => $user->id
+                ]);
+        
+                // Log to access logs
+                AccessLog::create([
+                    'file_id' => 0,
+                    'accessed_by' => $user->id,
+                    'action' => "Created folder '{$folderName}' under '{$basePath}' - Successful",
+                    'access_time' => now(),
+                ]);
+        
+                Log::info("User ID {$user->id} successfully created folder: {$newPath}");
+        
+                return response()->json(['success' => true]);
+            } catch (\Exception $e) {
+                Log::error("Failed to create folder: {$newPath} - Error: " . $e->getMessage());
+        
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Failed to create folder: ' . $e->getMessage()
+                ]);
+            }
+    }
+
+    public function setFolderStatus(Request $request)
     {
         $request->validate([
             'folderName' => 'required|string',
-            'basePath' => 'nullable|string'
+            'basePath' => 'required|string',
+            'action' => 'required|string|in:public,private',
         ]);
     
-        $basePath = $request->input('basePath', 'uploads');
-        $folderName = $request->input('folderName');
-        $newPath = $basePath . '/' . $folderName;
-    
-        if (Storage::disk('public')->exists($newPath)) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Folder already exists.'
-            ]);
-        }
+        Log::info('Setting folder status', [
+            'folderName' => $request->folderName,
+            'basePath' => $request->basePath,
+            'action' => $request->action
+        ]);
     
         try {
-            // Create the new folder
-            Storage::disk('public')->makeDirectory($newPath);
+            $folder = Folder::where('path', $request->basePath . '/' . $request->folderName)->first();
     
-            // Access log entry for folder creation
-            $user = session('user'); // Retrieve the user from session
+            if (!$folder) {
+                Log::warning('Folder not found', [
+                    'folderName' => $request->folderName,
+                    'basePath' => $request->basePath
+                ]);
     
-            AccessLog::create([
-                'file_id' => 0, // No file ID since it's a folder
-                'accessed_by' => $user->id, // Use session user's ID
-                'action' => "Created folder '{$folderName}' under '{$basePath}' - Successful",
-                'access_time' => now(),
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Folder not found.'
+                ]);
+            }
+    
+            $folder->status = $request->action;
+            $folder->save();
+    
+            Log::info('Folder status updated', [
+                'folderName' => $request->folderName,
+                'basePath' => $request->basePath,
+                'status' => $folder->status
             ]);
     
-            // Log the action for auditing
-            Log::info("User ID {$user->id} successfully created folder: {$newPath}");
-    
             return response()->json(['success' => true]);
+    
         } catch (\Exception $e) {
-            // Log the error for debugging
-            Log::error("Failed to create folder: {$newPath} - Error: " . $e->getMessage());
+            Log::error('Error setting folder status', [
+                'error' => $e->getMessage(),
+                'folderName' => $request->folderName,
+                'basePath' => $request->basePath
+            ]);
     
             return response()->json([
                 'success' => false,
-                'message' => 'Failed to create folder: ' . $e->getMessage()
+                'message' => 'Error: ' . $e->getMessage()
             ]);
         }
     }
+    
     
 
     public function AdminactiveFiles(Request $request)

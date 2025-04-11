@@ -11,9 +11,12 @@ use App\Models\FileTimeStamp;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Auth;
 use App\Models\FileRequest;
+use App\Models\Folder;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Str;
+use App\Models\FolderAccess;
+
 
 
 class StaffController extends Controller
@@ -37,6 +40,50 @@ class StaffController extends Controller
     
         return view('staff.pages.Folders', compact('folderNames', 'basePath', 'parentPath'));
     }
+
+    public function submitFolderAccess(Request $request)
+    {
+        // Validate the form data
+        $request->validate([
+            'folder_id' => 'required|integer|exists:folders,id',
+        ]);
+    
+        // Get the user_id from the session
+        $user_id = session('user')->id;
+    
+        // Check if the same folder access request already exists
+        $existingRequest = FolderAccess::where('folder_id', $request->folder_id)
+                                       ->where('user_id', $user_id)
+                                       ->first();
+    
+        if ($existingRequest) {
+            // If the request already exists, redirect back with an error flag
+            return redirect()->route('request.folder.access')
+                             ->with('duplicate', true);
+        }
+    
+        // Create a new FolderAccess entry if no duplicate exists
+        FolderAccess::create([
+            'folder_id' => $request->folder_id,
+            'user_id' => $user_id,
+            'status' => 'Waiting Approval',
+        ]);
+    
+        // Return a response with a success message
+        return redirect()->route('request.folder.access')->with('success', 'Folder access request submitted successfully.');
+    }
+    
+
+
+    public function showRequestFolder()
+    {
+        // Fetch all folders
+        $folders = Folder::all();
+
+        // Pass folders to the view
+        return view('staff.pages.StaffRequestView', compact('folders'));
+    }
+
 
     public function deleteFolder(Request $request)
     {
@@ -453,7 +500,73 @@ class StaffController extends Controller
     public function activeFiles(Request $request)
     {
         $files = Files::query();
+        $subfolder = $request->get('subfolder');
+        
+        $user = session('user');
+        $userId = $user->id ?? null;
+        $role = $user->role ?? null;
+        
+        Log::info('--- Incoming activeFiles Request ---', [
+            'subfolder' => $subfolder,
+            'user_id' => $userId,
+            'role' => $role,
+        ]);
     
+        if ($subfolder) {
+            $folder = Folder::where('name', $subfolder)->first();
+    
+            Log::info('Folder Lookup', [
+                'folder_found' => $folder ? true : false,
+                'folder_id' => $folder->id ?? null,
+                'folder_status' => $folder->status ?? null,
+            ]);
+    
+            if ($folder && $folder->status === 'private') {
+                if ($role !== 'admin') {
+                    $hasAccess = \App\Models\FolderAccess::where('folder_id', $folder->id)
+                        ->where('user_id', $userId)
+                        ->where('status', 'approved')
+                        ->exists();
+    
+                    Log::info('Folder Access Check', [
+                        'has_approved_access' => $hasAccess,
+                    ]);
+    
+                    if (!$hasAccess) {
+                        Log::warning('Unauthorized access attempt to private folder', [
+                            'user_id' => $userId,
+                            'folder' => $subfolder,
+                        ]);
+                    
+                        // Store warning message to pass to view
+                        session()->flash('unauthorized_alert', 'You are unauthorized to access this private folder.');
+                    
+                        // Empty results so no files are shown
+                        $files = Files::whereRaw('0 = 1')->paginate(20);
+                        $fileVersions = collect();
+                    
+                        $uploadPath = public_path('storage/uploads');
+                        $subfolders = [];
+                    
+                        if (\Illuminate\Support\Facades\File::exists($uploadPath)) {
+                            $subfolders = collect(\Illuminate\Support\Facades\File::directories($uploadPath))->map(function ($path) {
+                                return basename($path);
+                            });
+                        }
+                    
+                        return view('staff.pages.StaffViewAllFilesActive', compact('fileVersions', 'files', 'subfolders'));
+                    }
+                     else {
+                        Log::info('User is authorized to access this private folder.', [
+                            'user_id' => $userId,
+                            'folder' => $subfolder,
+                        ]); 
+                    }
+                }
+            }
+        }
+    
+        // Apply filters
         if ($request->has('search') && !empty($request->search)) {
             $files->where('filename', 'LIKE', '%' . $request->search . '%');
         }
@@ -462,28 +575,43 @@ class StaffController extends Controller
             $files->where('file_type', $request->file_type);
         }
     
-        if ($request->has('subfolder') && !empty($request->subfolder)) {
-            $files->where('file_path', 'LIKE', 'uploads/' . $request->subfolder . '/%');
+        if (!empty($subfolder)) {
+            $files->where('file_path', 'LIKE', 'uploads/' . $subfolder . '/%');
+        } else {
+            // No subfolder selected — exclude private folders unless admin or has access
+            if ($role !== 'admin') {
+                $privateFolders = Folder::where('status', 'private')->get();
+    
+                foreach ($privateFolders as $privateFolder) {
+                    $hasAccess = \App\Models\FolderAccess::where('folder_id', $privateFolder->id)
+                        ->where('user_id', $userId)
+                        ->where('status', 'approved')
+                        ->exists();
+    
+                    // If user doesn't have access, exclude the folder
+                    if (!$hasAccess) {
+                        $files->where('file_path', 'NOT LIKE', 'uploads/' . $privateFolder->name . '/%');
+                    }
+                }
+            }
         }
     
         $files = $files->paginate(20)->appends(['subfolder' => $request->subfolder]);
     
         $fileVersions = FileVersions::whereIn('file_id', $files->pluck('file_id'))->get();
     
-        // 🔥 Get subfolders from uploads directory
         $uploadPath = public_path('storage/uploads');
         $subfolders = [];
     
-        if (File::exists($uploadPath)) {
-            $subfolders = collect(File::directories($uploadPath))->map(function ($path) {
-                return basename($path); // Just get the folder name
+        if (\Illuminate\Support\Facades\File::exists($uploadPath)) {
+            $subfolders = collect(\Illuminate\Support\Facades\File::directories($uploadPath))->map(function ($path) {
+                return basename($path);
             });
         }
     
         return view('staff.pages.StaffViewAllFilesActive', compact('fileVersions', 'files', 'subfolders'));
     }
     
-
     public function StaffeditPrimaryFile($file_id)
     {
         // Fetch the file using the provided ID

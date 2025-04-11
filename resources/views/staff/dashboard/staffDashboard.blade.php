@@ -61,12 +61,16 @@
                 <i class="fas fa-folder mr-5"></i> FILES
             </p>
 
-            <a href="{{ route('staff.folders') }}" class="flex items-center text-gray-300 hover:text-white ">
+            <!-- <a href="{{ route('staff.folders') }}" class="flex items-center text-gray-300 hover:text-white ">
                 <i class="fas fa-folder-open mr-5"></i> Folders
-            </a>
+            </a> -->
 
             <a href="{{ route('staff.upload') }}" class="flex items-center text-gray-300 hover:text-white ">
                 <i class="fas fa-upload mr-5"></i> Upload 
+            </a>
+
+            <a href="{{ route('request.folder.access') }}" class="flex items-center text-gray-300 hover:text-white ">
+                <i class="fas fa-upload mr-5"></i> Request 
             </a>
 
             <!-- <a href="{{ route('staff.files') }}" class="flex items-center text-gray-300 hover:text-white ">

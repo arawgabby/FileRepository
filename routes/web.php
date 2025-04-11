@@ -57,6 +57,11 @@ Route::post('/forgot-password-request', function (Request $request) {
 //For Staff Middleware
 Route::middleware(['staff.auth'])->group(function () {
 
+    Route::get('/staff-folder-request-view', [StaffController::class, 'showRequestFolder'])->name('request.folder.access');
+
+    Route::post('/folder-access-submit', [StaffController::class, 'submitFolderAccess'])->name('folder.access.submit');
+
+
     Route::get('/staff-main', [StaffController::class, 'dashboard'])->name('staff.dashboard');
 
     Route::get('/staff-upload', function () {
@@ -155,11 +160,6 @@ Route::middleware(['admin.auth'])->group(function () {
         return view('admin.dashboard.adminDashboard');
     })->name('admin.dashboard');
 
-    Route::get('/admin-upload', function () {
-        return view('admin.pages.UploadNewFile');
-    })->name('admin.upload');
-
-
     //
     Route::get('/admin-dashboard', [FileController::class, 'AdminCountActiveFiles'])
     ->name('admin.page.dashboard');
@@ -169,7 +169,9 @@ Route::middleware(['admin.auth'])->group(function () {
     Route::delete('/admin-folders/delete', [FileController::class, 'AdmindeleteFolder'])->name('admin.folders.delete');
 
     Route::post('/admin-folders/create', [FileController::class, 'AdmincreateFolder'])->name('admin.folders.create');
-    
+
+    Route::post('/admin/folders/setStatus', [FileController::class, 'setFolderStatus'])->name('admin.folders.setStatus');
+
     Route::get('/admin-upload', function () {
         $subfolders = Storage::disk('public')->directories('uploads');
         $subfolders = array_map(fn($dir) => Str::after($dir, 'uploads/'), $subfolders);

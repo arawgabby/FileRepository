@@ -27,13 +27,6 @@
 
     <br>
 
-    <!-- Toggle Button -->
-    <!-- <div class="mb-4 flex gap-4">
-        <button onclick="toggleView()" class="bg-blue-500 text-white px-4 py-2 rounded">
-            Toggle View
-        </button>
-    </div> -->
-
     <!-- Search & Filters -->
     <div class="mb-4 flex gap-4 border-b border-gray pb-4">
 
@@ -79,14 +72,14 @@
     <!-- <div class="mt-2 flex items-center text-red-600 text-sm mb-2">
         <i class="fas fa-info-circle mr-2"></i>
         <span>File versions on this section cannot be downloaded. Go to file versions section to download your selected file version. Thank you.</span>
-    </div>
-    <div class="mt-2 flex items-center text-red-600 text-sm mb-2">
-        <i class="fas fa-info-circle mr-2"></i>
-        <span>This section is read-only.</span>
-    </div> -->
+        </div>
+        <div class="mt-2 flex items-center text-red-600 text-sm mb-2">
+            <i class="fas fa-info-circle mr-2"></i>
+            <span>This section is read-only.</span>
+        </div> -->
 
-    <!-- Table View -->
-    <!-- <div class="overflow-x-aut mb-12">
+        <!-- Table View -->
+        <!-- <div class="overflow-x-aut mb-12">
         <table class="min-w-full table-auto bg-white rounded-lg shadow-lg border">
             <thead class="bg-gray-100">
                 <tr>
@@ -234,7 +227,7 @@
 
 </div>
 
-<!--For subfolder filter category-->
+<!--For search filter ni siya-->
 <script>
     document.addEventListener("DOMContentLoaded", function () {
         const searchInput = document.getElementById("searchInput");
@@ -280,6 +273,7 @@
     });
 </script>
 
+<!--For year filter-->
 <script>
     document.addEventListener("DOMContentLoaded", function () {
         const yearFilter = document.getElementById("yearFilter");
@@ -328,6 +322,7 @@
         document.getElementById("cardView").classList.toggle("hidden");
     }
 </script>
+
 <script>
     function confirmTrash(fileId) {
         if (confirm("Are you sure you want to put this on trash this file?")) {
@@ -335,6 +330,7 @@
         }
     }
 </script>
+
 <script>
     document.addEventListener("DOMContentLoaded", function () {
         const searchInput = document.getElementById("searchInput");
@@ -369,6 +365,7 @@
         categoryFilter.addEventListener("change", filterTable);
     });
 </script>
+
 <script>
     document.addEventListener("DOMContentLoaded", function () {
         // Count the visible file rows
@@ -382,6 +379,7 @@
         updateFileCount();
     });
 </script>
+
 <script>
     document.addEventListener("DOMContentLoaded", function () {
     function updateFileCount() {
