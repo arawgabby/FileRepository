@@ -17,5 +17,11 @@ class FolderAccess extends Model
         'status',
     ];
 
+    public function folder()
+    {
+        return $this->belongsTo(Folder::class, 'folder_id');
+    }
+
+
 
 }

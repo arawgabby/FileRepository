@@ -16,7 +16,7 @@
     <script>alert("{{ session('error') }}");</script>
 @endif
 
-<div class="container mx-auto p-6 bg-white rounded-xl" style="box-shadow: 4px 4px 10px rgba(0, 0, 0, 0.1);">
+<div class="container mx-auto p-6 bg-white admin." style="box-shadow: 4px 4px 10px rgba(0, 0, 0, 0.1);">
 
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
 
@@ -151,100 +151,113 @@
     </div> -->
 
 
-  <!-- Card View -->
+    <!-- Card View -->
     <div id="cardView" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 mt-6 mb-12">
 
 
         @if (session('unauthorized_alert'))
-        <div class="col-span-full flex justify-center">
-            <div class="bg-red-50 border border-red-200 text-red-700 rounded-lg shadow-lg p-6 w-full max-w-md text-center">
-                <div class="text-lg font-semibold mb-2">
-                    🚫 Unauthorized Access
-                </div>
-                <div class="text-sm">
-                    You do not have permission to access this folder. Please request access from the administrator.
+            <div class="col-span-full flex justify-center" id="unauthorizedAlert">
+                <div class="relative bg-red-50 border border-red-200 text-red-700 rounded-lg shadow-lg p-6 w-full max-w-md text-center">
+                    <!-- X Button -->
+                    <button 
+                        type="button" 
+                        class="absolute top-2 right-2 text-red-500 hover:text-red-700"
+                        onclick="document.getElementById('unauthorizedAlert').remove()"
+                    >
+                        &times;
+                    </button>
+
+                    <div class="text-lg font-semibold mb-2">
+                        🚫 Unauthorized Access
+                    </div>
+                    <div class="text-sm">
+                        You do not have permission to access this folder. Please request access from the administrator.
+                    </div>
                 </div>
             </div>
-        </div>
         @endif
 
 
 
-        @foreach($files as $file)
-            @if($file->status == 'active')
-                @php
-                    $folderName = explode('/', $file->file_path)[1] ?? 'unknown';
-                @endphp
 
-                <div class="bg-white rounded-lg shadow-lg p-6" data-subfolder="{{ $folderName }}">
-                    <div class="flex justify-between">
-                        <span class="text-sm font-semibold break-words w-full block">{{ $file->filename }}</span>
-                        <span class="font-semibold text-sm">{{ $file->year_published }}</span>
-                    </div>
+            @foreach($files as $file)
+                @if($file->status == 'active')
+                    @php
+                        $folderName = explode('/', $file->file_path)[1] ?? 'unknown';
+                    @endphp
 
-                    <div class="mt-2 text-sm text-gray-600">
-                        <span class="font-semibold">
-                            Size: 
-                            @if($file->file_size >= 1024 * 1024)
-                                {{ number_format($file->file_size / (1024 * 1024), 2) }} MB
+                    <div class="bg-white rounded-lg shadow-lg p-6" 
+                    data-subfolder="{{ $folderName }}"   
+                    data-created="{{ $file->created_at->format('Y-m-d') }}">
+
+                        <div class="flex justify-between">
+                            <span class="text-sm font-semibold break-words w-full block">{{ $file->filename }}</span>
+                            <span class="font-semibold text-sm">{{ $file->year_published }}</span>
+                        </div>
+
+                        <div class="mt-2 text-sm text-gray-600">
+                            <span class="font-semibold">
+                                Size: 
+                                @if($file->file_size >= 1024 * 1024)
+                                    {{ number_format($file->file_size / (1024 * 1024), 2) }} MB
+                                @else
+                                    {{ number_format($file->file_size / 1024, 2) }} KB
+                                @endif
+                            </span>
+                        </div>
+
+                        <div class="mt-2 text-sm text-gray-600">
+                            <span class="font-semibold">Publisher: {{ $file->published_by }}</span>
+                        </div>  
+
+                        <div class="flex items-center mt-2">
+                            @php
+                                $fileType = strtolower($file->file_type);
+                            @endphp
+
+                            @if($fileType == 'pdf')
+                                <i class="fa-solid fa-file-pdf text-red-500 text-1xl"></i>
+                            @elseif($fileType == 'docx' || $fileType == 'doc')
+                                <i class="fa-solid fa-file-word text-blue-500 text-1xl"></i>
+                            @elseif($fileType == 'pptx' || $fileType == 'ppt')
+                                <i class="fa-solid fa-file-powerpoint text-orange-500 text-1xl"></i>
                             @else
-                                {{ number_format($file->file_size / 1024, 2) }} KB
+                                <i class="fa-solid fa-file text-gray-500 text-1xl"></i>
                             @endif
-                        </span>
-                    </div>
+                            <span class="ml-2">{{ strtoupper($fileType) }}</span>
+                        </div>
 
-                    <div class="mt-2 text-sm text-gray-600">
-                        <span class="font-semibold">Publisher: {{ $file->published_by }}</span>
-                    </div>  
-
-                    <div class="flex items-center mt-2">
-                        @php
-                            $fileType = strtolower($file->file_type);
-                        @endphp
-
-                        @if($fileType == 'pdf')
-                            <i class="fa-solid fa-file-pdf text-red-500 text-1xl"></i>
-                        @elseif($fileType == 'docx' || $fileType == 'doc')
-                            <i class="fa-solid fa-file-word text-blue-500 text-1xl"></i>
-                        @elseif($fileType == 'pptx' || $fileType == 'ppt')
-                            <i class="fa-solid fa-file-powerpoint text-orange-500 text-1xl"></i>
-                        @else
-                            <i class="fa-solid fa-file text-gray-500 text-1xl"></i>
-                        @endif
-                        <span class="ml-2">{{ strtoupper($fileType) }}</span>
-                    </div>
-
-                    <div class="flex justify-between items-center mt-4">
-                        <span class="text-sm text-gray-500">{{ $file->created_at->diffForHumans() }}</span>
-                        
-                        <div class="flex space-x-4">
-                            <a href="{{ route('staff.files.download', basename($file->file_path)) }}" class="text-blue-500" title="Download">
-                                <i class="fas fa-download text-sm"></i>
-                            </a>
-                            <a href="{{ route('staff.files.editPrimary', ['file_id' => $file->file_id]) }}" class="text-blue-500" title="Edit Primary File">
-                                <i class="fas fa-edit text-sm"></i>
-                            </a>
-                            <form action="{{ route('files.archive.active', ['file_id' => $file->file_id]) }}" method="POST" onsubmit="return confirm('Are you sure you want to archive this file?')">
-                                @csrf
-                                <button type="submit" class="text-red-500" title="Archive this file">
-                                    <i class="fas fa-archive text-sm"></i>
-                                </button>
-                            </form>
+                        <div class="flex justify-between items-center mt-4">
+                            <span class="text-sm text-gray-500">{{ $file->created_at->format('F j, Y H:i') }}</span>
                             
+                            <div class="flex space-x-4">
+                                <a href="{{ route('staff.files.download', basename($file->file_path)) }}" class="text-blue-500" title="Download">
+                                    <i class="fas fa-download text-sm"></i>
+                                </a>
+                                <a href="{{ route('staff.files.editPrimary', ['file_id' => $file->file_id, 'subfolder' => request('subfolder')]) }}" class="text-blue-500" title="Edit Primary File">
+                                <i class="fas fa-edit text-sm"></i>
+                                </a>
+                                <form action="{{ route('files.archive.active', ['file_id' => $file->file_id]) }}" method="POST" onsubmit="return confirm('Are you sure you want to archive this file?')">
+                                    @csrf
+                                    <button type="submit" class="text-red-500" title="Archive this file">
+                                        <i class="fas fa-archive text-sm"></i>
+                                    </button>
+                                </form>
+                                
+                            </div>
                         </div>
                     </div>
-                </div>
-            @endif
-        @endforeach
-        
-    </div>
+                @endif
+            @endforeach
+            
+        </div>
 
-    <!-- Pagination -->
-    <div class="mt-4">
-        {{ $files->links() }}
-    </div>
+        <!-- Pagination -->
+        <div class="mt-4">
+            {{ $files->links() }}
+        </div>
 
-</div>
+    </div>
 
 
 <script>
@@ -282,43 +295,47 @@
         const subfolderFilter = document.getElementById("subfolderFilter");
         const yearFilter = document.getElementById("yearFilter");
         const dateFilter = document.getElementById("dateFilter");
-        const cards = document.querySelectorAll("#cardView > div");
+        const cards = document.querySelectorAll('#cardView > div[data-created]');
 
         function filterCards() {
             const searchText = searchInput.value.toLowerCase();
             const selectedFileType = fileTypeFilter.value.toLowerCase();
             const selectedSubfolder = subfolderFilter.value.toLowerCase();
             const selectedYear = yearFilter.value;
-            const selectedDate = dateFilter.value;
+            const selectedDate = dateFilter.value; // e.g., "2025-04-12"
 
             cards.forEach(card => {
                 const fileName = card.querySelector("span.font-semibold").textContent.toLowerCase();
                 const fileType = card.querySelector("span.ml-2").textContent.toLowerCase();
                 const folder = card.dataset.subfolder ? card.dataset.subfolder.toLowerCase() : "";
+                const createdDate = card.dataset.created; // data-created="2025-04-12"
                 const year = card.querySelector("span.font-semibold:last-child").textContent;
-                const createdDate = card.querySelector(".text-sm.text-gray-500").textContent.trim();
 
-                const matchesSearch = fileName.includes(searchText);
+                const matchesSearch = searchText === "" || fileName.includes(searchText);
                 const matchesFileType = selectedFileType === "" || fileType.includes(selectedFileType);
-                const matchesSubfolder = selectedSubfolder === "" || folder.includes(selectedSubfolder);
+                const matchesSubfolder = selectedSubfolder === "" || folder === selectedSubfolder;
                 const matchesYear = selectedYear === "all" || year === selectedYear;
-                const matchesDate = selectedDate === "" || createdDate.includes(selectedDate);
+                const matchesDate = selectedDate === "" || createdDate === selectedDate;
 
-                if (matchesSearch && matchesFileType && matchesSubfolder && matchesYear && matchesDate) {
-                    card.style.display = "block";
-                } else {
-                    card.style.display = "none";
-                }
+                const shouldShow = matchesSearch && matchesFileType && matchesSubfolder && matchesYear && matchesDate;
+
+                card.style.display = shouldShow ? "block" : "none";
             });
         }
+        
 
+        // Event listeners
         searchInput.addEventListener("input", filterCards);
         fileTypeFilter.addEventListener("change", filterCards);
         subfolderFilter.addEventListener("change", filterCards);
         yearFilter.addEventListener("change", filterCards);
         dateFilter.addEventListener("change", filterCards);
     });
+
+    
 </script>
+
+
 
  <!--For year filter-->
 <script>
@@ -486,4 +503,5 @@
     });
 
 </script>
+
 @endsection

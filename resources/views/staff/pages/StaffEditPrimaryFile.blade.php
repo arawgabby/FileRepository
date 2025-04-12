@@ -14,6 +14,9 @@
         @csrf
         @method('POST')
 
+        <!-- Hidden input for the folder path -->
+        <input type="hidden" name="folder_path" value="{{ $folder->path }}">
+
         <!-- Filename Input -->
         <div class="mb-4">
             <label class="block text-gray-700 font-bold mb-2">Filename</label>

@@ -320,29 +320,22 @@ class FileController extends Controller
 
     public function AdmindownloadFile($filePath)
     {
-        $storagePath = 'uploads/' . $filePath;
+        // Define the root folder where files are stored
+        $basePath = storage_path('app/public/uploads');
     
-        if (Storage::disk('public')->exists($storagePath)) {
-            return response()->download(storage_path("app/public/$storagePath"));
-        }
+        // Recursively get all files under 'uploads'
+        $allFiles = File::allFiles($basePath);
     
-        $primaryFilePath = 'uploads/primaryFiles/' . $filePath;
-        if (Storage::disk('public')->exists($primaryFilePath)) {
-            return response()->download(storage_path("app/public/$primaryFilePath"));
-        }
-    
-        $subfolders = ['capstone', 'files'];
-    
-        foreach ($subfolders as $subfolder) {
-            $subfolderPath = 'uploads/' . $subfolder . '/' . $filePath;
-    
-            if (Storage::disk('public')->exists($subfolderPath)) {
-                return response()->download(storage_path("app/public/$subfolderPath"));
+        // Search for the file by name
+        foreach ($allFiles as $file) {
+            if ($file->getFilename() === $filePath) {
+                return response()->download($file->getRealPath());
             }
         }
     
+        // If not found, return back with error
         return back()->with('error', 'File not found.');
-    }    
+    }
 
     public function AdmineditPrimaryFile($file_id)
     {

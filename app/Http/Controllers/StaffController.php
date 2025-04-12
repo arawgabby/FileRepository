@@ -16,6 +16,7 @@ use Carbon\Carbon;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Str;
 use App\Models\FolderAccess;
+use Illuminate\Support\Facades\Response;
 
 
 
@@ -77,12 +78,18 @@ class StaffController extends Controller
 
     public function showRequestFolder()
     {
-        // Fetch all folders
+        $user = session('user'); // assuming 'user' is an array or object containing 'id'
+    
         $folders = Folder::all();
-
-        // Pass folders to the view
-        return view('staff.pages.StaffRequestView', compact('folders'));
+    
+        $folderAccesses = FolderAccess::with('folder')
+                            ->where('user_id', $user['id']) // or $user->id if it's an object
+                            ->orderByDesc('created_at')
+                            ->get();
+    
+        return view('staff.pages.StaffRequestView', compact('folders', 'folderAccesses'));
     }
+    
 
 
     public function deleteFolder(Request $request)
@@ -343,29 +350,22 @@ class StaffController extends Controller
 
     public function StaffdownloadFile($filePath)
     {
-        $storagePath = 'uploads/' . $filePath;
-    
-        if (Storage::disk('public')->exists($storagePath)) {
-            return response()->download(storage_path("app/public/$storagePath"));
-        }
-    
-        $primaryFilePath = 'uploads/primaryFiles/' . $filePath;
-        if (Storage::disk('public')->exists($primaryFilePath)) {
-            return response()->download(storage_path("app/public/$primaryFilePath"));
-        }
-    
-        $subfolders = ['capstone', 'files'];
-    
-        foreach ($subfolders as $subfolder) {
-            $subfolderPath = 'uploads/' . $subfolder . '/' . $filePath;
-    
-            if (Storage::disk('public')->exists($subfolderPath)) {
-                return response()->download(storage_path("app/public/$subfolderPath"));
+        // Define the root folder where files are stored
+        $basePath = storage_path('app/public/uploads');
+
+        // Recursively get all files under 'uploads'
+        $allFiles = File::allFiles($basePath);
+
+        // Search for the file by name
+        foreach ($allFiles as $file) {
+            if ($file->getFilename() === $filePath) {
+                return response()->download($file->getRealPath());
             }
         }
-    
+
+        // If not found, return back with error
         return back()->with('error', 'File not found.');
-    }    
+    }  
 
     public function StaffmoveToTrash(Request $request, $id)
     {
@@ -612,18 +612,28 @@ class StaffController extends Controller
         return view('staff.pages.StaffViewAllFilesActive', compact('fileVersions', 'files', 'subfolders'));
     }
     
-    public function StaffeditPrimaryFile($file_id)
+    public function StaffeditPrimaryFile(Request $request, $file_id)
     {
-        // Fetch the file using the provided ID
+        // Fetch the file
         $file = Files::findOrFail($file_id);
-
-        return view('staff.pages.StaffEditPrimaryFile', compact('file'));
+    
+        // Get subfolder path from query string
+        $subfolder = $request->query('subfolder');
+    
+        // Get the corresponding folder from DB
+        $folder = Folder::where('path', 'uploads/' . $subfolder)->first();
+    
+        if (!$folder) {
+            return redirect()->back()->withErrors(['Folder not found.']);
+        }
+    
+        return view('staff.pages.StaffEditPrimaryFile', compact('file', 'folder'));
     }
 
     public function StaffupdatePrimaryFile(Request $request, $file_id)
     {
         $file = Files::findOrFail($file_id);
-    
+        
         // Validate input
         $request->validate([
             'filename' => 'required|string|max:255',
@@ -634,36 +644,56 @@ class StaffController extends Controller
             'status' => 'required|string|in:active,inactive,pending,deactivated',
             'file' => 'nullable|file|max:5120', // Optional file upload, max 5MB
         ]);
-    
+        
+        // Fetch the folder path from the database
+        $folderPath = $request->input('folder_path');
+
+        // Double-check that a folder record exists (optional but good practice)
+        $folder = Folder::where('path', $folderPath)->first();
+        if (!$folder) {
+            return redirect()->back()->with('error', 'Subfolder not found!');
+        }
+        
+
+        $folderPath = $folder->path; // e.g., 'uploads/wow'
+
         // Check if a new file is uploaded
         if ($request->hasFile('file')) {
             $uploadedFile = $request->file('file');
             $newFileName = $uploadedFile->getClientOriginalName();
-            $filePath = $uploadedFile->storeAs('uploads/primaryFiles', $newFileName, 'public');
-    
-            // Delete old file if it exists
-            if ($file->file_path) {
+        
+            // Define the new file path
+            $newFilePath = $folderPath . '/' . $newFileName;
+        
+            // Delete the old file if it's a different file
+            if ($file->file_path !== $newFilePath && Storage::disk('public')->exists($file->file_path)) {
                 Storage::disk('public')->delete($file->file_path);
             }
-    
-            $file->file_path = $filePath;
+        
+            // Save the new file (overwrite if same name)
+            Storage::disk('public')->putFileAs($folderPath, $uploadedFile, $newFileName);
+        
+            // Update the file record
+            $file->file_path = $newFilePath;
             $file->file_size = $uploadedFile->getSize();
         } else {
-            // Rename the existing file
+            // Rename the existing file while keeping it in the same folder
             $oldFilePath = $file->file_path;
-    
+
             if ($oldFilePath && str_starts_with($oldFilePath, 'uploads/')) {
-                $directory = dirname($oldFilePath);
+                $directory = dirname($oldFilePath); // e.g., 'uploads/wow'
                 $oldExtension = pathinfo($oldFilePath, PATHINFO_EXTENSION);
                 $newFileName = pathinfo($request->filename, PATHINFO_FILENAME) . '.' . $oldExtension;
+
+                // Ensure the file stays in the same directory (subfolder)
                 $newFilePath = $directory . '/' . $newFileName;
-    
+
                 Storage::disk('public')->move($oldFilePath, $newFilePath);
                 $file->file_path = $newFilePath;
             }
         }
-    
-        // Update file details
+
+        // Update other file details
         $file->filename = pathinfo($request->filename, PATHINFO_FILENAME);
         $file->category = $request->category;
         $file->year_published = $request->year_published;
@@ -671,8 +701,10 @@ class StaffController extends Controller
         $file->description = $request->description;
         $file->status = $request->status;
         $file->save();
-    
-        return redirect()->route('staff.active.files', $file_id)->with('success', 'File updated successfully!');
+
+        // Pass subfolder info in redirect
+        return redirect()->route('staff.active.files', ['subfolder' => request('subfolder')])
+                        ->with('success', 'File updated successfully!');
     }
     
 

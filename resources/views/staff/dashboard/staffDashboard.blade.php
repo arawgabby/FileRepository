@@ -70,7 +70,7 @@
             </a>
 
             <a href="{{ route('request.folder.access') }}" class="flex items-center text-gray-300 hover:text-white ">
-                <i class="fas fa-upload mr-5"></i> Request 
+                <i class="fas fa-upload mr-5"></i> Request Access
             </a>
 
             <!-- <a href="{{ route('staff.files') }}" class="flex items-center text-gray-300 hover:text-white ">
