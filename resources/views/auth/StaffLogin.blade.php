@@ -28,7 +28,7 @@
         </script>
     @endif
 
-    <div class="bg-white p-10 rounded-xl shadow-md backdrop-blur-md" style="width: 360px">
+    <div class="bg-white p-10  shadow-md backdrop-blur-md" style="width: 360px">
         <h2 class="text-2xl font-bold text-center mb-6">CSIT LOGIN</h2>
 
         <form action="{{ url('/staff-login') }}" method="POST" class="space-y-4">

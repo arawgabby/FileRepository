@@ -3,7 +3,7 @@
 @section('content')
 
 <meta name="csrf-token" content="{{ csrf_token() }}">
-<div class="container mx-auto p-6 bg-white rounded-xl shadow-md">
+<div class="container mx-auto p-6 bg-white  shadow-md">
 
     <h1 class="-m-6 mb-6 pb-2 text-3xl font-bold border-b border-gray-300 p-6">
         Upload New File
@@ -26,15 +26,19 @@
                     </select>
                 </div>
 
-                <div class="mb-4">
-                    <label for="folder" class="block text-lg font-bold text-gray-700">Select Folder Category To Save File</label>
-                    <select name="folder" id="folder" class="mt-1 p-2 border rounded w-full">
-                        <option value="">Root (uploads/)</option>
-                        @foreach($subfolders as $subfolder)
-                            <option value="{{ $subfolder }}">{{ $subfolder }}</option>
-                        @endforeach
-                    </select>
-                </div>
+                <select name="folder" id="folder" class="mt-1 p-2 border rounded w-full">
+                    <option value="">Root (uploads/)</option>
+                    @foreach($subfolders as $folder)
+                        @if($folder->status === 'private')
+                            <option value="{{ $folder->name }}" disabled class="text-red-500">
+                                {{ $folder->name }} (Private – cannot insert file)
+                            </option>
+                        @else
+                            <option value="{{ $folder->name }}">{{ $folder->name }}</option>
+                        @endif
+                    @endforeach
+                </select>
+
 
                 <div class="mb-4">
                     <label for="published_by" class="block text-lg font-bold text-gray-700">Published By</label>

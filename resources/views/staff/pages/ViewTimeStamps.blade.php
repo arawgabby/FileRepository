@@ -16,12 +16,14 @@
     }
 </style>
 
-<div class="container mx-auto p-4 bg-white rounded-xl" style="box-shadow: 4px 4px 10px rgba(0, 0, 0, 0.1);">
+<div class="container mx-auto p-4 bg-white " style="box-shadow: 4px 4px 10px rgba(0, 0, 0, 0.1);">
     <h1 style="font-size: 36px; font-weight: bold; margin-bottom: 12px" class="border-b border-gray pb-2 -mx-4 px-4">
         <i class="fas fa-file text-gray-400 mr-4"></i>File Time Stamps
     </h1>
 
-    <div class="max-w-full mx-auto rounded-lg p-6">
+    <div class="max-w-full mx-auto rounded-lg p-2">
+
+    
         
         <input type="text" id="searchInput" placeholder="Search..." class="w-1/2 border border-gray-300">
         <input type="date" id="dateFilter" class="border border-gray-300">
@@ -31,7 +33,7 @@
                 <thead>
                     <tr class="bg-gray-200">
                         <!-- <th class="p-3">Timestamp ID</th> -->
-                        <th class="p-3">#</th>
+                        <!-- <th class="p-3">#</th> -->
                         <th class="p-3">File</th>
                         <!-- <th class="p-3">Version</th> -->
                         <th class="p-3">User</th>
@@ -44,7 +46,7 @@
                     @foreach ($timestamps as $timestamp)
                     <tr class="file-row border-b border-gray-300 {{ $loop->odd ? 'bg-gray-100' : '' }}">
                         <!-- <td class="p-3">00{{ $timestamp->timestamp_id }}</td> -->
-                        <td class="p-3">00{{ $timestamp->fileVersion->file_id ?? 'N/A' }}</td>
+                        <!-- <td class="p-3">00{{ $timestamp->fileVersion->file_id ?? 'N/A' }}</td> -->
                             <td class="p-3 text-center">
                                 @php
                                     $fileType = strtolower($timestamp->file->file_type ?? 'unknown');
@@ -91,7 +93,7 @@
                             </td>
                             <td class="p-3">
                                 <a href="{{ route('file.timestamps.details', ['file_id' => $timestamp->file_id]) }}" 
-                                class="bg-blue-700 text-white px-4 py-2 rounded-lg gap-2">
+                                class="bg-gray-800 text-white px-4 py-2 rounded-lg gap-2">
                                     <i class="fas fa-eye text-lg"></i>
                                 </a>
                             </td>

@@ -33,7 +33,7 @@
 
             <!-- <div class="flex items-center bg-white text-white rounded-lg p-4 space-x-3 w-full">
                 <div class="w-12 h-12 bg-gray-600 flex items-center justify-center rounded-full">
-                    <i class="fas fa-user text-gray-300 text-2xl"></i>
+                    <i class="fas fa-user text-white text-2xl"></i>
                 </div>
                 <div class="flex flex-col">
                     <p class="text-black text-sm">ID: {{ session('user')->id }}</p>
@@ -43,13 +43,13 @@
             </div> -->
 
 
-            <nav class="space-y-6">
+            <nav class="space-y-8">
 
             <!-- <p class="text-white text-1xl font-bold">
                 <i class="fas fa-folder-open"></i> MAIN
             </p> -->
 
-            <a href="{{ route('staff.page.dashboard') }}" class="flex items-center text-gray-300 hover:text-white relative top-4">
+            <a href="{{ route('staff.page.dashboard') }}" class="flex items-center text-white hover:text-white relative top-4">
                 <i class="fas fa-thumbtack mr-5"></i> Dashboard
             </a>
 
@@ -61,23 +61,23 @@
                 <i class="fas fa-folder mr-5"></i> FILES
             </p>
 
-            <!-- <a href="{{ route('staff.folders') }}" class="flex items-center text-gray-300 hover:text-white ">
+            <!-- <a href="{{ route('staff.folders') }}" class="flex items-center text-white hover:text-white ">
                 <i class="fas fa-folder-open mr-5"></i> Folders
             </a> -->
 
-            <a href="{{ route('staff.upload') }}" class="flex items-center text-gray-300 hover:text-white ">
+            <a href="{{ route('staff.upload') }}" class="flex items-center text-white hover:text-white ">
                 <i class="fas fa-upload mr-5"></i> Upload 
             </a>
 
-            <a href="{{ route('request.folder.access') }}" class="flex items-center text-gray-300 hover:text-white ">
-                <i class="fas fa-upload mr-5"></i> Request Access
+            <a href="{{ route('request.folder.access') }}" class="flex items-center text-white hover:text-white ">
+                <i class="fas fa-share-from-square mr-5"></i> Request Access
             </a>
 
-            <!-- <a href="{{ route('staff.files') }}" class="flex items-center text-gray-300 hover:text-white ">
+            <!-- <a href="{{ route('staff.files') }}" class="flex items-center text-white hover:text-white ">
                 <i class="fas fa-file-alt mr-5"></i>  My Uploads
             </a>
 
-            <a href="{{ route('staff.pending.files') }}" class="flex items-center text-gray-300 hover:text-white  relative">
+            <a href="{{ route('staff.pending.files') }}" class="flex items-center text-white hover:text-white  relative">
                 <i class="fas fa-file-alt mr-5"></i> Pending File Request
 
                 @if($pendingRequestCount > 0)
@@ -94,20 +94,20 @@
                 <i class="fas fa-folder-open"></i> Manage Files
             </p> -->
 
-            <a href="{{ route('staff.active.files') }}" class="flex items-center text-gray-300 hover:text-white ">
-                <i class="fas fa-file-alt mr-6"></i> Files
+            <a href="{{ route('staff.active.files') }}" class="flex items-center text-white hover:text-white ">
+                <i class="fas fa-folder-open mr-6"></i> Files
             </a>
 
-            <!-- <a href="{{ route('staff.update') }}" class="flex items-center text-gray-300 hover:text-white ">
+            <!-- <a href="{{ route('staff.update') }}" class="flex items-center text-white hover:text-white ">
                 <i class="fas fa-history mr-5"></i> File Versions
             </a> -->
 
-            <a href="{{ route('staff.archived.files') }}" class="flex items-center text-gray-300 hover:text-white ">
+            <a href="{{ route('staff.archived.files') }}" class="flex items-center text-white hover:text-white ">
                 <i class="fas fa-bookmark mr-5"></i> Archived Files
             </a>
 
             
-            <!-- <a href="{{ route('staff.trash.bins') }}" class="flex items-center text-gray-300 hover:text-white ">
+            <!-- <a href="{{ route('staff.trash.bins') }}" class="flex items-center text-white hover:text-white ">
                 <i class="fas fa-trash-alt mr-5"></i> Trash Files
             </a> -->
 
@@ -119,16 +119,16 @@
                 <i class="fas fa-file-text mr-5"></i> ACTIVITY
             </p>
 
-            <a href="{{ route ('timestamps.index')}}" class="flex items-center text-gray-300 hover:text-white ">
+            <a href="{{ route ('timestamps.index')}}" class="flex items-center text-white hover:text-white ">
                 <i class="fas fa-list mr-5"></i> File Timestamps
             </a>
 
             <!-- @if (session('user')->role === 'staff') -->
-                <a href="{{ route('staff.logs.view') }}" class="flex items-center text-gray-300 hover:text-white ">
+                <a href="{{ route('staff.logs.view') }}" class="flex items-center text-white hover:text-white ">
                     <i class="fas fa-inbox mr-5"></i> Activity Logs
                 </a>
             <!-- @elseif (session('user')->role === 'faculty') -->
-                <!-- <a href="{{ route('staff.logs.view') }}" class="flex items-center text-gray-300 hover:text-white ">
+                <!-- <a href="{{ route('staff.logs.view') }}" class="flex items-center text-white hover:text-white ">
                     <i class="fas fa-file mr-5"></i> Faculty Logs
                 </a> -->
             <!-- @endif -->
@@ -307,14 +307,14 @@
                         "text-black", "bg-white", "shadow-md", "scale-105", 
                         "font-bold", "p-4", "rounded-lg"
                     );
-                    link.classList.add("text-gray-300", "hover:text-white", "transition-all", "duration-300", "ease-in-out");
+                    link.classList.add("text-white", "hover:text-white", "transition-all", "duration-300", "ease-in-out");
                 });
 
                 clickedLink.classList.add(
                     "text-black", "bg-white", "shadow-md", "scale-105", 
                     "font-bold", "p-4", "rounded-lg", "transition-all", "duration-300", "ease-in-out"
                 );
-                clickedLink.classList.remove("text-gray-300", "hover:text-white"); 
+                clickedLink.classList.remove("text-white", "hover:text-white"); 
 
                 // Store the active link in localStorage to persist highlight
                 localStorage.setItem("activeNav", clickedLink.getAttribute("href"));

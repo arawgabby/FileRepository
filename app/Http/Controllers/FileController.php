@@ -15,6 +15,7 @@ use Carbon\Carbon;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Str;
 use App\Models\Folder; 
+use App\Models\User;
 
 
 class FileController extends Controller
@@ -528,16 +529,11 @@ class FileController extends Controller
     
     public function AdminCountActiveFiles(Request $request)
     {
-        // ✅ Count all active files
+        // ========== FILE COUNTS ==========
         $activeFilesCount = Files::where('status', 'active')->count();
-        
-        // ✅ Count all pending files
         $pendingFilesCount = Files::where('status', 'pending')->count();
     
-        // ✅ Get filter type from request, default to 'all' (count all uploads)
-        $filter = $request->get('filter', 'all'); 
-    
-        // ✅ Apply the filter for recent uploads count
+        $filter = $request->get('filter', 'all');
         switch ($filter) {
             case 'daily':
                 $recentUploadsCount = Files::whereDate('created_at', today())->count();
@@ -548,27 +544,40 @@ class FileController extends Controller
             case 'yearly':
                 $recentUploadsCount = Files::whereYear('created_at', now()->year)->count();
                 break;
-            default: // 'all' or no filter
-                $recentUploadsCount = Files::count();  // Count all uploads
+            default:
+                $recentUploadsCount = Files::count();
                 break;
         }
     
-        // ✅ Get total storage used
-        $uploadPath = storage_path('app/public/uploads'); // Absolute path
-        $totalStorageUsed = $this->getFolderSize($uploadPath); // Get folder size
-        $formattedStorage = $this->formatSizeUnits($totalStorageUsed); // Format size
-    
-        // ✅ Fetch recent file activities (latest updated files)
+        $uploadPath = storage_path('app/public/uploads');
+        $totalStorageUsed = $this->getFolderSize($uploadPath);
+        $formattedStorage = $this->formatSizeUnits($totalStorageUsed);
         $recentFiles = Files::orderBy('updated_at', 'desc')->limit(10)->get();
     
-        // ✅ Return all necessary data to the view
+        // ========== USER COUNTS ==========
+        $totalUsers = User::count();
+    
+        $usersThisMonth = User::whereMonth('created_at', now()->month)
+                              ->whereYear('created_at', now()->year)
+                              ->count();
+    
+        $usersToday = User::whereDate('created_at', today())->count();
+    
+        $activeUsers = User::where('status', 'active')->count();
+    
         return view('admin.pages.adminDashboardPage', compact(
             'activeFilesCount', 
             'pendingFilesCount', 
             'recentUploadsCount', 
             'formattedStorage',
             'recentFiles',
-            'filter' // Pass the filter to the view
+            'filter',
+    
+            // Pass user stats to the view
+            'totalUsers',
+            'usersThisMonth',
+            'usersToday',
+            'activeUsers'
         ));
     }
 

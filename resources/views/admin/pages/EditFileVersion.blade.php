@@ -2,7 +2,7 @@
 
 @section('content')
 
-<div class="container mx-auto p-6 bg-white rounded-xl" style="box-shadow: 4px 4px 10px rgba(0, 0, 0, 0.1);">
+<div class="container mx-auto p-6 bg-white " style="box-shadow: 4px 4px 10px rgba(0, 0, 0, 0.1);">
     
     <!-- Back Button -->
     <a href="{{ route('admin.update') }}" class="text-gray-600 hover:text-gray-800 flex items-center mb-4">

@@ -27,7 +27,7 @@
         </script>
     @endif
 
-    <div class="bg-white p-8 rounded-xl shadow-md w-full max-w-md">
+    <div class="bg-white p-8  shadow-md w-full max-w-md">
         <h2 class="text-2xl font-bold text-center mb-6">ADMINISTRATOR LOGIN</h2>
 
         <form action="{{ url('/admin-login') }}" method="POST" class="space-y-4">

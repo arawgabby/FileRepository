@@ -16,7 +16,7 @@
     <script>alert("{{ session('error') }}");</script>
 @endif
 
-<div class="container mx-auto p-6 bg-white rounded-xl" style="box-shadow: 4px 4px 10px rgba(0, 0, 0, 0.1);">
+<div class="container mx-auto p-6 bg-white " style="box-shadow: 4px 4px 10px rgba(0, 0, 0, 0.1);">
 
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
 
@@ -153,7 +153,10 @@
                     $folderName = explode('/', $file->file_path)[1] ?? 'unknown';
                 @endphp
 
-                <div class="bg-white rounded-lg shadow-lg p-6" data-subfolder="{{ $folderName }}">
+                <div class="bg-white rounded-lg shadow-lg p-6" 
+                data-subfolder="{{ $folderName }}"
+                data-created="{{ $file->created_at->format('Y-m-d') }}">
+
                     <div class="flex justify-between">
                         <span class="text-sm font-semibold break-words w-full block">{{ $file->filename }}</span>
                         <span class="font-semibold text-sm">{{ $file->year_published }}</span>
@@ -192,7 +195,7 @@
                     </div>
 
                     <div class="flex justify-between items-center mt-4">
-                        <span class="text-sm text-gray-500">{{ $file->created_at->diffForHumans() }}</span>
+                        <span class="text-sm text-gray-500">{{ $file->created_at->format('F j, Y H:i') }}</span>
                         
                         <div class="flex space-x-4">
                             <a href="{{ route('admin.files.download', basename($file->file_path)) }}" class="text-blue-500" title="Download">
@@ -235,42 +238,44 @@
         const subfolderFilter = document.getElementById("subfolderFilter");
         const yearFilter = document.getElementById("yearFilter");
         const dateFilter = document.getElementById("dateFilter");
-        const cards = document.querySelectorAll("#cardView > div");
+        const cards = document.querySelectorAll('#cardView > div[data-created]');
 
         function filterCards() {
             const searchText = searchInput.value.toLowerCase();
             const selectedFileType = fileTypeFilter.value.toLowerCase();
             const selectedSubfolder = subfolderFilter.value.toLowerCase();
             const selectedYear = yearFilter.value;
-            const selectedDate = dateFilter.value;
+            const selectedDate = dateFilter.value; // e.g., "2025-04-12"
 
             cards.forEach(card => {
                 const fileName = card.querySelector("span.font-semibold").textContent.toLowerCase();
                 const fileType = card.querySelector("span.ml-2").textContent.toLowerCase();
                 const folder = card.dataset.subfolder ? card.dataset.subfolder.toLowerCase() : "";
+                const createdDate = card.dataset.created; // data-created="2025-04-12"
                 const year = card.querySelector("span.font-semibold:last-child").textContent;
-                const createdDate = card.querySelector(".text-sm.text-gray-500").textContent.trim();
 
-                const matchesSearch = fileName.includes(searchText);
+                const matchesSearch = searchText === "" || fileName.includes(searchText);
                 const matchesFileType = selectedFileType === "" || fileType.includes(selectedFileType);
-                const matchesSubfolder = selectedSubfolder === "" || folder.includes(selectedSubfolder);
+                const matchesSubfolder = selectedSubfolder === "" || folder === selectedSubfolder;
                 const matchesYear = selectedYear === "all" || year === selectedYear;
-                const matchesDate = selectedDate === "" || createdDate.includes(selectedDate);
+                const matchesDate = selectedDate === "" || createdDate === selectedDate;
 
-                if (matchesSearch && matchesFileType && matchesSubfolder && matchesYear && matchesDate) {
-                    card.style.display = "block";
-                } else {
-                    card.style.display = "none";
-                }
+                const shouldShow = matchesSearch && matchesFileType && matchesSubfolder && matchesYear && matchesDate;
+
+                card.style.display = shouldShow ? "block" : "none";
             });
         }
+        
 
+        // Event listeners
         searchInput.addEventListener("input", filterCards);
         fileTypeFilter.addEventListener("change", filterCards);
         subfolderFilter.addEventListener("change", filterCards);
         yearFilter.addEventListener("change", filterCards);
         dateFilter.addEventListener("change", filterCards);
     });
+
+    
 </script>
 
 <!--For year filter-->

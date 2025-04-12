@@ -3,8 +3,9 @@
 @section('content')
 
 <meta name="csrf-token" content="{{ csrf_token() }}">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
 
-<div class="container mx-auto p-6 bg-white rounded-xl shadow-lg">
+<div class="container mx-auto p-6 bg-white  shadow-lg">
     <h1 class="text-5xl font-semibold mb-4 border-b border-gray pb-2 -mx-6 px-6">Activity Log</h1>
 
     <!-- Search Bar -->
@@ -31,27 +32,28 @@
                         @php
                             $fileType = strtolower($log->file->file_type ?? 'unknown');
                             $icons = [
-                                'doc' => 'fa-file-word',       // Word Document
+                                'doc' => 'fa-file-word',
                                 'docx' => 'fa-file-word',
-                                'pdf' => 'fa-file-pdf',        // PDF File
-                                'jpg' => 'fa-file-image',      // Image Files
+                                'pdf' => 'fa-file-pdf',
+                                'jpg' => 'fa-file-image',
+                                'jpeg' => 'fa-file-image',
                                 'png' => 'fa-file-image',
                                 'svg' => 'fa-file-image',
-                                'ppt' => 'fa-file-powerpoint', // PowerPoint Files
+                                'ppt' => 'fa-file-powerpoint',
                                 'pptx' => 'fa-file-powerpoint',
-                                'xls' => 'fa-file-excel',      // Excel Files
+                                'xls' => 'fa-file-excel',
                                 'xlsx' => 'fa-file-excel',
-                                'txt' => 'fa-file-alt',        // Text Files
-                                'zip' => 'fa-file-archive',    // Zip/Compressed Files
-                                'rar' => 'fa-file-archive',
-                                'mp4' => 'fa-file-video',      // Video Files
+                                'txt' => 'fa-file-lines',
+                                'zip' => 'fa-file-zipper',
+                                'rar' => 'fa-file-zipper',
+                                'mp4' => 'fa-file-video',
                                 'avi' => 'fa-file-video',
                             ];
-                            $iconClass = $icons[$fileType] ?? 'fa-file'; // Default icon if not listed
+                            $iconClass = $icons[$fileType] ?? 'fa-file';
                         @endphp
 
-                        <i class="fas {{ $iconClass }} text-gray-500 text-lg "></i> 
-                        {{ ucfirst($log->file->file_type ?? 'N/A') }}
+                        <i class="fa-solid {{ $iconClass }} text-gray-500 text-lg text-center"></i>
+                        {{ strtoupper($log->file->file_type ?? 'N/A') }}
                     </td>
                         <!-- <td class="py-2 px-4">{{ ucfirst($log->file_id) }}</td> -->
                         <td class="py-2 px-4">{{ ucfirst($log->user->name) }}</td> <!-- Display role based on accessed_by -->

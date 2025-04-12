@@ -3,7 +3,7 @@
 @section('content')
 
 <meta name="csrf-token" content="{{ csrf_token() }}">
-<div class="container mx-auto p-6 bg-white rounded-xl shadow-md">
+<div class="container mx-auto p-6 bg-white  shadow-md">
 
     <h1 class="-m-6 mb-6 pb-2 text-3xl font-semibold border-b border-gray-300 p-6">
         Upload New File
@@ -64,13 +64,13 @@
         <div class="w-full md:w-1/2 flex flex-col items-center">
         <div id="dropArea"
             class="mb-4 flex flex-col items-center justify-center border-2 border-dashed border-gray-400 p-6
-             rounded-lg cursor-pointer bg-gray-100 w-full h-64">
+             rounded-lg cursor-pointer w-full h-64">
             <p class="text-gray-600">Drag & Drop your file here or click to select</p>
             <input type="file" name="file" id="file" class="hidden" required>
             </div>
 
         <div class="text-gray-600 text-1xl mb-4 text-center">
-            <p><strong>Allowed files:</strong> PPT, DOCX, PNG, SVG, PDF</p>
+            <p><strong>Allowed files:</strong> PPT, DOCX, JPEG, PNG, SVG, PDF</p>
             <p>File Upload limited to <strong>500MB only</strong></p>
         </div>
 

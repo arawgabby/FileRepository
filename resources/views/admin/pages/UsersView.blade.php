@@ -4,7 +4,7 @@
 
 <meta name="csrf-token" content="{{ csrf_token() }}">
 
-<div class="container mx-auto p-6 bg-white rounded-xl shadow-md">
+<div class="container mx-auto p-6 bg-white  shadow-md">
     <div class="flex justify-between items-center mb-4">
         <h1 style="font-size: 40px; font-weight: bold;">Users</h1>
         <a href="{{ route('admin.users.view') }}" class="bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded-lg flex items-center">
@@ -14,11 +14,9 @@
 
     <!-- Search & Filters -->
     <div class="flex flex-wrap gap-4 mb-4">
-        <input type="text" id="searchInput" placeholder="Search by name or email..." 
-            class="p-2 border rounded-lg flex-1 min-w-[200px]" onkeyup="filterUsers()">
-        
+
         <!-- Role Filter -->
-        <select id="roleFilter" class="p-2 border rounded-lg min-w-[150px]" onchange="filterUsers()">
+        <select id="roleFilter" class="p-2 border rounded-lg min-w-[70px]" onchange="filterUsers()">
             <option value="">All Roles</option>
             <option value="admin">Admin</option>
             <option value="staff">Staff</option>
@@ -34,24 +32,29 @@
             <option value="pending">Pending</option>
             <option value="deactivated">Deactivated</option>
         </select>
+
+
+        <input type="text" id="searchInput" placeholder="Search by name or email..." 
+            class="p-2 border rounded-lg flex-1 min-w-[70px]" onkeyup="filterUsers()">
+        
     </div>
 
-    <table class="min-w-full border border-gray-300 text-center">
-        <thead>
+    <table class="min-w-full border border-gray-100 text-center">
+        <thead class="bg-gray-100 pb-8">
             <tr>
-                <th class="py-3 px-6 bg-gray-800 text-gray-600 font-semibold">ID</th>
-                <th class="py-3 px-6 bg-gray-800 text-gray-600 font-semibold">Name</th>
-                <th class="py-3 px-6 bg-gray-800 text-gray-600 font-semibold">Email</th>
-                <th class="py-3 px-6 bg-gray-800 text-gray-600 font-semibold">Role</th>
-                <th class="py-3 px-6 bg-gray-800 text-gray-600 font-semibold">Updated At</th>
-                <th class="py-3 px-6 bg-gray-800 text-gray-600 font-semibold">Status</th>
-                <th class="py-3 px-6 bg-gray-800 text-gray-600 font-semibold">Action</th>
+                <!-- <th class="py-3 px-6 admin. text-gray-600 font-semibold">ID</th> -->
+                <th class="py-3 px-6 admin. text-gray-600 font-semibold">Name</th>
+                <th class="py-3 px-6 admin. text-gray-600 font-semibold">Email</th>
+                <th class="py-3 px-6 admin. text-gray-600 font-semibold">Role</th>
+                <th class="py-3 px-6 admin. text-gray-600 font-semibold">Updated At</th>
+                <th class="py-3 px-6 admin. text-gray-600 font-semibold">Status</th>
+                <th class="py-3 px-6 admin. text-gray-600 font-semibold">Action</th>
             </tr>
         </thead>
         <tbody id="userTable">
             @foreach ($users as $user)
             <tr class="border-b text-center">
-                <td class="py-3 px-6">00{{ $user->id }}</td>
+                <!-- <td class="py-3 px-6">00{{ $user->id }}</td> -->
                 <td class="py-3 px-6">{{ $user->name }}</td>
                 <td class="py-3 px-6">{{ $user->email }}</td>
                 <td class="py-3 px-6 user-role">{{ $user->role }}</td>
@@ -62,7 +65,7 @@
                     @elseif($user->status == 'pending') bg-yellow-500
                     @elseif($user->status == 'deactivated') bg-red-500
                     @endif 
-                    rounded-lg">
+                    ">
                     {{ ucfirst($user->status) }}
                 </td>
                 <td class="py-3 px-4">

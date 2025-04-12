@@ -9,7 +9,7 @@
     }
 </style>
 
-<div class="container mx-auto p-6 bg-white rounded-xl" style="box-shadow: 4px 4px 10px rgba(0, 0, 0, 0.1);">
+<div class="container mx-auto p-6 bg-white " style="box-shadow: 4px 4px 10px rgba(0, 0, 0, 0.1);">
 
     <h1 class="text-[30px] font-bold mb-3 flex items-center border-b border-gray pb-2">
         <i class="fas fa-trash w-[30px] h-[30px] mr-2"></i>

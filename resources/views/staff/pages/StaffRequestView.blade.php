@@ -35,8 +35,8 @@
                             <td class="py-2 text-center">{{ $access->folder->name ?? 'N/A' }}</td>
                             <td class="py-2 text-center">
                                 <span class="px-2 py-1 rounded-full 
-                                    {{ $access->status === 'Approved' ? 'bg-green-200 text-green-800' : 
-                                       ($access->status === 'Rejected' ? 'bg-red-200 text-red-800' : 'bg-yellow-200 text-yellow-800') }}">
+                                    {{ $access->status === 'approved' ? 'bg-green-200 text-green-800' : 
+                                       ($access->status === 'rejected' ? 'bg-red-200 text-red-800' : 'bg-yellow-200 text-yellow-800') }}">
                                     {{ $access->status }}
                                 </span>
                             </td>

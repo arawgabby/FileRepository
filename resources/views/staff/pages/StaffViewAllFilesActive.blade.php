@@ -21,8 +21,8 @@
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
 
     <div class="flex justify-between items-center p-2">
-        <h1 class="-m-6 mb-6 pb-2 text-4xl font-bold border-b border-gray-300 p-6">Active Files</h1>
-        <span class="text-white text-2xl font-semibold bg-blue-400 p-4 rounded-lg" id="activeFileCount">0</span>
+        <h1 class="-m-6 mb-6 pb-2 text-4xl font-bold border-b border-gray-300 p-6">Files</h1>
+        <span class="text-white text-2xl font-semibold bg-gray-800 p-4 rounded-lg" id="activeFileCount">0</span>
         </div>
 
     <br>
@@ -30,8 +30,8 @@
     <!-- Search & Filters -->
     <div class="mb-4 flex gap-4 border-b border-gray pb-4">
 
-        <label for="subfolderFilter" class="block text-sm font-medium text-gray-700 mt-2"> Type</label>
-        <select id="fileTypeFilter" class="border rounded p-1\ text-sm">
+        <label for="subfolderFilter" class="block text-sm font-medium text-gray-700 mt-3"> Type</label>
+        <select id="fileTypeFilter" class="border rounded p-1 mt-2 text-sm">
             <option value="">All Types</option>
             <option value="pdf">Pdf</option>
             <option value="docx">Docx</option>
@@ -39,7 +39,7 @@
         </select>
 
 
-        <label for="subfolderFilter" class="block text-sm font-medium text-gray-700 mt-2">Subfolder</label>
+        <label for="subfolderFilter" class="block text-sm font-medium text-gray-700 mt-3">Subfolder</label>
 
         <form method="GET" action="{{ route('staff.active.files') }}" id="subfolderForm">
             <select id="subfolderFilter" name="subfolder" class="border rounded p-1 text-sm mt-2" onchange="document.getElementById('subfolderForm').submit()">
@@ -59,18 +59,18 @@
         @endif -->
 
 
-        <label for="yearFilter" class="font-medium text-gray-700 mt-2 text-sm">Filter by Year:</label>
-        <select id="yearFilter" class="border rounded p-1 text-sm">
+        <label for="yearFilter" class="font-medium text-gray-700 mt-3 text-sm">Filter by Year:</label>
+        <select id="yearFilter" class="border rounded    text-sm ">
             <option value="all">All Years</option>
             @foreach($files->unique('year_published') as $file)
                 <option value="{{ $file->year_published }}">{{ $file->year_published }}</option>
             @endforeach
         </select>
 
-        <label for="dateFilter" class="font-medium mt-2 text-gray-700 text-sm">Filter by Date Created:</label>
-        <input type="date" id="dateFilter" class="border rounded p-1 text-sm">
+        <label for="dateFilter" class="font-medium text-gray-700 text-sm mt-2">Filter by Date Created:</label>
+        <input type="date" id="dateFilter" class="border rounded p-1 text-sm ">
 
-        <input type="text" id="searchInput" placeholder="Search files..." class="border rounded p-1 w-1/4 text-sm">
+        <input type="text" id="searchInput" placeholder="Search files..." class="border rounded p-1 w-1/3 text-sm ">
 
 
     </div>
@@ -152,6 +152,13 @@
 
 
     <!-- Card View -->
+    <p class="italic text-sm text-gray-500 ml-2 flex items-center gap-1">
+        <i class="fa-solid fa-circle-info text-gray-500"></i>
+        Choose a folder to get the file you needed to update or download.
+    </p>
+
+
+
     <div id="cardView" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 mt-6 mb-12">
 
 
@@ -190,10 +197,30 @@
                     data-subfolder="{{ $folderName }}"   
                     data-created="{{ $file->created_at->format('Y-m-d') }}">
 
-                        <div class="flex justify-between">
+                    <div class="flex justify-between">
+                        <div class="flex items-center gap-3">
+                            @php
+                                $fileType = strtolower($file->file_type);
+                                $isImage = in_array($fileType, ['jpg', 'jpeg', 'png', 'gif', 'webp']);
+                                $isPdf = $fileType === 'pdf';
+                            @endphp
+
+                            @if ($isImage)
+                                <img src="{{ asset('storage/' . $file->file_path) }}" alt="Preview" class="w-16 h-16 object-cover rounded">
+                            @elseif ($isPdf)
+                                <img src="{{ asset('images/pdf-thumbnail.png') }}" alt="PDF Preview" class="w-16 h-16 object-cover rounded">
+                            @else
+                                <div class="w-16 h-16 flex items-center justify-center bg-gray-100 rounded">
+                                    <i class="fa-solid fa-file text-gray-400 text-2xl"></i>
+                                </div>
+                            @endif
+
                             <span class="text-sm font-semibold break-words w-full block">{{ $file->filename }}</span>
-                            <span class="font-semibold text-sm">{{ $file->year_published }}</span>
                         </div>
+
+                        <span class="font-semibold text-sm">{{ $file->year_published }}</span>
+                    </div>
+
 
                         <div class="mt-2 text-sm text-gray-600">
                             <span class="font-semibold">
