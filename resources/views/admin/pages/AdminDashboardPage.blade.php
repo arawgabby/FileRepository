@@ -153,7 +153,9 @@
                 @foreach ($recentFiles as $file)
                     <tr class="hover:bg-gray-50">
                         <td class="border-left border-left-gray-200 px-4 py-2">{{ $file->filename }}</td>
-                        <td class="border-left border-left-gray-200 px-4 py-2">{{ $file->uploaded_by }}</td>
+                        <td class="border-left border-left-gray-200 px-4 py-2">
+                            {{ optional($file->user)->name ?? 'Unknown' }}
+                        </td>
                         <td class="border-left border-left-gray-200 px-4 py-2 text-blue-600">
                             @if ($file->status == 'active') Edited
                             @elseif ($file->status == 'pending') Uploaded

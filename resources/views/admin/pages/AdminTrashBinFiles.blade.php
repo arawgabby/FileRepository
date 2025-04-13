@@ -18,7 +18,7 @@
 
     <!-- Search & Filters -->
     <div class="mb-4 flex gap-4 mt-2">
-        <input type="text" id="searchInput" placeholder="Search files..." class="border rounded p-2 w-1/3">
+        <input type="text" id="searchInput" placeholder="Search files..." class="border rounded p-2 w-1/4">
         
         <select id="fileTypeFilter" class="border rounded p-4">
             <option value="">All Types</option>
@@ -32,8 +32,8 @@
     <table class="w-full -collapse  -gray-300">
         <thead>
             <tr class="bg-gray-100">
-                <th class="p-4">File ID</th>
-                <th class="p-4">Filename</th>
+                <!-- <th class="p-4">File ID</th> -->
+                <th class="p-4 text-left">Filename</th>
                 <th class="p-4">File Type</th>
                 <th class="p-4">Uploaded By</th>
                 <th class="p-4">Updated_at</th>
@@ -43,8 +43,8 @@
         <tbody id="fileTableBody">
             @foreach($fileVersions as $fileVersion)
                 <tr class="file-row">
-                    <td class="p-4 border-b border-gray">{{ $fileVersion->file_id }}</td>
-                    <td class="p-4 border-b border-gray filename">{{ $fileVersion->filename }}</td>
+                    <!-- <td class="p-4 border-b border-gray">{{ $fileVersion->file_id }}</td> -->
+                    <td class="p-4 border-b border-gray filename text-left">{{ $fileVersion->filename }}</td>
                     <td class="p-4 border-b border-gray file-type">
                         @php
                             $fileType = strtolower($fileVersion->file_type);
@@ -83,7 +83,8 @@
                             <!-- Delete Button (No route yet) -->
                             <a href="#" 
                                 class="bg-red-500 hover:bg-red-700 text-white rounded-lg p-2 transition duration-300" 
-                                title="Delete this file permanently">
+                                title="Delete this file permanently"
+                                onclick="confirmDelete(event, {{ $fileVersion->file_id }})">
                                 <i class="fas fa-trash"></i>
                             </a>
 
@@ -101,6 +102,44 @@
 
 </div>
 
+<script>
+    function confirmDelete(event, fileId) {
+        event.preventDefault();
+
+        // Browser alert to confirm deletion
+        const confirmation = confirm("Are you sure you want to delete this file permanently?");
+
+        if (confirmation) {
+            // Proceed with form submission for deletion
+            const form = document.createElement('form');
+            form.method = 'POST';
+            form.action = '{{ url("/admin/files") }}' + '/' + fileId;
+
+            // Add CSRF token and DELETE method
+            const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+            const csrfInput = document.createElement('input');
+            csrfInput.type = 'hidden';
+            csrfInput.name = '_token';
+            csrfInput.value = csrfToken;
+            form.appendChild(csrfInput);
+
+            const methodInput = document.createElement('input');
+            methodInput.type = 'hidden';
+            methodInput.name = '_method';
+            methodInput.value = 'DELETE';
+            form.appendChild(methodInput);
+
+            document.body.appendChild(form);
+            form.submit();
+
+            // Display success message via alert if deletion is successful
+            alert("File has been deleted successfully.");
+        } else {
+            // If deletion is cancelled, show a message
+            alert("File deletion was cancelled.");
+        }
+    }
+</script>
 <script>
     function confirmRestore(event, fileId) {
         event.preventDefault();

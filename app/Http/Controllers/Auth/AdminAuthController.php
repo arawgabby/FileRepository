@@ -75,7 +75,7 @@ class AdminAuthController extends Controller
             // Store user in session if you want
             session(['user' => $user]);
 
-            return redirect()->route('admin.dashboard')->with('success', 'Login successful!');
+            return redirect()->route('admin.page.dashboard')->with('success', 'Login successful!');
         } else {
             return redirect('/admin-login')->with('error', 'Invalid email or password. Please try again.');
         }

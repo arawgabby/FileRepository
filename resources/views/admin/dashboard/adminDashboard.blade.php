@@ -46,7 +46,7 @@
                 </i> Main
             </p>
 
-            <a href="{{ route('admin.page.dashboard') }}" class="flex items-center text-gray-300 hover:text-white relative text-sm">
+            <a href="{{ route('admin.page.dashboard') }}" class="flex items-center text-white hover:text-white relative text-sm">
                 <i class="fas fa-thumbtack mr-4"></i> Dashboard
             </a>
 
@@ -62,37 +62,41 @@
             </p>
 
             
-            <a href="{{ route('admin.folders') }}" class="flex items-center text-gray-300 hover:text-white text-sm ">
+            <a href="{{ route('admin.folders') }}" class="flex items-center text-white hover:text-white text-sm ">
                 <i class="fas fa-folder-open mr-4 "></i> Folders
             </a>
 
-            <a href="{{ route('admin.uploadFiles') }}" class="flex items-center text-gray-300 hover:text-white text-sm">
+            <a href="{{ route('admin.uploadFiles') }}" class="flex items-center text-white hover:text-white text-sm">
                 <i class="fas fa-upload mr-4"></i> Upload
             </a>
 
-            <a href="{{ route('admin.active.files') }}" class="flex items-center text-gray-300 hover:text-white mr-2 text-sm">
+            <a href="{{ route('admin.view.requests') }}" class="flex items-center text-white hover:text-white text-sm">
+                <i class="fas fa-share-from-square mr-4"></i> Request
+            </a>
+
+            <a href="{{ route('admin.active.files') }}" class="flex items-center text-white hover:text-white mr-2 text-sm">
                 <i class="fas fa-file-alt mr-5"></i> Files
             </a>
 
-            <!-- <a href="#" class="flex items-center text-gray-300 hover:text-white ">
+            <!-- <a href="#" class="flex items-center text-white hover:text-white ">
                 <i class="fas fa-info mr-4"></i> View File Request
             </a> -->
 
 
-            <!-- <a href="{{ route('admin.update') }}" class="flex items-center text-gray-300 hover:text-white ">
+            <!-- <a href="{{ route('admin.update') }}" class="flex items-center text-white hover:text-white ">
                 <i class="fas fa-history mr-4"></i> File Versions
             </a> -->
 
-            <a href="{{ route('admin.archived.files') }}" class="flex items-center text-gray-300 hover:text-white text-sm">
+            <a href="{{ route('admin.archived.files') }}" class="flex items-center text-white hover:text-white text-sm">
                 <i class="fas fa-archive mr-4"></i> Archived Files
             </a>
 
             
-            <a href="{{ route('admin.trash.bins') }}" class="flex items-center text-gray-300 hover:text-white text-sm">
+            <a href="{{ route('admin.trash.bins') }}" class="flex items-center text-white hover:text-white text-sm">
                 <i class="fas fa-trash-alt mr-4"></i> Trash 
             </a>
 
-               <!-- <a href="{{ route('admin.trash.bins') }}" class="flex items-center text-gray-300 hover:text-white ">
+               <!-- <a href="{{ route('admin.trash.bins') }}" class="flex items-center text-white hover:text-white ">
                 <i class="fas fa-trash-alt mr-4"></i> Trash Files
             </a> -->
 
@@ -104,7 +108,7 @@
             </p>
             
 
-            <a href="{{ route('admin.users') }}" class="flex items-center text-gray-300 hover:text-white text-sm">
+            <a href="{{ route('admin.users') }}" class="flex items-center text-white hover:text-white text-sm">
                 <i class="fas fa-user mr-4"></i> Users
             </a>
 
@@ -116,8 +120,12 @@
                 Activity 
             </p>
 
-            <a href="#" class="flex items-center text-gray-300 hover:text-white text-sm">
+            <a href="{{ route ('admin.logs.view')}}" class="flex items-center text-white hover:text-white text-sm">
                 <i class="fas fa-file mr-4"></i> Activity Logs
+            </a>
+
+            <a href="{{ route ('admin.timestamps.index')}}" class="flex items-center text-white hover:text-white ">
+                <i class="fas fa-list mr-3"></i> File Timestamps
             </a>
 
             <p class=" -m-5 mb-6 border-b border-white text-gray-200 pb-2">
@@ -219,14 +227,14 @@
                         "text-black", "bg-white", "shadow-md", "scale-105", 
                         "font-bold", "p-4", "rounded-lg"
                     );
-                    link.classList.add("text-gray-300", "hover:text-white", "transition-all", "duration-300", "ease-in-out");
+                    link.classList.add("text-white", "hover:text-white", "transition-all", "duration-300", "ease-in-out");
                 });
 
                 clickedLink.classList.add(
                     "text-black", "bg-white", "shadow-md", "scale-105", 
                     "font-bold", "p-4", "rounded-lg", "transition-all", "duration-300", "ease-in-out"
                 );
-                clickedLink.classList.remove("text-gray-300", "hover:text-white"); 
+                clickedLink.classList.remove("text-white", "hover:text-white"); 
 
                 // Store the active link in localStorage to persist highlight
                 localStorage.setItem("activeNav", clickedLink.getAttribute("href"));

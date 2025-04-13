@@ -166,11 +166,23 @@ Route::middleware(['admin.auth'])->group(function () {
         return view('admin.dashboard.adminDashboard');
     })->name('admin.dashboard');
 
+    Route::get('/admin-timestamps', [FileTimeStampController::class, 'AdminViewIndex'])->name('admin.timestamps.index');
+
+    Route::get('/admin-logs', [FileTimeStampController::class, 'AdminViewLogs'])->name('admin.logs.view');
+
+    Route::get('/admin-file-timestamps/{file_id}', [FileTimeStampController::class, 'Adminshow'])->name('admin.file.timestamps.details');
+
+    Route::delete('/admin/files/{file}', [FileTimeStampController::class, 'AdmindeleteFile'])->name('admin.files.delete');
+
     //
     Route::get('/admin-dashboard', [FileController::class, 'AdminCountActiveFiles'])
     ->name('admin.page.dashboard');
 
     Route::get('/admin-folders/{subfolder?}', [FileController::class, 'AdminshowFolders'])->name('admin.folders');
+    
+    Route::get('/admin-view-requests', [FileController::class, 'AdminViewRequests'])->name('admin.view.requests');
+
+    Route::put('/admin/folder-access/{id}/update-status', [FileController::class, 'updateFolderAccessStatus']);
 
     Route::delete('/admin-folders/delete', [FileController::class, 'AdmindeleteFolder'])->name('admin.folders.delete');
 

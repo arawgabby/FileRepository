@@ -22,6 +22,10 @@ class FolderAccess extends Model
         return $this->belongsTo(Folder::class, 'folder_id');
     }
 
-
+    public function user()
+    {
+        return $this->belongsTo(User::class, 'user_id');
+    }
+    
 
 }

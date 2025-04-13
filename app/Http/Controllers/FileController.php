@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use Symfony\Component\HttpFoundation\Response;
 use App\Models\FileVersions;
 use App\Models\Files;
+use App\Models\FolderAccess;
 use App\Models\AccessLog;
 use App\Models\FileTimeStamp;
 use Illuminate\Support\Facades\Log;
@@ -74,6 +75,32 @@ class FileController extends Controller
         }
     
         return view('admin.pages.AdminFolders', compact('folders', 'basePath', 'parentPath'));
+    }
+
+    public function AdminViewRequests(Request $request)
+    {
+        $requests = FolderAccess::with(['folder', 'user'])->paginate(10);
+    
+        return view('admin.pages.AdminViewRequests', compact('requests'));
+    }
+    
+    
+    public function updateFolderAccessStatus(Request $request, $id)
+    {
+        $request->validate([
+            'status' => 'required|in:Approved,Rejected',
+        ]);
+
+        $access = FolderAccess::find($id);
+
+        if (!$access) {
+            return redirect()->back()->with('error', 'Request not found.')->withInput();
+        }
+
+        $access->status = $request->status;
+        $access->save();
+
+        return redirect()->back()->with('success', 'Status updated successfully.');
     }
     
     public function AdminuploadFile(Request $request)
@@ -284,8 +311,6 @@ class FileController extends Controller
         }
     }
     
-    
-
     public function AdminactiveFiles(Request $request)
     {
         $files = Files::query();
