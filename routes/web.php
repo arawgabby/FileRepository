@@ -1,6 +1,7 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
+use Illuminate\Support\Facades\Auth;
 use App\Http\Controllers\Auth\AdminAuthController;
 use App\Http\Controllers\FileController;
 use App\Http\Controllers\UserController;
@@ -60,19 +61,33 @@ Route::middleware(['staff.auth'])->group(function () {
 
     Route::get('/staff-folder-request-view', [StaffController::class, 'showRequestFolder'])->name('request.folder.access');
 
+    Route::get('/staff-file-request-view', [StaffController::class, 'showRequestFile'])->name('request.file.access');
+
+    Route::post('/file-request-staff/submit', [StaffController::class, 'submitFileRequests'])->name('file-request.submit');
+
     Route::post('/folder-access-submit', [StaffController::class, 'submitFolderAccess'])->name('folder.access.submit');
 
 
     Route::get('/staff-main', [StaffController::class, 'dashboard'])->name('staff.dashboard');
 
     Route::get('/staff-upload', function () {
-
-        $subfolders = Storage::disk('public')->directories('uploads');
-
-        $subfolders = array_map(fn($dir) => Str::after($dir, 'uploads/'), $subfolders);
-
-        $subfolders = Folder::select('name', 'status')->get();
-
+        $userId = session('user')->id;
+    
+        $subfolders = Folder::select('id', 'name', 'status')
+            ->get()
+            ->map(function ($folder) use ($userId) {
+                // Check if this user has approved access to the folder
+                $hasAccess = \DB::table('folder_access')
+                    ->where('folder_id', $folder->id)
+                    ->where('user_id', $userId)
+                    ->where('status', 'approved')
+                    ->exists();
+    
+                $folder->user_has_access = $hasAccess;
+    
+                return $folder;
+            });
+    
         return view('staff.pages.StaffUploadNewFile', compact('subfolders'));
     })->name('staff.upload');
 
@@ -181,6 +196,10 @@ Route::middleware(['admin.auth'])->group(function () {
     Route::get('/admin-folders/{subfolder?}', [FileController::class, 'AdminshowFolders'])->name('admin.folders');
     
     Route::get('/admin-view-requests', [FileController::class, 'AdminViewRequests'])->name('admin.view.requests');
+
+    Route::get('/admin-view-file-requests', [FileController::class, 'AdminViewRequestsFile'])->name('admin.view.requests.file');
+
+    Route::post('/update-file-request-status', [FileController::class, 'updateStatusFile'])->name('file-request.update-status');
 
     Route::put('/admin/folder-access/{id}/update-status', [FileController::class, 'updateFolderAccessStatus']);
 

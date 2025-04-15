@@ -14,6 +14,7 @@ class FolderAccess extends Model
         'folder_id', 
         'user_id', 
         'assigned_by', 
+        'note', 
         'status',
     ];
 

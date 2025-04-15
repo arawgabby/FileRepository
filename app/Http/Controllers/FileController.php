@@ -83,7 +83,38 @@ class FileController extends Controller
     
         return view('admin.pages.AdminViewRequests', compact('requests'));
     }
+
+    public function AdminViewRequestsFile(Request $request)
+    {
+        $requests = FileRequest::with(['user', 'file'])->orderBy('created_at', 'desc')->get();
     
+        return view('admin.pages.AdminViewRequestsFiles', compact('requests'));
+    }
+
+    public function updateStatusFile(Request $request)
+    {
+        // Validate the input
+        $validated = $request->validate([
+            'request_id' => 'required|exists:file_requests,request_id',
+            'status' => 'required|in:approved,rejected',
+        ]);
+
+        try {
+            // Find the request by ID
+            $fileRequest = FileRequest::findOrFail($validated['request_id']);
+
+            // Update the status
+            $fileRequest->request_status = $validated['status'];
+            $fileRequest->save();
+
+            // Return success message
+            return back()->with('success', 'Request status updated successfully.');
+        } catch (\Exception $e) {
+            // Handle any error that occurs during the process
+            return back()->with('error', 'An error occurred while updating the request status.');
+        }
+    }
+        
     
     public function updateFolderAccessStatus(Request $request, $id)
     {

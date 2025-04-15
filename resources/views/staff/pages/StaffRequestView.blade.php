@@ -68,6 +68,12 @@
                 <input type="text" name="status" id="status" value="Waiting Approval" class="mt-1 block w-full border border-gray-300 rounded-lg p-2" readonly>
             </div>
 
+            <div class="mb-4">
+                <label for="note" class="block text-sm font-medium text-gray-700">Note (optional)</label>
+                <textarea name="note" id="note" rows="3" placeholder="Add a note for the approver..." class="mt-1 block w-full border border-gray-300 rounded-lg p-2"></textarea>
+            </div>
+
+
             <div class="flex justify-end">
                 <button type="submit" class="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-700" id="submitBtn">
                     Save

@@ -29,13 +29,17 @@
                 <select name="folder" id="folder" class="mt-1 p-2 border rounded w-full">
                     <option value="">Root (uploads/)</option>
                     @foreach($subfolders as $folder)
-                        @if($folder->status === 'private')
-                            <option value="{{ $folder->name }}" disabled class="text-red-500">
-                                {{ $folder->name }} (Private – cannot insert file)
-                            </option>
-                        @else
-                            <option value="{{ $folder->name }}">{{ $folder->name }}</option>
-                        @endif
+                    
+                    @if($folder->status === 'private' && !$folder->user_has_access)
+                        <option value="{{ $folder->name }}" disabled class="text-red-500">
+                            {{ $folder->name }} (Private – cannot insert file)
+                        </option>
+                    @else
+                        <option value="{{ $folder->name }}">
+                            {{ $folder->name }}{{ $folder->status === 'private' ? ' (Private – access approved)' : '' }}
+                        </option>
+                    @endif
+
                     @endforeach
                 </select>
 

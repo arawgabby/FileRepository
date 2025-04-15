@@ -19,6 +19,7 @@ class FileRequest extends Model
         'file_id',
         'requested_by',
         'request_status',
+        'note',
     ];
 
     public function file()

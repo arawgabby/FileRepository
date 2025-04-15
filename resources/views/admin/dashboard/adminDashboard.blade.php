@@ -70,8 +70,12 @@
                 <i class="fas fa-upload mr-4"></i> Upload
             </a>
 
+            <a href="{{ route('admin.view.requests.file') }}" class="flex items-center text-white hover:text-white text-sm">
+                <i class="fas fa-share-from-square mr-4"></i> File Requests
+            </a>
+
             <a href="{{ route('admin.view.requests') }}" class="flex items-center text-white hover:text-white text-sm">
-                <i class="fas fa-share-from-square mr-4"></i> Request
+                <i class="fas fa-share-from-square mr-4"></i> Folder Requests
             </a>
 
             <a href="{{ route('admin.active.files') }}" class="flex items-center text-white hover:text-white mr-2 text-sm">

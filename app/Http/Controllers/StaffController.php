@@ -44,38 +44,32 @@ class StaffController extends Controller
 
     public function submitFolderAccess(Request $request)
     {
-        // Validate the form data
         $request->validate([
             'folder_id' => 'required|integer|exists:folders,id',
+            'note' => 'nullable|string|max:1000', // optional note
         ]);
     
-        // Get the user_id from the session
         $user_id = session('user')->id;
     
-        // Check if the same folder access request already exists
         $existingRequest = FolderAccess::where('folder_id', $request->folder_id)
                                        ->where('user_id', $user_id)
                                        ->first();
     
         if ($existingRequest) {
-            // If the request already exists, redirect back with an error flag
             return redirect()->route('request.folder.access')
                              ->with('duplicate', true);
         }
     
-        // Create a new FolderAccess entry if no duplicate exists
         FolderAccess::create([
             'folder_id' => $request->folder_id,
             'user_id' => $user_id,
             'status' => 'Waiting Approval',
+            'note' => $request->note, // this can be null, which is fine
         ]);
     
-        // Return a response with a success message
         return redirect()->route('request.folder.access')->with('success', 'Folder access request submitted successfully.');
     }
     
-
-
     public function showRequestFolder()
     {
         $user = session('user'); // assuming 'user' is an array or object containing 'id'
@@ -89,6 +83,45 @@ class StaffController extends Controller
     
         return view('staff.pages.StaffRequestView', compact('folders', 'folderAccesses'));
     }
+
+
+    public function showRequestFile()
+    {
+        $files = Files::where('status', 'private')->get(); // For the request form
+    
+        $requests = FileRequest::with('file') // eager load file relation
+            ->where('requested_by', session('user')->id)
+            ->latest()
+            ->get();
+    
+        return view('staff.pages.RequestFile', compact('files', 'requests'));
+    }
+
+    public function submitFileRequests(Request $request)
+    {
+        // Check if request already exists for this user and file
+        $exists = FileRequest::where('requested_by', $request->requested_by)
+                    ->where('file_id', $request->file_id)
+                    ->first();
+
+        if ($exists) {
+            return redirect()->back()->with('duplicate', 'You have already requested access to this file.');
+        }
+
+        try {
+            FileRequest::create([
+                'file_id' => $request->file_id,
+                'requested_by' => $request->requested_by,
+                'note' => $request->note,
+                'request_status' => 'Pending', // or leave null if handled in DB
+            ]);
+
+            return redirect()->back()->with('success', 'File access request submitted successfully.');
+        } catch (\Exception $e) {
+            return redirect()->back()->with('error', 'Failed to submit request.');
+        }
+    }
+    
     
 
 
@@ -501,17 +534,18 @@ class StaffController extends Controller
     {
         $files = Files::query();
         $subfolder = $request->get('subfolder');
-        
+    
         $user = session('user');
         $userId = $user->id ?? null;
         $role = $user->role ?? null;
-        
+    
         Log::info('--- Incoming activeFiles Request ---', [
             'subfolder' => $subfolder,
             'user_id' => $userId,
             'role' => $role,
         ]);
     
+        // Check access to selected subfolder if it exists
         if ($subfolder) {
             $folder = Folder::where('name', $subfolder)->first();
     
@@ -522,6 +556,7 @@ class StaffController extends Controller
             ]);
     
             if ($folder && $folder->status === 'private') {
+
                 if ($role !== 'admin') {
                     $hasAccess = \App\Models\FolderAccess::where('folder_id', $folder->id)
                         ->where('user_id', $userId)
@@ -537,30 +572,27 @@ class StaffController extends Controller
                             'user_id' => $userId,
                             'folder' => $subfolder,
                         ]);
-                    
-                        // Store warning message to pass to view
+    
                         session()->flash('unauthorized_alert', 'You are unauthorized to access this private folder.');
-                    
-                        // Empty results so no files are shown
+    
                         $files = Files::whereRaw('0 = 1')->paginate(20);
                         $fileVersions = collect();
-                    
+    
                         $uploadPath = public_path('storage/uploads');
                         $subfolders = [];
-                    
+    
                         if (\Illuminate\Support\Facades\File::exists($uploadPath)) {
                             $subfolders = collect(\Illuminate\Support\Facades\File::directories($uploadPath))->map(function ($path) {
                                 return basename($path);
                             });
                         }
-                    
+    
                         return view('staff.pages.StaffViewAllFilesActive', compact('fileVersions', 'files', 'subfolders'));
-                    }
-                     else {
+                    } else {
                         Log::info('User is authorized to access this private folder.', [
                             'user_id' => $userId,
                             'folder' => $subfolder,
-                        ]); 
+                        ]);
                     }
                 }
             }
@@ -578,25 +610,50 @@ class StaffController extends Controller
         if (!empty($subfolder)) {
             $files->where('file_path', 'LIKE', 'uploads/' . $subfolder . '/%');
         } else {
-            // No subfolder selected — exclude private folders unless admin or has access
-            if ($role !== 'admin') {
-                $privateFolders = Folder::where('status', 'private')->get();
-    
-                foreach ($privateFolders as $privateFolder) {
-                    $hasAccess = \App\Models\FolderAccess::where('folder_id', $privateFolder->id)
-                        ->where('user_id', $userId)
-                        ->where('status', 'approved')
-                        ->exists();
-    
-                    // If user doesn't have access, exclude the folder
-                    if (!$hasAccess) {
-                        $files->where('file_path', 'NOT LIKE', 'uploads/' . $privateFolder->name . '/%');
-                    }
-                }
+            // Exclude private files unless admin or has approved access/request
+          if ($role !== 'admin') {
+                $files->where(function ($query) use ($userId) {
+                    $query->where('status', '!=', 'private') // Public files
+                        ->orWhere(function ($subQuery) use ($userId) {
+                            $subQuery->where('status', 'private')
+                                ->whereIn('file_id', function ($subSubQuery) use ($userId) {
+                                    $subSubQuery->select('file_id')
+                                        ->from('file_requests')
+                                        ->where('requested_by', $userId)
+                                        ->where('request_status', 'approved');
+                                });
+                        });
+                });
             }
         }
     
         $files = $files->paginate(20)->appends(['subfolder' => $request->subfolder]);
+
+        // Fetch all approved requests for the current user
+        $approvedRequests = \App\Models\FileRequest::where('requested_by', $userId)
+            ->where('request_status', 'approved')
+            ->get();
+
+        // Logging each approved request
+        Log::info('Approved File Requests Summary', [
+            'user_id' => $userId,
+            'total_approved' => $approvedRequests->count(),
+        ]);
+
+        foreach ($approvedRequests as $request) {
+            Log::info('Approved Request Detail', [
+                'request_id' => $request->request_id ?? $request->id, // depending on your column
+                'file_id' => $request->file_id,
+                'requested_by' => $request->requested_by,
+                'request_status' => $request->request_status,
+                'created_at' => optional($request->created_at)->toDateTimeString(),
+            ]);
+        }
+
+        // Extract file IDs for use in the view
+        $approvedFileRequests = $approvedRequests->pluck('file_id')->toArray();
+
+        
     
         $fileVersions = FileVersions::whereIn('file_id', $files->pluck('file_id'))->get();
     
@@ -609,7 +666,7 @@ class StaffController extends Controller
             });
         }
     
-        return view('staff.pages.StaffViewAllFilesActive', compact('fileVersions', 'files', 'subfolders'));
+        return view('staff.pages.StaffViewAllFilesActive', compact('fileVersions', 'files', 'subfolders', 'approvedFileRequests', 'role'));
     }
     
     public function StaffeditPrimaryFile(Request $request, $file_id)

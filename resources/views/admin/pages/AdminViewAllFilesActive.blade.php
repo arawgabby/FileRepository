@@ -148,8 +148,8 @@
   <!-- Card View -->
     <div id="cardView" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 mt-6 mb-12">
         @foreach($files as $file)
-            @if($file->status == 'active')
-                @php
+            @if($file->status === 'active' || $file->status === 'private')
+            @php
                     $folderName = explode('/', $file->file_path)[1] ?? 'unknown';
                 @endphp
 

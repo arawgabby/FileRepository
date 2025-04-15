@@ -20,7 +20,7 @@
 
 
 <div class="container mx-auto p-6 bg-white shadow-md">
-    <h1 class="text-3xl font-bold mb-4 border-b border-gray-300 pb-2">Requests</h1>
+    <h1 class="text-3xl font-bold mb-4 border-b border-gray-300 pb-2">User's Folder Requests</h1>
 
     <!-- Filters -->
     <div class="flex flex-col sm:flex-row sm:items-center sm:justify-end gap-2 mb-4 space-y-4 sm:space-y-0">
