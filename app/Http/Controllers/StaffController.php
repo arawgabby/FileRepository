@@ -610,22 +610,39 @@ class StaffController extends Controller
         if (!empty($subfolder)) {
             $files->where('file_path', 'LIKE', 'uploads/' . $subfolder . '/%');
         } else {
-            // Exclude private files unless admin or has approved access/request
-          if ($role !== 'admin') {
-                $files->where(function ($query) use ($userId) {
-                    $query->where('status', '!=', 'private') // Public files
-                        ->orWhere(function ($subQuery) use ($userId) {
-                            $subQuery->where('status', 'private')
-                                ->whereIn('file_id', function ($subSubQuery) use ($userId) {
-                                    $subSubQuery->select('file_id')
-                                        ->from('file_requests')
-                                        ->where('requested_by', $userId)
-                                        ->where('request_status', 'approved');
-                                });
-                        });
+            if ($role !== 'admin') {
+                // Fetch private folders the user DOES NOT have access to
+                $privateFolders = Folder::where('status', 'private')->pluck('name')->toArray();
+        
+                $deniedFolderAccess = FolderAccess::where('user_id', $userId)
+                    ->where('status', 'approved')
+                    ->pluck('folder_id')
+                    ->toArray();
+        
+                $allowedPrivateFolders = Folder::whereIn('id', $deniedFolderAccess)->pluck('name')->toArray();
+        
+                // Filter out files inside private folders that the user doesn't have access to
+                $files->where(function ($query) use ($userId, $privateFolders, $allowedPrivateFolders) {
+                    $query->where(function ($q) use ($privateFolders, $allowedPrivateFolders) {
+                        foreach ($privateFolders as $folder) {
+                            // Skip folders that user has approved access to
+                            if (!in_array($folder, $allowedPrivateFolders)) {
+                                $q->where('file_path', 'not like', 'uploads/' . $folder . '/%');
+                            }
+                        }
+                    })
+                    ->where(function ($q2) use ($userId) {
+                        $q2->where('status', '!=', 'private') // show public or active files
+                            ->orWhereIn('file_id', function ($subQ) use ($userId) {
+                                $subQ->select('file_id')
+                                    ->from('file_requests')
+                                    ->where('requested_by', $userId)
+                                    ->where('request_status', 'approved');
+                            });
+                    });
                 });
             }
-        }
+        }        
     
         $files = $files->paginate(20)->appends(['subfolder' => $request->subfolder]);
 

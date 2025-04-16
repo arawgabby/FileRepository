@@ -25,14 +25,14 @@
             <table class="min-w-full text-sm">
                 <thead>
                     <tr class="border-b font-medium text-gray-700">
-                        <th class="py-2 text-left text-center">Folder Name</th>
+                        <th class="py-2 text-left text-left">Folder Name</th>
                         <th class="py-2 text-left text-center">Status</th>
                     </tr>
                 </thead>
                 <tbody>
                     @foreach($folderAccesses as $access)
                         <tr class="border-b hover:bg-gray-50">
-                            <td class="py-2 text-center">{{ $access->folder->name ?? 'N/A' }}</td>
+                            <td class="py-2 text-left">{{ $access->folder->name ?? 'N/A' }}</td>
                             <td class="py-2 text-center">
                                 <span class="px-2 py-1 rounded-full 
                                     {{ $access->status === 'approved' ? 'bg-green-200 text-green-800' : 

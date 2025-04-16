@@ -128,7 +128,7 @@
                 <i class="fas fa-file mr-4"></i> Activity Logs
             </a>
 
-            <a href="{{ route ('admin.timestamps.index')}}" class="flex items-center text-white hover:text-white ">
+            <a href="{{ route ('admin.timestamps.index')}}" class="flex items-center text-white hover:text-white text-sm">
                 <i class="fas fa-list mr-3"></i> File Timestamps
             </a>
 

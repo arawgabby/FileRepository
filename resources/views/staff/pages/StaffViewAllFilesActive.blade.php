@@ -43,7 +43,7 @@
 
         <form method="GET" action="{{ route('staff.active.files') }}" id="subfolderForm">
             <select id="subfolderFilter" name="subfolder" class="border rounded p-1 text-sm mt-2" onchange="document.getElementById('subfolderForm').submit()">
-                <option value="">All public files outside root folder</option>
+                <option value="">Public files </option>
                 @foreach ($subfolders as $folder)
                     <option value="{{ $folder }}" {{ request('subfolder') === $folder ? 'selected' : '' }}>
                         {{ ucfirst($folder) }}
