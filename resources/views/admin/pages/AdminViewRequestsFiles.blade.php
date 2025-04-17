@@ -77,6 +77,10 @@
             </tbody>
         </table>
     </div>
+    <div class="mt-4">
+        <!-- Paginate links -->
+        {{ $requests->links() }}
+    </div>
 </div>
 
 <!-- Edit Status Modal -->

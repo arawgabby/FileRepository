@@ -181,6 +181,9 @@ Route::middleware(['admin.auth'])->group(function () {
         return view('admin.dashboard.adminDashboard');
     })->name('admin.dashboard');
 
+    Route::post('/admin/files/change-status/{file_id}', 
+    [FileController::class, 'AdminchangeStatusFile'])->name('admin.files.changeStatus');
+
     Route::get('/admin-timestamps', [FileTimeStampController::class, 'AdminViewIndex'])->name('admin.timestamps.index');
 
     Route::get('/admin-logs', [FileTimeStampController::class, 'AdminViewLogs'])->name('admin.logs.view');

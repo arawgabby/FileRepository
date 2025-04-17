@@ -18,6 +18,7 @@ class FileRequest extends Model
     protected $fillable = [
         'file_id',
         'requested_by',
+        'processed_by',
         'request_status',
         'note',
     ];

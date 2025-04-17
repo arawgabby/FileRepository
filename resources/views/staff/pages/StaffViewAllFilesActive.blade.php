@@ -60,7 +60,7 @@
 
 
         <label for="yearFilter" class="font-medium text-gray-700 mt-3 text-sm">Filter by Year:</label>
-        <select id="yearFilter" class="border rounded    text-sm ">
+        <select id="yearFilter" class="border rounded text-sm ">
             <option value="all">All Years</option>
             @foreach($files->unique('year_published') as $file)
                 <option value="{{ $file->year_published }}">{{ $file->year_published }}</option>
@@ -191,7 +191,9 @@
 
                 <div class="bg-white rounded-lg shadow-lg p-6" 
                 data-subfolder="{{ $folderName }}"   
-                data-created="{{ $file->created_at->format('Y-m-d') }}">
+                data-created="{{ $file->created_at->format('Y-m-d') }}"
+                data-year="{{ $file->year_published }}">
+                
 
                     <div class="flex justify-between">
                         <div class="flex items-center gap-3">
@@ -336,14 +338,14 @@
             const selectedFileType = fileTypeFilter.value.toLowerCase();
             const selectedSubfolder = subfolderFilter.value.toLowerCase();
             const selectedYear = yearFilter.value;
-            const selectedDate = dateFilter.value; // e.g., "2025-04-12"
+            const selectedDate = dateFilter.value;
 
             cards.forEach(card => {
                 const fileName = card.querySelector("span.font-semibold").textContent.toLowerCase();
                 const fileType = card.querySelector("span.ml-2").textContent.toLowerCase();
                 const folder = card.dataset.subfolder ? card.dataset.subfolder.toLowerCase() : "";
-                const createdDate = card.dataset.created; // data-created="2025-04-12"
-                const year = card.querySelector("span.font-semibold:last-child").textContent;
+                const createdDate = card.dataset.created;
+                const year = card.dataset.year;
 
                 const matchesSearch = searchText === "" || fileName.includes(searchText);
                 const matchesFileType = selectedFileType === "" || fileType.includes(selectedFileType);
@@ -369,28 +371,6 @@
     
 </script>
 
- <!--For year filter-->
-<script>
-    document.addEventListener("DOMContentLoaded", function () {
-        const yearFilter = document.getElementById("yearFilter");
-        const cards = document.querySelectorAll("#cardView > div");
-
-        yearFilter.addEventListener("change", function () {
-            const selectedYear = this.value;
-
-            cards.forEach(card => {
-                const yearElement = card.querySelector("div.flex.justify-between span:nth-child(2)");
-                const fileYear = yearElement ? yearElement.textContent.trim() : "";
-
-                if (selectedYear === "all" || fileYear === selectedYear) {
-                    card.style.display = "block";
-                } else {
-                    card.style.display = "none";
-                }
-            });
-        });
-    });
-</script>
 
 <script>
     const subfolderFilter = document.getElementById("subfolderFilter");

@@ -22,6 +22,26 @@ use App\Models\User;
 class FileController extends Controller
 {
 
+    public function AdminchangeStatusFile(Request $request, $file_id)
+    {
+        $request->validate([
+            'new_status' => 'required|in:active,private',
+        ]);
+
+        $file = Files::find($file_id);
+
+        if (!$file) {
+            return back()->with('error', 'File not found.');
+        }
+
+        $file->status = $request->new_status;
+        $file->save();
+
+        return back()->with('success', 'File status updated successfully.');
+    }
+
+
+
     public function downloadFile($filePath)
     {
         // Ensure that the file path doesn't start with 'uploads/' (because it could break the path)
@@ -79,17 +99,23 @@ class FileController extends Controller
 
     public function AdminViewRequests(Request $request)
     {
-        $requests = FolderAccess::with(['folder', 'user'])->paginate(10);
-    
+        // Paginate the requests, 6 per page, ordered by created_at in descending order
+        $requests = FolderAccess::with(['folder', 'user'])
+                                ->orderBy('created_at', 'desc') // Order by created_at in descending order
+                                ->paginate(6);
+        
         return view('admin.pages.AdminViewRequests', compact('requests'));
     }
+    
 
     public function AdminViewRequestsFile(Request $request)
     {
-        $requests = FileRequest::with(['user', 'file'])->orderBy('created_at', 'desc')->get();
-    
+        // Paginate the requests, 10 per page (you can adjust the number as needed)
+        $requests = FileRequest::with(['user', 'file'])->orderBy('created_at', 'desc')->paginate(6);
+        
         return view('admin.pages.AdminViewRequestsFiles', compact('requests'));
     }
+
 
     public function updateStatusFile(Request $request)
     {
@@ -100,17 +126,20 @@ class FileController extends Controller
         ]);
 
         try {
+            // Get the session user
+            $user = session('user');
+
             // Find the request by ID
             $fileRequest = FileRequest::findOrFail($validated['request_id']);
 
-            // Update the status
+            // Update status and processed_by
             $fileRequest->request_status = $validated['status'];
+            $fileRequest->processed_by = $user->id ?? null; // Use ID from session user
+
             $fileRequest->save();
 
-            // Return success message
             return back()->with('success', 'Request status updated successfully.');
         } catch (\Exception $e) {
-            // Handle any error that occurs during the process
             return back()->with('error', 'An error occurred while updating the request status.');
         }
     }

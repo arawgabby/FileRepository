@@ -177,6 +177,11 @@
                         <span class="font-semibold">Publisher: {{ $file->published_by }}</span>
                     </div>  
 
+                    <span class="text-sm font-semibold py-1 px-3 rounded-lg 
+                        {{ $file->status === 'active' ? 'bg-green-500 text-white' : 'bg-gray-500 text-white' }}">
+                        {{ $file->status === 'active' ? 'Public' : 'Private' }}
+                    </span>
+
                     <div class="flex items-center mt-2">
                         @php
                             $fileType = strtolower($file->file_type);
@@ -210,6 +215,55 @@
                                     <i class="fas fa-archive text-sm"></i>
                                 </button>
                             </form>
+
+                           <!-- Trigger Button (opens modal) -->
+                            <button type="button" onclick="openStatusDropdown({{ $file->file_id }})" class="text-yellow-500" title="Change Status">
+                                <i class="fas fa-pen-to-square text-sm"></i>
+                            </button>
+
+                            <!-- Hidden Form -->
+                            <form id="statusForm-{{ $file->file_id }}" action="{{ route('admin.files.changeStatus', ['file_id' => $file->file_id]) }}" method="POST" class="hidden">
+                                @csrf
+                                <input type="hidden" name="new_status" id="newStatusInput-{{ $file->file_id }}">
+                            </form>
+
+                            <!-- Modal (simple dropdown) -->
+                            <div id="statusModal-{{ $file->file_id }}" class="hidden fixed inset-0 bg-gray-500 bg-opacity-50 flex items-center justify-center z-50">
+                                <div class="bg-white p-6 rounded-lg shadow-md">
+                                    <h3 class="text-lg font-semibold mb-4">Change Status</h3>
+                                    <label for="statusDropdown" class="block text-sm font-medium text-gray-700">Select Status</label>
+                                    <select id="statusDropdown-{{ $file->file_id }}" class="mt-2 mb-4 p-2 border border-gray-300 rounded">
+                                        <option value="active">Public</option>
+                                        <option value="private">Private</option>
+                                    </select>
+                                    <div class="flex justify-end">
+                                        <button type="button" onclick="submitStatusChange({{ $file->file_id }})" class="bg-blue-500 text-white px-4 py-2 rounded mr-2">Save</button>
+                                        <button type="button" onclick="closeStatusModal({{ $file->file_id }})" class="bg-gray-500 text-white px-4 py-2 rounded">Cancel</button>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <script>
+                                function openStatusDropdown(fileId) {
+                                    document.getElementById(`statusModal-${fileId}`).classList.remove('hidden');
+                                }
+
+                                function closeStatusModal(fileId) {
+                                    document.getElementById(`statusModal-${fileId}`).classList.add('hidden');
+                                }
+
+                                function submitStatusChange(fileId) {
+                                    const selectedStatus = document.getElementById(`statusDropdown-${fileId}`).value;
+
+                                    document.getElementById(`newStatusInput-${fileId}`).value = selectedStatus;
+                                    document.getElementById(`statusForm-${fileId}`).submit();
+
+                                    alert("Status changed to " + (selectedStatus === 'active' ? 'Public' : 'Private'));
+                                    closeStatusModal(fileId);
+                                }
+                            </script>
+
+
                             <form action="{{ route('admin.trash.files', ['file_id' => $file->file_id]) }}" method="POST" onsubmit="return confirm('Are you sure you want to move this file to trash?');">
                                 @csrf
                                 <button type="submit" class="text-black" title="Move File to Trash">

@@ -22,9 +22,14 @@ class FileTimeStampController extends Controller
 
     public function AdminViewIndex()
     {
-        $timestamps = FileTimeStamp::with(['file', 'fileVersion'])->paginate(10); // Paginate with 10 records per page
+        // Paginate with 10 records per page and order by created_at in descending order
+        $timestamps = FileTimeStamp::with(['file', 'fileVersion'])
+                                    ->orderBy('recorded_at', 'desc') // Order by created_at in descending order
+                                    ->paginate(10);
+        
         return view('admin.pages.AdminViewTimeStamps', compact('timestamps'));
-    }   
+    }
+  
 
     public function show($file_id)
     {

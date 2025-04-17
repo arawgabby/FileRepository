@@ -2,7 +2,7 @@
 
 @section('content')
 
-<div class="container mx-auto p-6 bg-white  shadow-md">
+<div class="container mx-auto p-6 bg-white shadow-md">
     <a href="{{ route('admin.users') }}" class="text-gray-600 hover:text-gray-800 flex items-center mb-4">
        <i class="fas fa-arrow-left mr-2" style="font-size: 34px; font-weight: bold"></i>
     </a>
@@ -36,6 +36,19 @@
         <div class="mb-4">
             <label class="block text-gray-700 font-bold mb-2">Password</label>
             <input type="password" name="password" class="w-full p-2 border rounded-lg" required>
+        </div>
+
+        <div class="mb-4">
+            <label class="block text-gray-700 font-bold mb-2">Contact Number</label>
+            <input type="text" name="contact_number" class="w-full p-2 border rounded-lg" required>
+        </div>
+
+        <div class="mb-4">
+            <label class="block text-gray-700 font-bold mb-2">Role</label>
+            <select name="role" class="w-full p-2 border rounded-lg" required>
+                <option value="staff">Staff</option>
+                <option value="faculty">Faculty</option>
+            </select>
         </div>
 
         <div class="mb-4">

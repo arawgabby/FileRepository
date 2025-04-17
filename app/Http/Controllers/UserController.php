@@ -8,12 +8,15 @@ use Illuminate\Support\Facades\Hash;
 
 class UserController extends Controller
 {
+
     public function index()
     {
-        $users = User::all(); // Fetch all users
+        // Paginate users (10 per page) and order by created_at in descending order
+        $users = User::orderBy('created_at', 'desc')->paginate(8);
+    
         return view('admin.pages.UsersView', compact('users'));
     }
-
+    
     public function AddUserViewBlade()
     {
         return view('admin.pages.AddUser'); // Ensure this blade file exists
@@ -29,6 +32,8 @@ class UserController extends Controller
             'email' => 'required|email|unique:users,email',
             'password' => 'required|min:6',
             'status' => 'required|in:active,inactive,pending,deactivated',
+            'contact_number' => 'required|string|max:15', // Validate contact number
+            'role' => 'required|in:staff,faculty', // Validate role
         ]);
 
         try {
@@ -37,8 +42,9 @@ class UserController extends Controller
                 'name' => $request->name,
                 'email' => $request->email,
                 'password' => Hash::make($request->password), // Encrypt password
-                'role' => 'user', // Default role
+                'role' => $request->role, // Use role from the form
                 'status' => $request->status,
+                'contact_number' => $request->contact_number, // Store contact number
             ]);
 
             // Success message
