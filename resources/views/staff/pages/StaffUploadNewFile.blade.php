@@ -137,6 +137,18 @@
         $('#uploadForm').submit(function (e) {
             e.preventDefault();
 
+            let selectedFolder = $('#folder').val();
+            if (selectedFolder === "") {
+                Swal.fire({
+                    title: "Folder Required",
+                    text: "Please select a specific folder (not Root).",
+                    icon: "warning",
+                    confirmButtonText: "OK"
+                });
+                return;
+            }
+
+
             let formData = new FormData(this);
             let fileInput = document.getElementById("file");
 

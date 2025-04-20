@@ -12,7 +12,7 @@
     <style>
         body {
             font-family: 'Lato', sans-serif;
-            zoom: 80%;
+            zoom: 90%;
         }
     </style>
 </head>
@@ -26,7 +26,7 @@
      transition-transform duration-300 fixed top-0 bottom-0 z-40 overflow-y-auto">
      
         <div class="text-2xl font-bold flex justify-center">
-            <img src="{{ asset('storage/csitlogo.jpg') }}" alt="CSIT Logo" class="w-25 h-25">
+            <img src="{{ asset('storage/csitlogo.jpg') }}" alt="CSIT Logo" class="w-24 h-24 rounded-full">
             <!-- <p><a href="#" class="text-white">Staff Panel</a></p>  -->
         </div>
 

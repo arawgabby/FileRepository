@@ -148,7 +148,7 @@ class FileController extends Controller
     public function updateFolderAccessStatus(Request $request, $id)
     {
         $request->validate([
-            'status' => 'required|in:Approved,Rejected',
+            'status' => 'required|in:Approved,Rejected,Restricted',
         ]);
 
         $access = FolderAccess::find($id);

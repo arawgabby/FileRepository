@@ -12,7 +12,7 @@
     <style>
         body {
             font-family: 'Lato', sans-serif;
-            zoom: 80%;
+            zoom: 90%;
         }
     </style>
 </head>
@@ -25,8 +25,8 @@
     <div id="sidebar" class="bg-gray-900 text-white w-66 space-y-6 py-8 px-6 transform -translate-x-full md:translate-x-0
     transition-transform duration-300 fixed top-0 bottom-0 z-40 overflow-y-auto">
 
-    <div class="text-2xl font-bold flex justify-center">
-            <img src="{{ asset('storage/csitlogo.jpg') }}" alt="CSIT Logo" class="w-25 h-25">
+        <div class="text-2xl font-bold flex justify-center">
+            <img src="{{ asset('storage/csitlogo.jpg') }}" alt="CSIT Logo" class="w-[200px] h-[200px] rounded-full">
             <!-- <p><a href="#" class="text-white">Staff Panel</a></p>  -->
         </div>
 

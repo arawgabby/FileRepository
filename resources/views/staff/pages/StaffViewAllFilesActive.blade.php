@@ -203,15 +203,20 @@
                                 $isPdf = $fileType === 'pdf';
                             @endphp
 
-                            @if ($isImage)
-                                <img src="{{ asset('storage/' . $file->file_path) }}" alt="Preview" class="w-16 h-16 object-cover rounded">
-                            @elseif ($isPdf)
-                                <img src="{{ asset('images/pdf-thumbnail.png') }}" alt="PDF Preview" class="w-16 h-16 object-cover rounded">
-                            @else
-                                <div class="w-16 h-16 flex items-center justify-center bg-gray-100 rounded">
+                            <div class="w-16 h-16 flex items-center justify-center bg-gray-100 rounded">
+                                @if ($fileType == 'pdf')
+                                    <i class="fa-solid fa-file-pdf text-red-500 text-2xl"></i>
+                                @elseif ($fileType == 'docx' || $fileType == 'doc')
+                                    <i class="fa-solid fa-file-word text-blue-500 text-2xl"></i>
+                                @elseif ($fileType == 'pptx' || $fileType == 'ppt')
+                                    <i class="fa-solid fa-file-powerpoint text-orange-500 text-2xl"></i>
+                                @elseif (in_array($fileType, ['jpg', 'jpeg', 'png', 'gif', 'webp']))
+                                    <i class="fa-solid fa-file-image text-green-500 text-2xl"></i>
+                                @else
                                     <i class="fa-solid fa-file text-gray-400 text-2xl"></i>
-                                </div>
-                            @endif
+                                @endif
+                            </div>
+
 
                             <span class="text-sm font-semibold break-words w-full block">{{ $file->filename }}
                                 @if($file->status === 'private' && !in_array($file->file_id, $approvedFileRequests))
@@ -244,7 +249,12 @@
                         <span class="font-semibold">Publisher: {{ $file->published_by }}</span>
                     </div>  
 
-                    <div class="flex items-center mt-2">
+                    <span class="text-sm font-semibold py-1 px-3 rounded-lg 
+                        {{ $file->status === 'active' ? 'bg-green-500 text-white' : 'bg-gray-500 text-white' }}">
+                        {{ $file->status === 'active' ? 'Public' : 'Private' }}
+                    </span>
+
+                    <!-- <div class="flex items-center mt-2">
                         @php
                             $fileType = strtolower($file->file_type);
                         @endphp
@@ -259,7 +269,7 @@
                             <i class="fa-solid fa-file text-gray-500 text-1xl"></i>
                         @endif
                         <span class="ml-2">{{ strtoupper($fileType) }}</span>
-                    </div>
+                    </div> -->
 
                     <div class="flex justify-between items-center mt-4">
                         <span class="text-sm text-gray-500">{{ $file->created_at->format('F j, Y H:i') }}</span>

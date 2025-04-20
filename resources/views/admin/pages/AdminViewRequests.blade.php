@@ -2,12 +2,12 @@
 
 @section('content')
 
-@if(session('success'))
+<!-- @if(session('success'))
     <script>alert("{{ session('success') }}");</script>
 @endif
 @if(session('error'))
     <script>alert("{{ session('error') }}");</script>
-@endif
+@endif -->
 
 <style>
     th, td {
@@ -43,6 +43,7 @@
                 <tr>
                     <th class="px-4 py-2 text-left border-b">Folder Wishes to Access</th>
                     <th class="px-4 py-2 text-left border-b  text-center">User</th>
+                    <th class="px-4 py-2 text-left border-b  text-center">Note</th>
                     <th class="px-4 py-2 text-left border-b  text-center">Status</th>
                     <th class="px-4 py-2 text-left border-b  text-center">Actions</th>
                 </tr>
@@ -55,10 +56,42 @@
                         </td>
                         <td class="px-4 py-2 border-b">{{ $request->user->name ?? 'N/A' }}</td>
 
+                       <td class="px-4 py-2 border-b text-center">
+                            <button 
+                                class="text-blue-600 hover:text-blue-800" 
+                                onclick="showNoteModal('{{ addslashes($request->note ?? 'N/A') }}')"
+                            >
+                                <i class="fas fa-eye"></i>
+                            </button>
+                        </td>
+
+
+                        <div id="noteModal" class="fixed inset-0 z-50 hidden items-center justify-center bg-black bg-opacity-50">
+                            <div class="bg-white w-96 p-6 rounded-lg shadow-lg relative">
+                                <h2 class="text-lg font-semibold mb-4">Note</h2>
+                                <p id="modalNoteContent" class="text-gray-700"></p>
+                                <button onclick="hideNoteModal()" class="mt-6 px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700">Close</button>
+                            </div>
+                        </div>
+
+                        <script>
+                            function showNoteModal(noteContent) {
+                                document.getElementById('modalNoteContent').textContent = noteContent;
+                                document.getElementById('noteModal').classList.remove('hidden');
+                                document.getElementById('noteModal').classList.add('flex');
+                            }
+
+                            function hideNoteModal() {
+                                document.getElementById('noteModal').classList.remove('flex');
+                                document.getElementById('noteModal').classList.add('hidden');
+                            }
+                        </script>
+
                         @php
                             $status = ucfirst($request->status);
                             $bgColor = match($status) {
                                 'Approved' => 'bg-green-400 text-white',
+                                'Restricted' => 'bg-violet-700 text-white',
                                 'Waiting Approval' => 'bg-yellow-400 text-black',
                                 default => 'bg-gray-200 text-black',
                             };
@@ -102,6 +135,7 @@
             <select name="status" id="statusSelect" class="w-full border rounded px-3 py-2 mb-4">
                 <option value="Approved">Approved</option>
                 <option value="Rejected">Rejected</option>
+                <option value="Restricted">Restricted</option>
             </select>
             <div class="flex justify-end">
                 <button type="button" onclick="closeModal()" class="mr-2 px-4 py-2 bg-gray-300 rounded">Cancel</button>
