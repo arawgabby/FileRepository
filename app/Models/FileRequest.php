@@ -23,6 +23,11 @@ class FileRequest extends Model
         'note',
     ];
 
+    public function user()
+    {
+        return $this->belongsTo(User::class, 'requested_by', 'id');
+    }
+
     // Relationship to Files Model
     public function file()
     {

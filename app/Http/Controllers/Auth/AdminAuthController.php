@@ -111,7 +111,7 @@ class AdminAuthController extends Controller
                 return redirect('/staff-login')->with('error', 'Access denied. Only faculty or staff can log in.');
             }
             Auth::login($user); // Use Laravel authentication
-            return redirect()->route('staff.dashboard')->with('success', 'Login successful!');
+            return redirect()->route('staff.page.dashboard')->with('success', 'Login successful!');
         } else {
             return redirect('/staff-login')->with('error', 'Invalid email or password. Please try again.');
         }

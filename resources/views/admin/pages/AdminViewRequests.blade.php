@@ -1,5 +1,5 @@
 @extends('admin.dashboard.adminDashboard')
-
+@section('title', 'View Request')
 @section('content')
 
 <!-- @if(session('success'))
@@ -10,9 +10,11 @@
 @endif -->
 
 <style>
-    th, td {
+    th,
+    td {
         text-align: center;
     }
+
     td.no-center {
         text-align: left;
     }
@@ -50,69 +52,68 @@
             </thead>
             <tbody class="bg-white">
                 @forelse($requests as $index => $request)
-                    <tr class="hover:bg-gray-100 table-row">
-                        <td class="px-4 py-2 border-b no-center">
-                            <i class="fas fa-folder text-gray-800 mr-2"></i>{{ $request->folder->name ?? 'N/A' }}
-                        </td>
-                        <td class="px-4 py-2 border-b">{{ $request->user->name ?? 'N/A' }}</td>
+                <tr class="hover:bg-gray-100 table-row">
+                    <td class="px-4 py-2 border-b no-center">
+                        <i class="fas fa-folder text-gray-800 mr-2"></i>{{ $request->folder->name ?? 'N/A' }}
+                    </td>
+                    <td class="px-4 py-2 border-b">{{ $request->user->name ?? 'N/A' }}</td>
 
-                       <td class="px-4 py-2 border-b text-center">
-                            <button 
-                                class="text-blue-600 hover:text-blue-800" 
-                                onclick="showNoteModal('{{ addslashes($request->note ?? 'N/A') }}')"
-                            >
-                                <i class="fas fa-eye"></i>
-                            </button>
-                        </td>
+                    <td class="px-4 py-2 border-b text-center">
+                        <button
+                            class="text-blue-600 hover:text-blue-800"
+                            onclick="showNoteModal('{{ addslashes($request->note ?? 'N/A') }}')">
+                            <i class="fas fa-eye"></i>
+                        </button>
+                    </td>
 
 
-                        <div id="noteModal" class="fixed inset-0 z-50 hidden items-center justify-center bg-black bg-opacity-50">
-                            <div class="bg-white w-96 p-6 rounded-lg shadow-lg relative">
-                                <h2 class="text-lg font-semibold mb-4">Note</h2>
-                                <p id="modalNoteContent" class="text-gray-700"></p>
-                                <button onclick="hideNoteModal()" class="mt-6 px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700">Close</button>
-                            </div>
+                    <div id="noteModal" class="fixed inset-0 z-50 hidden items-center justify-center bg-black bg-opacity-50">
+                        <div class="bg-white w-96 p-6 rounded-lg shadow-lg relative">
+                            <h2 class="text-lg font-semibold mb-4">Note</h2>
+                            <p id="modalNoteContent" class="text-gray-700"></p>
+                            <button onclick="hideNoteModal()" class="mt-6 px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700">Close</button>
                         </div>
+                    </div>
 
-                        <script>
-                            function showNoteModal(noteContent) {
-                                document.getElementById('modalNoteContent').textContent = noteContent;
-                                document.getElementById('noteModal').classList.remove('hidden');
-                                document.getElementById('noteModal').classList.add('flex');
-                            }
+                    <script>
+                        function showNoteModal(noteContent) {
+                            document.getElementById('modalNoteContent').textContent = noteContent;
+                            document.getElementById('noteModal').classList.remove('hidden');
+                            document.getElementById('noteModal').classList.add('flex');
+                        }
 
-                            function hideNoteModal() {
-                                document.getElementById('noteModal').classList.remove('flex');
-                                document.getElementById('noteModal').classList.add('hidden');
-                            }
-                        </script>
+                        function hideNoteModal() {
+                            document.getElementById('noteModal').classList.remove('flex');
+                            document.getElementById('noteModal').classList.add('hidden');
+                        }
+                    </script>
 
-                        @php
-                            $status = ucfirst($request->status);
-                            $bgColor = match($status) {
-                                'Approved' => 'bg-green-400 text-white',
-                                'Restricted' => 'bg-violet-700 text-white',
-                                'Waiting Approval' => 'bg-yellow-400 text-black',
-                                default => 'bg-gray-200 text-black',
-                            };
-                        @endphp
-                        <td class="px-4 py-2 border-b">
-                            <span class="px-3 py-1 {{ $bgColor }} rounded-full inline-block text-sm font-semibold">
-                                {{ $status }}
-                            </span>
-                        </td>
-                        <td class="px-4 py-2 border-b">
-                            <button onclick="openModal({{ $request->id }}, '{{ $request->status }}')" class="text-blue-600 hover:text-blue-800">
-                                <i class="fas fa-edit"></i>
-                            </button>
-                        </td>
-                    </tr>
+                    @php
+                    $status = ucfirst($request->status);
+                    $bgColor = match($status) {
+                    'Approved' => 'bg-green-400 text-white',
+                    'Restricted' => 'bg-violet-700 text-white',
+                    'Waiting Approval' => 'bg-yellow-400 text-black',
+                    default => 'bg-gray-200 text-black',
+                    };
+                    @endphp
+                    <td class="px-4 py-2 border-b">
+                        <span class="px-3 py-1 {{ $bgColor }} rounded-full inline-block text-sm font-semibold">
+                            {{ $status }}
+                        </span>
+                    </td>
+                    <td class="px-4 py-2 border-b">
+                        <button onclick="openModal({{ $request->id }}, '{{ $request->status }}')" class="text-blue-600 hover:text-blue-800">
+                            <i class="fas fa-edit"></i>
+                        </button>
+                    </td>
+                </tr>
                 @empty
-                    <tr>
-                        <td colspan="4" class="px-4 py-4 text-center text-gray-500 border-b">
-                            No requests found.
-                        </td>
-                    </tr>
+                <tr>
+                    <td colspan="4" class="px-4 py-4 text-center text-gray-500 border-b">
+                        No requests found.
+                    </td>
+                </tr>
                 @endforelse
             </tbody>
         </table>
