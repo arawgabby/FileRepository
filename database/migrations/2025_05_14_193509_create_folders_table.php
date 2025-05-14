@@ -11,20 +11,14 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('users', function (Blueprint $table) {
+        Schema::create('folders', function (Blueprint $table) {
             $table->increments('id');
             $table->string('name', 255);
-            $table->string('email', 255);
-            $table->timestamp('email_verified_at')->nullable()->default(null);
-            $table->string('password', 255);
-            $table->string('role', 255)->default('NULL');
-            $table->string('contact_number', 255)->default('null');
-            $table->string('remember_token', 100)->nullable()->default(null);
-            $table->string('status', 255)->default('active');
+            $table->text('path');
+            $table->string('status', 255)->default('public');
+            $table->unsignedInteger('user_id')->nullable();
             $table->timestamp('created_at')->nullable()->default(null);
             $table->timestamp('updated_at')->nullable()->default(null);
-
-            $table->unique('email');
         });
     }
 
@@ -33,6 +27,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('users');
+        Schema::dropIfExists('folders');
     }
 };

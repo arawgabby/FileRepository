@@ -14,6 +14,7 @@ class Files extends Model
     protected $primaryKey = 'file_id';
 
     protected $fillable = [
+        'file_id',
         'filename',
         'file_path',
         'file_size',
@@ -34,4 +35,3 @@ class Files extends Model
         return $this->belongsTo(User::class, 'uploaded_by');
     }
 }
-

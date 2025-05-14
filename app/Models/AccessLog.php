@@ -12,6 +12,7 @@ class AccessLog extends Model
     protected $table = 'access_logs'; // Define the table name
 
     protected $fillable = [
+        'log_id',
         'file_id',
         'accessed_by',
         'action',

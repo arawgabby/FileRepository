@@ -8,26 +8,21 @@ use App\Http\Controllers\UserController;
 use App\Http\Controllers\StaffController;
 use App\Http\Controllers\FileTimeStampController;
 use Illuminate\Support\Facades\Storage;
-use App\Models\Folder; 
+use App\Models\Folder;
+use Illuminate\Http\Request;
 
 Route::get('/', function () {
     return view('welcome');
 });
-
-
 Route::get('/admin-login', function () {
     return view('auth.AdminLogin');
 });
 Route::get('/staff-login', function () {
     return view('auth.StaffLogin');
 });
-
-
 Route::get('/admin-signup', function () {
     return view('auth.AdminSignup');
 });
-
-
 Route::get('/admin-signup', function () {
     return view('auth.AdminSignup');
 });
@@ -49,7 +44,7 @@ Route::get('/admin-logout', [AdminAuthController::class, 'logout'])->name('admin
 Route::get('/staff-logout', [AdminAuthController::class, 'Stafflogout'])->name('staff.logout');
 
 Route::post('/forgot-password-request', function (Request $request) {
-    
+
     return response()->json([
         'message' => 'Request received. Admin will contact you soon!',
     ]);
@@ -72,7 +67,7 @@ Route::middleware(['staff.auth'])->group(function () {
 
     Route::get('/staff-upload', function () {
         $userId = session('user')->id;
-    
+
         $subfolders = Folder::select('id', 'name', 'status')
             ->get()
             ->map(function ($folder) use ($userId) {
@@ -82,12 +77,12 @@ Route::middleware(['staff.auth'])->group(function () {
                     ->where('user_id', $userId)
                     ->where('status', 'approved')
                     ->exists();
-    
+
                 $folder->user_has_access = $hasAccess;
-    
+
                 return $folder;
             });
-    
+
         return view('staff.pages.StaffUploadNewFile', compact('subfolders'));
     })->name('staff.upload');
 
@@ -100,13 +95,13 @@ Route::middleware(['staff.auth'])->group(function () {
     Route::get('/staff-logs', [StaffController::class, 'StaffviewLogs'])->name('staff.logs.view');
 
     Route::get('/staff-dashboard', [StaffController::class, 'CountActiveFiles'])
-    ->name('staff.page.dashboard');
+        ->name('staff.page.dashboard');
 
     Route::get('/staff-dashboard/check-file-requests', [StaffController::class, 'checkFileRequests'])
-    ->name('staff.check.file.requests');
+        ->name('staff.check.file.requests');
 
     Route::post('/active-files/archive/{file_id}', [StaffController::class, 'ActiveFileArchived'])
-    ->name('files.archive.active');
+        ->name('files.archive.active');
 
     Route::get('/staff-files-requests', [StaffController::class, 'pendingAndDeniedFileRequests'])->name('staff.pending.files');
 
@@ -129,10 +124,10 @@ Route::middleware(['staff.auth'])->group(function () {
     Route::post('/staff/request-file/{file_id}', [StaffController::class, 'requestFile'])->name('staff.requestFile');
 
     Route::get('/staff/files/{file_id}/edit-primary', [StaffController::class, 'StaffeditPrimaryFile'])
-    ->name('staff.files.editPrimary');
+        ->name('staff.files.editPrimary');
 
     Route::post('/staff/files/{file_id}/update-primary', [StaffController::class, 'StaffupdatePrimaryFile'])
-    ->name('staff.files.updatePrimary');
+        ->name('staff.files.updatePrimary');
 
     Route::get('/staff-edit-file/{file_id}', [StaffController::class, 'StaffeditFile'])->name('staff.editFile');
 
@@ -143,30 +138,27 @@ Route::middleware(['staff.auth'])->group(function () {
     Route::put('/staff/archive-file/{version_id}', [StaffController::class, 'StaffarchiveFile'])->name('staff.archiveFile');
 
     Route::get('/staff/edit-file-version/{version_id}', [StaffController::class, 'StaffeditFileVersion'])
-    ->name('staff.editFileVersion');
+        ->name('staff.editFileVersion');
 
     Route::put('/staff-view/trash-file/{version_id}', [StaffController::class, 'StaffTrashFile'])->name('staff.trash');
 
     Route::get('/staff-archive-files', [StaffController::class, 'StaffArchivedViewFilesVersions'])->name('staff.archived.files');
 
     Route::put('/staff/unarchive-file/{id}', [StaffController::class, 'StaffunarchiveFile'])
-    ->name('staff.unarchiveFile');
+        ->name('staff.unarchiveFile');
 
     Route::get('/staff-trash-files', [StaffController::class, 'StaffTrashViewFilesVersions'])->name('staff.trash.bins');
 
     Route::put('/staff/restore-file/{version_id}', [StaffController::class, 'StafRestoreFile'])->name('staff.restore');
 
     Route::put('/staff/update-file-version/{version_id}', [StaffController::class, 'StaffupdateFileVersion'])
-    ->name('staff.updateFileVersion');
+        ->name('staff.updateFileVersion');
 
     Route::put('/staff-view/trash-file/{version_id}', [StaffController::class, 'StaffTrashFile'])->name('staff.trash');
 
     Route::get('/timestamps', [FileTimeStampController::class, 'ViewIndex'])->name('timestamps.index');
 
     Route::get('/file-timestamps/{file_id}', [FileTimeStampController::class, 'show'])->name('file.timestamps.details');
-
-
-
 });
 
 
@@ -181,8 +173,10 @@ Route::middleware(['admin.auth'])->group(function () {
         return view('admin.dashboard.adminDashboard');
     })->name('admin.dashboard');
 
-    Route::post('/admin/files/change-status/{file_id}', 
-    [FileController::class, 'AdminchangeStatusFile'])->name('admin.files.changeStatus');
+    Route::post(
+        '/admin/files/change-status/{file_id}',
+        [FileController::class, 'AdminchangeStatusFile']
+    )->name('admin.files.changeStatus');
 
     Route::get('/admin-timestamps', [FileTimeStampController::class, 'AdminViewIndex'])->name('admin.timestamps.index');
 
@@ -194,10 +188,10 @@ Route::middleware(['admin.auth'])->group(function () {
 
     //
     Route::get('/admin-dashboard', [FileController::class, 'AdminCountActiveFiles'])
-    ->name('admin.page.dashboard');
+        ->name('admin.page.dashboard');
 
     Route::get('/admin-folders/{subfolder?}', [FileController::class, 'AdminshowFolders'])->name('admin.folders');
-    
+
     Route::get('/admin-view-requests', [FileController::class, 'AdminViewRequests'])->name('admin.view.requests');
 
     Route::get('/admin-view-file-requests', [FileController::class, 'AdminViewRequestsFile'])->name('admin.view.requests.file');
@@ -221,17 +215,17 @@ Route::middleware(['admin.auth'])->group(function () {
     Route::post('/admin-upload', [FileController::class, 'AdminuploadFile'])->name('admin.uploadFiles');
 
     Route::get('/admin-active-files', [FileController::class, 'AdminactiveFiles'])->name('admin.active.files');
-    
+
     Route::get('/admin-files/download/{file}', [FileController::class, 'AdmindownloadFile'])->name('admin.files.download');
 
     Route::get('/admin/files/{file_id}/edit-primary', [FileController::class, 'AdmineditPrimaryFile'])
-    ->name('admin.files.editPrimary');
+        ->name('admin.files.editPrimary');
 
     Route::post('/admin-active-files/archive/{file_id}', [FileController::class, 'AdminActiveFileArchived'])
-    ->name('admin.files.archive.active');
+        ->name('admin.files.archive.active');
 
     Route::post('/admin/files/{file_id}/update-primary', [FileController::class, 'AdminupdatePrimaryFile'])
-    ->name('admin.files.updatePrimary');
+        ->name('admin.files.updatePrimary');
 
     Route::put('/overview/trash-file/{version_id}', [FileController::class, 'OverviewTrashFile'])->name('admin.overview.trash');
 
@@ -240,13 +234,13 @@ Route::middleware(['admin.auth'])->group(function () {
     Route::get('/admin-archive-view', [FileController::class, 'AdminArchivedViewFilesVersions'])->name('admin.archived.view');
 
     Route::put('/admin/unarchive-file/{id}', [FileController::class, 'AdminunarchiveFile'])
-    ->name('admin.unarchive.file');
+        ->name('admin.unarchive.file');
 
     Route::get('/admin-archive-files', [FileController::class, 'AdminArchivedViewFilesVersions'])->name('admin.archived.files');
 
     Route::get('/admin-trash-files', [FileController::class, 'AdminTrashViewFilesVersions'])->name('admin.trash.bins');
 
-    Route::put('/admin/restore-file/{file_id}', [FileController::class, 'AdminRestoreFile'])->name('admin.restore');
+    // Route::put('/admin/restore-file/{file_id}', [FileController::class, 'AdminRestoreFile'])->name('admin.restore');
 
 
 
@@ -276,11 +270,11 @@ Route::middleware(['admin.auth'])->group(function () {
     Route::get('/admin-download-file/{file_id}', [FileController::class, 'downloadFileUpdated'])->name('admin.downloadFile');
 
     Route::get('/admin/edit-file-version/{version_id}', [FileController::class, 'editFileVersion'])
-    ->name('admin.editFileVersion');
+        ->name('admin.editFileVersion');
 
 
     Route::put('/admin/update-file-version/{version_id}', [FileController::class, 'updateFileVersion'])
-    ->name('admin.updateFileVersion');
+        ->name('admin.updateFileVersion');
 
     Route::put('/admin/archive-file/{version_id}', [FileController::class, 'archiveFile'])->name('admin.archiveFile');
 
@@ -302,7 +296,7 @@ Route::middleware(['admin.auth'])->group(function () {
 
 
     Route::get('/admin/users/{id}/edit', [UserController::class, 'edit'])->name('admin.users.edit');
-    
+
     Route::put('/admin/users/{id}/update', [UserController::class, 'updateUser'])->name('admin.users.update');
 
     // Route::get('/admin/files/{file_id}/edit-primary', [FileController::class, 'editPrimaryFile'])

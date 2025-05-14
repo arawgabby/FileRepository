@@ -15,6 +15,11 @@ use Symfony\Component\HttpFoundation\Response;
 
 class AdminAuthController extends Controller
 {
+    public function showAdminLoginForm()
+    {
+        return view('auth.AdminLogin');
+    }
+
     public function store(Request $request)
     {
         $validated = $request->validate([
@@ -36,7 +41,7 @@ class AdminAuthController extends Controller
         } catch (\Exception $e) {
             return redirect('/admin-signup')->with('error', 'Something went wrong. Please try again.');
         }
-    }   
+    }
 
     public function Staffstore(Request $request)
     {
@@ -46,7 +51,7 @@ class AdminAuthController extends Controller
             'password' => 'required|string|min:6',
             'role' => 'required|in:staff,faculty',
         ]);
-    
+
         try {
             User::create([
                 'name' => $validated['name'],
@@ -54,13 +59,13 @@ class AdminAuthController extends Controller
                 'password' => Hash::make($validated['password']),
                 'role' => $validated['role'],
             ]);
-    
+
             return redirect('/staff-login')->with('success', 'Account created successfully! You can now log in.');
         } catch (\Exception $e) {
             return redirect('/staff-signup')->with('error', 'Something went wrong. Please try again.');
         }
     }
-    
+
     public function login(Request $request)
     {
         $credentials = $request->validate([
@@ -125,22 +130,22 @@ class AdminAuthController extends Controller
     public function uploadFile(Request $request)
     {
         $request->validate([
-            'file' => 'required|file|max:502400', 
+            'file' => 'required|file|max:502400',
             'category' => 'required|in:capstone,thesis,faculty_request,accreditation,admin_docs',
         ]);
-    
+
         // Ensure the user is logged in via session
         if (!session()->has('user')) {
             return redirect()->route('admin.upload')->with('error', 'Unauthorized: Please log in.');
         }
-    
+
         $user = session('user'); // Get user data from session
-    
+
         if ($request->hasFile('file')) {
             $file = $request->file('file');
             $filename = $file->getClientOriginalName();
             $filePath = $file->storeAs('uploads', $filename, 'public');
-    
+
             Files::create([
                 'filename' => $filename,
                 'file_path' => $filePath,
@@ -149,10 +154,10 @@ class AdminAuthController extends Controller
                 'uploaded_by' => $user->id, // Use session user ID
                 'category' => $request->category,
             ]);
-    
+
             return redirect()->route('admin.upload')->with('success', 'File uploaded successfully!');
         }
-    
+
         return redirect()->route('admin.upload')->with('error', 'File upload failed.');
     }
 
@@ -182,7 +187,7 @@ class AdminAuthController extends Controller
         return view('admin.pages.ViewAllFiles', compact('fileVersions', 'files'));
     }
 
-    public function ViewFilesVersions(Request $request) 
+    public function ViewFilesVersions(Request $request)
     {
         $query = FileVersions::query(); // Make sure you're fetching from FileVersion model
 
@@ -207,7 +212,7 @@ class AdminAuthController extends Controller
         return view('admin.pages.EditFilesOverview', compact('fileVersions')); // Pass $fileVersions to view
     }
 
-    public function ArchivedViewFilesVersions(Request $request) 
+    public function ArchivedViewFilesVersions(Request $request)
     {
         $query = FileVersions::query(); // Make sure you're fetching from FileVersion model
 
@@ -233,7 +238,7 @@ class AdminAuthController extends Controller
     }
 
 
-    public function TrashViewFilesVersions(Request $request) 
+    public function TrashViewFilesVersions(Request $request)
     {
         $query = FileVersions::query(); // Make sure you're fetching from FileVersion model
 
@@ -285,16 +290,16 @@ class AdminAuthController extends Controller
     }
 
 
-    
+
     public function updateFile(Request $request, $file_id)
     {
         if (!session()->has('user')) {
             return redirect()->route('admin.upload')->with('error', 'Unauthorized: Please log in.');
         }
-    
+
         $user = session('user'); // Get user from session
         $file = Files::findOrFail($file_id);
-    
+
         // Validate input
         $request->validate([
             'filename' => 'required|string|max:255',
@@ -302,15 +307,15 @@ class AdminAuthController extends Controller
             'category' => 'required|string|max:50',
             'file' => 'nullable|file|max:5120', // Optional file upload, max 5MB
         ]);
-    
+
         // Get the latest version number and increment it
         $latestVersion = FileVersions::where('file_id', $file->file_id)->max('version_number') ?? 0;
         $newVersion = $latestVersion + 1;
-    
+
         // Handle file upload
         if ($request->hasFile('file')) {
             $uploadedFile = $request->file('file');
-    
+
             // Generate a unique filename with the same name
             $newFileName = pathinfo($file->filename, PATHINFO_FILENAME) . '.' . $uploadedFile->getClientOriginalExtension();
             $filePath = $uploadedFile->storeAs('uploads/files', $newFileName, 'public'); // Store with new name
@@ -321,7 +326,7 @@ class AdminAuthController extends Controller
             $fileSize = $file->file_size;
             $fileType = $file->file_type;
         }
-    
+
         // Store the new version in `file_versions`
         FileVersions::create([
             'file_id' => $file->file_id,
@@ -332,7 +337,7 @@ class AdminAuthController extends Controller
             'file_type' => $fileType,
             'uploaded_by' => $user->id ?? null, // Use session user ID
         ]);
-    
+
         // Log the file update in `access_logs`
         AccessLog::create([
             'file_id' => $file->file_id,
@@ -340,13 +345,7 @@ class AdminAuthController extends Controller
             'action' => 'Added File - Version ' . $newVersion,
             'access_time' => now()
         ]);
-    
+
         return redirect()->route('admin.editFile', $file_id)->with('success', 'New file version saved!');
     }
-    
-
-    
-  
-
-
 }

@@ -1,9 +1,11 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
+    <meta name="csrf-token" content="{{ csrf_token() }}">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Admin</title>
+    <title>@yield('title')</title>
     <link href="https://fonts.googleapis.com/css2?family=Lato:wght@400;700&display=swap" rel="stylesheet">
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
@@ -16,21 +18,22 @@
         }
     </style>
 </head>
-<body class="bg-gray-50 bg-cover bg-center" 
-      style="background: url('{{ asset('storage/uploads/bodybackground.png') }}') no-repeat center center fixed; 
+
+<body class="bg-gray-50 bg-cover bg-center"
+    style="background: url('{{ asset('storage/uploads/bodybackground.png') }}') no-repeat center center fixed; 
              background-size: contain;">
 
     <div class="flex h-screen">
-        
-    <div id="sidebar" class="bg-gray-900 text-white w-66 space-y-6 py-8 px-6 transform -translate-x-full md:translate-x-0
+
+        <div id="sidebar" class="bg-gray-900 text-white w-66 space-y-6 py-8 px-6 transform -translate-x-full md:translate-x-0
     transition-transform duration-300 fixed top-0 bottom-0 z-40 overflow-y-auto">
 
-        <div class="text-2xl font-bold flex justify-center">
-            <img src="{{ asset('storage/csitlogo.jpg') }}" alt="CSIT Logo" class="w-[200px] h-[200px] rounded-full">
-            <!-- <p><a href="#" class="text-white">Staff Panel</a></p>  -->
-        </div>
+            <div class="text-2xl font-bold flex justify-center">
+                <img src="{{ asset('storage/csitlogo.jpg') }}" alt="CSIT Logo" class="w-[200px] h-[200px] rounded-full">
+                <!-- <p><a href="#" class="text-white">Staff Panel</a></p>  -->
+            </div>
 
-        
+
             <!-- @if(session()->has('user'))
                 <p>Welcome, {{ session('user')->name }}!</p>
             @endif -->
@@ -42,109 +45,109 @@
 
             <nav class="space-y-6">
 
-            <p class="text-white text-sm font-bold">
-                </i> Main
-            </p>
+                <p class="text-white text-sm font-bold">
+                    </i> Main
+                </p>
 
-            <a href="{{ route('admin.page.dashboard') }}" class="flex items-center text-white hover:text-white relative text-sm">
-                <i class="fas fa-thumbtack mr-4"></i> Dashboard
-            </a>
-
-
-            <p class=" -m-5 mb-6 border-b border-white text-gray-200 pb-2">
-            </p>
-
-            
+                <a href="{{ route('admin.page.dashboard') }}" class="flex items-center text-white hover:text-white relative text-sm">
+                    <i class="fas fa-thumbtack mr-4"></i> Dashboard
+                </a>
 
 
-            <p class="text-white text-sm font-bold">
-                 Files
-            </p>
+                <p class=" -m-5 mb-6 border-b border-white text-gray-200 pb-2">
+                </p>
 
-            
-            <a href="{{ route('admin.folders') }}" class="flex items-center text-white hover:text-white text-sm ">
-                <i class="fas fa-folder-open mr-4 "></i> Folders
-            </a>
 
-            <a href="{{ route('admin.uploadFiles') }}" class="flex items-center text-white hover:text-white text-sm">
-                <i class="fas fa-upload mr-4"></i> Upload
-            </a>
 
-            <a href="{{ route('admin.view.requests.file') }}" class="flex items-center text-white hover:text-white text-sm">
-                <i class="fas fa-share-from-square mr-4"></i> File Requests
-            </a>
 
-            <a href="{{ route('admin.view.requests') }}" class="flex items-center text-white hover:text-white text-sm">
-                <i class="fas fa-share-from-square mr-4"></i> Folder Requests
-            </a>
+                <p class="text-white text-sm font-bold">
+                    Files
+                </p>
 
-            <a href="{{ route('admin.active.files') }}" class="flex items-center text-white hover:text-white mr-2 text-sm">
-                <i class="fas fa-file-alt mr-5"></i> Files
-            </a>
 
-            <!-- <a href="#" class="flex items-center text-white hover:text-white ">
+                <a href="{{ route('admin.folders') }}" class="flex items-center text-white hover:text-white text-sm ">
+                    <i class="fas fa-folder-open mr-4 "></i> Folders
+                </a>
+
+                <a href="{{ route('admin.uploadFiles') }}" class="flex items-center text-white hover:text-white text-sm">
+                    <i class="fas fa-upload mr-4"></i> Upload
+                </a>
+
+                <a href="{{ route('admin.view.requests.file') }}" class="flex items-center text-white hover:text-white text-sm">
+                    <i class="fas fa-share-from-square mr-4"></i> File Requests
+                </a>
+
+                <a href="{{ route('admin.view.requests') }}" class="flex items-center text-white hover:text-white text-sm">
+                    <i class="fas fa-share-from-square mr-4"></i> Folder Requests
+                </a>
+
+                <a href="{{ route('admin.active.files') }}" class="flex items-center text-white hover:text-white mr-2 text-sm">
+                    <i class="fas fa-file-alt mr-5"></i> Files
+                </a>
+
+                <!-- <a href="#" class="flex items-center text-white hover:text-white ">
                 <i class="fas fa-info mr-4"></i> View File Request
             </a> -->
 
 
-            <!-- <a href="{{ route('admin.update') }}" class="flex items-center text-white hover:text-white ">
+                <!-- <a href="{{ route('admin.update') }}" class="flex items-center text-white hover:text-white ">
                 <i class="fas fa-history mr-4"></i> File Versions
             </a> -->
 
-            <a href="{{ route('admin.archived.files') }}" class="flex items-center text-white hover:text-white text-sm">
-                <i class="fas fa-archive mr-4"></i> Archived Files
-            </a>
+                <a href="{{ route('admin.archived.files') }}" class="flex items-center text-white hover:text-white text-sm">
+                    <i class="fas fa-archive mr-4"></i> Archived Files
+                </a>
 
-            
-            <a href="{{ route('admin.trash.bins') }}" class="flex items-center text-white hover:text-white text-sm">
-                <i class="fas fa-trash-alt mr-4"></i> Trash 
-            </a>
 
-               <!-- <a href="{{ route('admin.trash.bins') }}" class="flex items-center text-white hover:text-white ">
+                <a href="{{ route('admin.trash.bins') }}" class="flex items-center text-white hover:text-white text-sm">
+                    <i class="fas fa-trash-alt mr-4"></i> Trash
+                </a>
+
+                <!-- <a href="{{ route('admin.trash.bins') }}" class="flex items-center text-white hover:text-white ">
                 <i class="fas fa-trash-alt mr-4"></i> Trash Files
             </a> -->
 
-            <p class=" -m-5 mb-6 border-b border-white text-gray-200 pb-2">
-            </p>
+                <p class=" -m-5 mb-6 border-b border-white text-gray-200 pb-2">
+                </p>
 
-            <p class="text-white text-sm font-bold mt-8 text-sm">
-                 Accounts
-            </p>
-            
+                <p class="text-white text-sm font-bold mt-8 text-sm">
+                    Accounts
+                </p>
 
-            <a href="{{ route('admin.users') }}" class="flex items-center text-white hover:text-white text-sm">
-                <i class="fas fa-user mr-4"></i> Users
-            </a>
 
-            
-            <p class=" -m-5 mb-6 border-b border-white text-gray-200 pb-2">
-            </p>
+                <a href="{{ route('admin.users') }}" class="flex items-center text-white hover:text-white text-sm">
+                    <i class="fas fa-user mr-4"></i> Users
+                </a>
 
-            <p class="text-white text-sm font-bold mt-8">
-                Activity 
-            </p>
 
-            <a href="{{ route ('admin.logs.view')}}" class="flex items-center text-white hover:text-white text-sm">
-                <i class="fas fa-file mr-4"></i> Activity Logs
-            </a>
+                <p class=" -m-5 mb-6 border-b border-white text-gray-200 pb-2">
+                </p>
 
-            <a href="{{ route ('admin.timestamps.index')}}" class="flex items-center text-white hover:text-white text-sm">
-                <i class="fas fa-list mr-3"></i> File Timestamps
-            </a>
+                <p class="text-white text-sm font-bold mt-8">
+                    Activity
+                </p>
 
-            <p class=" -m-5 mb-6 border-b border-white text-gray-200 pb-2">
-            </p>
+                <a href="{{ route ('admin.logs.view')}}" class="flex items-center text-white hover:text-white text-sm">
+                    <i class="fas fa-file mr-4"></i> Activity Logs
+                </a>
 
-            <a href="{{ url('/admin-logout') }}" class="flex items-center text-white hover:text-white text-sm" 
-            style="font-weight: bold" onclick="return confirmLogout();">
-            <i class="fas fa-bookmark mr-4"></i>  Logout
-            </a>
+                <a href="{{ route ('admin.timestamps.index')}}" class="flex items-center text-white hover:text-white text-sm">
+                    <i class="fas fa-list mr-3"></i> File Timestamps
+                </a>
 
-            <script>
-                function confirmLogout() {
-                    return confirm("Are you sure you want to log out?");
-                }
-            </script>
+                <p class=" -m-5 mb-6 border-b border-white text-gray-200 pb-2">
+                </p>
+
+                <a href="{{ url('/admin-logout') }}" class="flex items-center text-white hover:text-white text-sm"
+                    style="font-weight: bold" onclick="return confirmLogout();">
+                    <i class="fas fa-bookmark mr-4"></i> Logout
+                </a>
+
+                <script>
+                    function confirmLogout() {
+                        return confirm("Are you sure you want to log out?");
+                    }
+                </script>
 
 
             </nav>
@@ -159,7 +162,7 @@
                 <h1 class="text-2xl font-bold text-gray-800"></h1>
 
                 <div class="flex items-center space-x-6">
-            
+
                     <!-- User Profile (Right End) -->
                     <div class="flex items-center bg-white p-2 space-x-3 shadow-md overflow-hidden">
                         <div class="w-12 h-12 bg-gray-600 flex items-center justify-center rounded-full">
@@ -172,7 +175,7 @@
                             </p>
                         </div>
 
-                    <!-- Notification Bell with Modal Trigger -->
+                        <!-- Notification Bell with Modal Trigger -->
                         <!-- <button id="bellButton" class="text-gray-600 text-4xl focus:outline-none relative">
                             <i class="fas fa-bell"></i>
                             <span class="absolute top-0 right-0 bg-red-500 text-white text-xs font-bold rounded-full px-1.5 py-0.5">
@@ -206,7 +209,7 @@
                     </div>
                 </div>
             </div>
-           
+
 
             <main class="p-8 sm: pt-7">
                 @yield('content')
@@ -216,29 +219,29 @@
 
 
     @if(session('success'))
-        <script>
-            alert("{{ session('success') }}");
-        </script>
+    <script>
+        alert("{{ session('success') }}");
+    </script>
     @endif
     <script>
-        document.addEventListener("DOMContentLoaded", function () {
+        document.addEventListener("DOMContentLoaded", function() {
             const navLinks = document.querySelectorAll("#sidebar nav a");
 
             // Function to update active link state with smooth animation
             function setActiveLink(clickedLink) {
                 navLinks.forEach(link => {
                     link.classList.remove(
-                        "text-black", "bg-white", "shadow-md", "scale-105", 
+                        "text-black", "bg-white", "shadow-md", "scale-105",
                         "font-bold", "p-4", "rounded-lg"
                     );
                     link.classList.add("text-white", "hover:text-white", "transition-all", "duration-300", "ease-in-out");
                 });
 
                 clickedLink.classList.add(
-                    "text-black", "bg-white", "shadow-md", "scale-105", 
+                    "text-black", "bg-white", "shadow-md", "scale-105",
                     "font-bold", "p-4", "rounded-lg", "transition-all", "duration-300", "ease-in-out"
                 );
-                clickedLink.classList.remove("text-white", "hover:text-white"); 
+                clickedLink.classList.remove("text-white", "hover:text-white");
 
                 // Store the active link in localStorage to persist highlight
                 localStorage.setItem("activeNav", clickedLink.getAttribute("href"));
@@ -255,7 +258,7 @@
 
             // Add click event listener to each nav link
             navLinks.forEach(link => {
-                link.addEventListener("click", function () {
+                link.addEventListener("click", function() {
                     setActiveLink(this);
                 });
             });
@@ -288,5 +291,5 @@
     </script>
 
 </body>
-</html>
 
+</html>
