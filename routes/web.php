@@ -8,8 +8,10 @@ use App\Http\Controllers\UserController;
 use App\Http\Controllers\StaffController;
 use App\Http\Controllers\FileTimeStampController;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\DB;
 use App\Models\Folder;
 use Illuminate\Http\Request;
+use Illuminate\Support\Str;
 
 Route::get('/', function () {
     return view('welcome');
@@ -66,13 +68,13 @@ Route::middleware(['staff.auth'])->group(function () {
     Route::get('/staff-main', [StaffController::class, 'dashboard'])->name('staff.dashboard');
 
     Route::get('/staff-upload', function () {
-        $userId = session('user')->id;
+        $userId = auth()->user()->id;
 
         $subfolders = Folder::select('id', 'name', 'status')
             ->get()
             ->map(function ($folder) use ($userId) {
                 // Check if this user has approved access to the folder
-                $hasAccess = \DB::table('folder_access')
+                $hasAccess = DB::table('folder_access')
                     ->where('folder_id', $folder->id)
                     ->where('user_id', $userId)
                     ->where('status', 'approved')
@@ -104,6 +106,9 @@ Route::middleware(['staff.auth'])->group(function () {
         ->name('files.archive.active');
 
     Route::get('/staff-files-requests', [StaffController::class, 'pendingAndDeniedFileRequests'])->name('staff.pending.files');
+
+    Route::post('/file-request/{id}/update-status', [StaffController::class, 'updateFileRequestStatus'])
+        ->name('newFile-request.update-status');
 
     Route::post('/file-request/retry/{id}', [StaffController::class, 'retryFileRequest'])->name('retry.status');
 

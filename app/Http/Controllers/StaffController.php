@@ -26,19 +26,19 @@ class StaffController extends Controller
     public function showFolders(Request $request)
     {
         $basePath = $request->get('path', 'uploads'); // Default to 'uploads'
-    
+
         $directories = Storage::disk('public')->directories($basePath);
-    
+
         $folderNames = array_map(function ($dir) use ($basePath) {
             return Str::after($dir, $basePath . '/');
         }, $directories);
-    
+
         // Determine parent path for "Back" navigation
         $parentPath = dirname($basePath);
         if ($parentPath === '.' || $basePath === '') {
             $parentPath = null;
         }
-    
+
         return view('staff.pages.Folders', compact('folderNames', 'basePath', 'parentPath'));
     }
 
@@ -46,63 +46,89 @@ class StaffController extends Controller
     {
         $request->validate([
             'folder_id' => 'required|integer|exists:folders,id',
-            'note' => 'nullable|string|max:1000', // optional note
+            'note' => 'nullable|string|max:1000',
         ]);
-    
-        $user_id = session('user')->id;
-    
+
+        $user_id = auth()->id();
+
         $existingRequest = FolderAccess::where('folder_id', $request->folder_id)
-                                       ->where('user_id', $user_id)
-                                       ->first();
-    
+            ->where('user_id', $user_id)
+            ->first();
+
         if ($existingRequest) {
             return redirect()->route('request.folder.access')
-                             ->with('duplicate', true);
+                ->with('duplicate', true);
         }
-    
+
         FolderAccess::create([
             'folder_id' => $request->folder_id,
             'user_id' => $user_id,
             'status' => 'Waiting Approval',
-            'note' => $request->note, // this can be null, which is fine
+            'note' => $request->note,
         ]);
-    
+
         return redirect()->route('request.folder.access')->with('success', 'Folder access request submitted successfully.');
     }
-    
+
     public function showRequestFolder()
     {
-        $user = session('user'); // assuming 'user' is an array or object containing 'id'
-    
+        $user = auth()->user();
+
         $folders = Folder::all();
-    
+
         $folderAccesses = FolderAccess::with('folder')
-                            ->where('user_id', $user['id']) // or $user->id if it's an object
-                            ->orderByDesc('created_at')
-                            ->get();
-    
+            ->where('user_id', $user->id)
+            ->orderByDesc('created_at')
+            ->get();
+
         return view('staff.pages.StaffRequestView', compact('folders', 'folderAccesses'));
     }
 
 
     public function showRequestFile()
     {
-        $files = Files::where('status', 'private')->get(); // For the request form
-    
-        $requests = FileRequest::with('file') // eager load file relation
-            ->where('requested_by', session('user')->id)
+        $userId = auth()->id();
+
+        // Only show files that are private and NOT uploaded by the current user
+        $files = Files::whereHas('folder', function ($query) {
+            $query->where('status', 'private');
+        })
+            ->where('uploaded_by', '!=', $userId)
+            ->get();
+
+        $requests = FileRequest::with('file')
+            ->where('requested_by', $userId)
             ->latest()
             ->get();
-    
-        return view('staff.pages.RequestFile', compact('files', 'requests'));
+
+        $myFileRequests = FileRequest::with('file', 'requester')
+            ->whereHas('file', function ($q) use ($userId) {
+                $q->where('uploaded_by', $userId);
+            })
+            ->latest()
+            ->get();
+
+        return view('staff.pages.RequestFile', compact('files', 'requests', 'myFileRequests'));
+    }
+
+    public function updateFileRequestStatus(Request $request, $id)
+    {
+        $request->validate([
+            'action' => 'required|in:approved,rejected',
+        ]);
+
+        $fileRequest = \App\Models\FileRequest::findOrFail($id);
+        $fileRequest->request_status = $request->action;
+        $fileRequest->save();
+
+        return redirect()->back()->with('success', 'Request status updated!');
     }
 
     public function submitFileRequests(Request $request)
     {
-        // Check if request already exists for this user and file
-        $exists = FileRequest::where('requested_by', $request->requested_by)
-                    ->where('file_id', $request->file_id)
-                    ->first();
+        $exists = FileRequest::where('requested_by', auth()->id())
+            ->where('file_id', $request->file_id)
+            ->first();
 
         if ($exists) {
             return redirect()->back()->with('duplicate', 'You have already requested access to this file.');
@@ -111,9 +137,9 @@ class StaffController extends Controller
         try {
             FileRequest::create([
                 'file_id' => $request->file_id,
-                'requested_by' => $request->requested_by,
+                'requested_by' => auth()->id(),
                 'note' => $request->note,
-                'request_status' => 'Pending', // or leave null if handled in DB
+                'request_status' => 'Pending',
             ]);
 
             return redirect()->back()->with('success', 'File access request submitted successfully.');
@@ -121,8 +147,8 @@ class StaffController extends Controller
             return redirect()->back()->with('error', 'Failed to submit request.');
         }
     }
-    
-    
+
+
 
 
     public function deleteFolder(Request $request)
@@ -131,79 +157,73 @@ class StaffController extends Controller
             'folderName' => 'required|string',
             'basePath' => 'required|string',
         ]);
-    
+
         $fullPath = $request->basePath . '/' . $request->folderName;
-    
+
         if (!Storage::disk('public')->exists($fullPath)) {
             Log::warning("Attempted to delete non-existent folder: {$fullPath} by user ID " . Auth::id());
-    
+
             return response()->json(['success' => false, 'message' => 'Folder does not exist.']);
         }
-    
+
         try {
             Storage::disk('public')->deleteDirectory($fullPath);
-    
-            $user = session('user');
-    
-            // Access log database entry
+
+            $user = auth()->user();
+
             AccessLog::create([
-                'file_id' => 0, // No file ID since it's a folder
+                'file_id' => 0,
                 'accessed_by' => $user->id,
                 'action' => "Deleted subfolder '{$request->folderName}' under '{$request->basePath}' - Successful",
                 'access_time' => now(),
             ]);
-    
-            // Laravel log
+
             Log::info("User ID {$user->id} successfully deleted folder: {$fullPath}");
-    
+
             return response()->json(['success' => true]);
         } catch (\Exception $e) {
             Log::error("Failed to delete folder: {$fullPath} - Error: " . $e->getMessage());
-    
+
             return response()->json(['success' => false, 'message' => 'Failed to delete folder.']);
         }
     }
-    
+
     public function createFolder(Request $request)
     {
         $request->validate([
             'folderName' => 'required|string',
             'basePath' => 'nullable|string'
         ]);
-    
+
         $basePath = $request->input('basePath', 'uploads');
         $folderName = $request->input('folderName');
         $newPath = $basePath . '/' . $folderName;
-    
+
         if (Storage::disk('public')->exists($newPath)) {
             return response()->json([
                 'success' => false,
                 'message' => 'Folder already exists.'
             ]);
         }
-    
+
         try {
-            // Create the new folder
             Storage::disk('public')->makeDirectory($newPath);
-    
-            // Access log entry for folder creation
-            $user = session('user'); // Retrieve the user from session
-    
+
+            $user = auth()->user();
+
             AccessLog::create([
-                'file_id' => 0, // No file ID since it's a folder
-                'accessed_by' => $user->id, // Use session user's ID
+                'file_id' => 0,
+                'accessed_by' => $user->id,
                 'action' => "Created folder '{$folderName}' under '{$basePath}' - Successful",
                 'access_time' => now(),
             ]);
-    
-            // Log the action for auditing
+
             Log::info("User ID {$user->id} successfully created folder: {$newPath}");
-    
+
             return response()->json(['success' => true]);
         } catch (\Exception $e) {
-            // Log the error for debugging
             Log::error("Failed to create folder: {$newPath} - Error: " . $e->getMessage());
-    
+
             return response()->json([
                 'success' => false,
                 'message' => 'Failed to create folder: ' . $e->getMessage()
@@ -218,8 +238,8 @@ class StaffController extends Controller
 
         // Count pending file requests for the user
         $pendingRequestCount = FileRequest::where('requested_by', $userId)
-                                        ->where('request_status', 'pending')
-                                        ->count();
+            ->where('request_status', 'pending')
+            ->count();
 
         return view('staff.dashboard.staffDashboard', compact('pendingRequestCount'));
     }
@@ -228,19 +248,18 @@ class StaffController extends Controller
     public function StaffuploadFile(Request $request)
     {
         $request->validate([
-            'file' => 'required|file|max:502400', 
+            'file' => 'required|file|max:502400',
             'category' => 'required|in:capstone,thesis,faculty_request,accreditation,admin_docs',
             'published_by' => 'required|string|max:255',
-            'year_published' => 'required|string|regex:/^\d{4}$/', // ✅ Ensure it’s a 4-digit year
+            'year_published' => 'required|string|regex:/^\d{4}$/',
             'description' => 'nullable|string|max:1000',
-            'folder' => 'nullable|string|max:255', 
+            'folder' => 'nullable|string|max:255',
+            'level' => 'required_if:category,accreditation|max:255',
+            'area' => 'required_if:category,accreditation|max:255',
+            'parameter' => 'required_if:category,accreditation|max:255',
         ]);
 
-        if (!session()->has('user')) {
-            return response()->json(['message' => 'Unauthorized: Please log in.'], 403);
-        }
-
-        $user = session('user');
+        $user = auth()->user();
 
         if ($request->hasFile('file')) {
             $file = $request->file('file');
@@ -251,7 +270,7 @@ class StaffController extends Controller
 
             $filePath = $file->storeAs($uploadPath, $filename, 'public');
 
-            $fileEntry = Files::create([
+            $fileData = [
                 'filename' => $filename,
                 'file_path' => $filePath,
                 'file_size' => $file->getSize(),
@@ -259,16 +278,24 @@ class StaffController extends Controller
                 'uploaded_by' => $user->id,
                 'category' => $request->category,
                 'published_by' => $request->published_by,
-                'year_published' => (string) $request->year_published, // ✅ Ensure it's stored as a string
+                'year_published' => (string) $request->year_published,
                 'description' => $request->description ?? null,
-                'status' => 'active', // ✅ Directly set to active
-            ]);
+                'status' => 'active',
+            ];
+
+            if ($request->category === 'accreditation') {
+                $fileData['level'] = $request->level;
+                $fileData['area'] = $request->area;
+                $fileData['parameter'] = $request->parameter;
+            }
+
+            $fileEntry = Files::create($fileData);
 
             if ($fileEntry) {
                 AccessLog::create([
                     'file_id' => $fileEntry->id ?? 0,
                     'accessed_by' => $user->id,
-                    'action' => 'Uploaded file - Successful', // ✅ Modified action log
+                    'action' => 'Uploaded file - Successful',
                     'access_time' => now(),
                 ]);
 
@@ -286,25 +313,25 @@ class StaffController extends Controller
     {
         // Find the file
         $file = Files::find($file_id);
-    
+
         if (!$file) {
             return redirect()->back()->with('error', 'File not found');
         }
-    
+
         // Update the status to archived
         $file->status = 'archived';
         $file->save();
-    
+
         // Insert into file_time_stamps to log the event
         FileTimeStamp::create([
             'file_id' => $file->file_id,
             'event_type' => 'File ID ' . $file->id . ' Archived', // Log archive event
             'timestamp' => now(),
         ]);
-    
+
         return redirect()->back()->with('success', 'File successfully archived');
     }
-    
+
 
 
 
@@ -312,9 +339,9 @@ class StaffController extends Controller
     {
         // Fetch all access logs with pagination
         $accessLogs = AccessLog::with(['user', 'file']) // Load related user and file
-                        ->latest()
-                        ->paginate(12); // Set pagination to 15 per page
-    
+            ->latest()
+            ->paginate(12); // Set pagination to 15 per page
+
         return view('staff.pages.StaffLogsView', compact('accessLogs'));
     }
 
@@ -326,35 +353,35 @@ class StaffController extends Controller
         if (!session()->has('user')) {
             return redirect()->route('staff.upload')->with('error', 'Unauthorized: Please log in.');
         }
-    
-        $user = session('user'); // Get logged-in user from session
-    
+
+        $user = auth()->user(); // Get logged-in user from session
+
         // Fetch primary files uploaded by the logged-in user
         $files = Files::where('uploaded_by', $user->id); // Use session user ID
-    
+
         // Apply search filter
         if ($request->has('search') && !empty($request->search)) {
             $files->where('filename', 'LIKE', '%' . $request->search . '%');
         }
-    
+
         // Apply file type filter
         if ($request->has('file_type') && !empty($request->file_type)) {
             $files->where('file_type', $request->file_type);
         }
-    
+
         // Apply category filter
         if ($request->has('category') && !empty($request->category)) {
             $files->where('category', $request->category);
         }
-    
+
         $files = $files->paginate(20); // Paginate results
-    
+
         // Fetch file versions separately and link to files
         $fileVersions = FileVersions::whereIn('file_id', $files->pluck('file_id'))->get();
-    
+
         return view('staff.pages.StaffViewAllFiles', compact('fileVersions', 'files'));
     }
-    
+
     public function MyUploads(Request $request)
     {
         // Fetch primary files
@@ -398,7 +425,7 @@ class StaffController extends Controller
 
         // If not found, return back with error
         return back()->with('error', 'File not found.');
-    }  
+    }
 
     public function StaffmoveToTrash(Request $request, $id)
     {
@@ -407,7 +434,8 @@ class StaffController extends Controller
             return redirect()->back()->with('error', 'Unauthorized: Please log in.');
         }
 
-        $user = session('user'); // Get logged-in user from session
+        $user = auth()->user();
+        // Get logged-in user from session
 
         // Find the file by file_id
         $file = Files::where('file_id', $id)->first();
@@ -430,20 +458,20 @@ class StaffController extends Controller
         return redirect()->back()->with('success', 'File moved to trash successfully.');
     }
 
-    
+
     public function StaffOverviewTrashFile($version_id)
     {
         // Find the file version
         $fileVersion = FileVersions::findOrFail($version_id);
-    
+
         // Ensure the related file exists
         if (!$fileVersion->file_id) {
             return redirect()->back()->with('error', 'Invalid file version.');
         }
-    
+
         // Update status to 'deleted'
         $fileVersion->update(['status' => 'deleted']);
-    
+
         // ✅ Log the action in access_logs
         AccessLog::create([
             'file_id' => $fileVersion->file_id, // Ensure valid file_id
@@ -451,7 +479,7 @@ class StaffController extends Controller
             'action' => 'File moved to trash',
             'access_time' => now(),
         ]);
-    
+
         return redirect()->back()->with('success', 'File version placed on trash successfully!');
     }
 
@@ -461,32 +489,33 @@ class StaffController extends Controller
         if (!session()->has('user')) {
             return redirect()->route('staff.upload')->with('error', 'Unauthorized: Please log in.');
         }
-    
-        $user = session('user'); // Get logged-in user
-    
+
+        $user = auth()->user();
+        // Get logged-in user
+
         // Check if the file exists before proceeding
         $file = Files::find($file_id);
         if (!$file) {
             return redirect()->back()->with('error', 'File not found.');
         }
-    
+
         // Check if the request already exists to avoid duplicates
         $existingRequest = FileRequest::where('file_id', $file_id)
             ->where('requested_by', $user->id)
             ->where('request_status', 'pending')
             ->first();
-    
+
         if ($existingRequest) {
             return redirect()->back()->with('error', 'You have already requested this file.');
         }
-    
+
         // ✅ Insert new request
         $fileRequest = FileRequest::create([
             'file_id' => $file_id,
             'requested_by' => $user->id,
             'request_status' => 'pending', // Default status
         ]);
-    
+
         // ✅ Log the action only if the request is successfully created
         if ($fileRequest) {
             AccessLog::create([
@@ -496,7 +525,7 @@ class StaffController extends Controller
                 'access_time' => now(),
             ]);
         }
-    
+
         return redirect()->back()->with('success', 'File request submitted successfully.');
     }
 
@@ -505,56 +534,58 @@ class StaffController extends Controller
         if (!session()->has('user')) {
             return redirect()->route('staff.upload')->with('error', 'Unauthorized: Please log in.');
         }
-    
-        $user = session('user');
-    
+
+        $user = auth()->user();
+
+
         $fileRequests = FileRequest::where('requested_by', $user->id)
             ->whereIn('request_status', ['pending', 'denied'])
             ->with('file')
             ->get();
-    
+
         return view('staff.pages.PendingFiles', compact('fileRequests'));
     }
 
     public function retryFileRequest($id)
     {
         $fileRequest = FileRequest::findOrFail($id);
-    
+
         if ($fileRequest->request_status === 'denied') {
             $fileRequest->request_status = 'pending';
             $fileRequest->save();
             return redirect()->back()->with('success', 'Request successfully resubmitted.');
         }
-    
+
         return redirect()->back()->with('error', 'Invalid action.');
     }
-    
-        
+
+
     public function activeFiles(Request $request)
     {
         $files = Files::query();
         $subfolder = $request->get('subfolder');
-    
-        $user = session('user');
+
+        $user = auth()->user();
+
         $userId = $user->id ?? null;
         $role = $user->role ?? null;
-    
+
         Log::info('--- Incoming activeFiles Request ---', [
             'subfolder' => $subfolder,
             'user_id' => $userId,
             'role' => $role,
         ]);
-    
+
         // Check access to selected subfolder if it exists
         if ($subfolder) {
             $folder = Folder::where('name', $subfolder)->first();
-    
+
             Log::info('Folder Lookup', [
                 'folder_found' => $folder ? true : false,
                 'folder_id' => $folder->id ?? null,
                 'folder_status' => $folder->status ?? null,
             ]);
-    
+
             if ($folder && $folder->status === 'private') {
 
                 if ($role !== 'admin') {
@@ -562,31 +593,31 @@ class StaffController extends Controller
                         ->where('user_id', $userId)
                         ->where('status', 'approved')
                         ->exists();
-    
+
                     Log::info('Folder Access Check', [
                         'has_approved_access' => $hasAccess,
                     ]);
-    
+
                     if (!$hasAccess) {
                         Log::warning('Unauthorized access attempt to private folder', [
                             'user_id' => $userId,
                             'folder' => $subfolder,
                         ]);
-    
+
                         session()->flash('unauthorized_alert', 'You are unauthorized to access this private folder.');
-    
+
                         $files = Files::whereRaw('0 = 1')->paginate(20);
                         $fileVersions = collect();
-    
+
                         $uploadPath = public_path('storage/uploads');
                         $subfolders = [];
-    
+
                         if (\Illuminate\Support\Facades\File::exists($uploadPath)) {
                             $subfolders = collect(\Illuminate\Support\Facades\File::directories($uploadPath))->map(function ($path) {
                                 return basename($path);
                             });
                         }
-    
+
                         return view('staff.pages.StaffViewAllFilesActive', compact('fileVersions', 'files', 'subfolders'));
                     } else {
                         Log::info('User is authorized to access this private folder.', [
@@ -597,30 +628,30 @@ class StaffController extends Controller
                 }
             }
         }
-    
+
         // Apply filters
         if ($request->has('search') && !empty($request->search)) {
             $files->where('filename', 'LIKE', '%' . $request->search . '%');
         }
-    
+
         if ($request->has('file_type') && !empty($request->file_type)) {
             $files->where('file_type', $request->file_type);
         }
-    
+
         if (!empty($subfolder)) {
             $files->where('file_path', 'LIKE', 'uploads/' . $subfolder . '/%');
         } else {
             if ($role !== 'admin') {
                 // Fetch private folders the user DOES NOT have access to
                 $privateFolders = Folder::where('status', 'private')->pluck('name')->toArray();
-        
+
                 $deniedFolderAccess = FolderAccess::where('user_id', $userId)
                     ->where('status', 'approved')
                     ->pluck('folder_id')
                     ->toArray();
-        
+
                 $allowedPrivateFolders = Folder::whereIn('id', $deniedFolderAccess)->pluck('name')->toArray();
-        
+
                 // Filter out files inside private folders that the user doesn't have access to
                 $files->where(function ($query) use ($userId, $privateFolders, $allowedPrivateFolders) {
                     $query->where(function ($q) use ($privateFolders, $allowedPrivateFolders) {
@@ -631,25 +662,30 @@ class StaffController extends Controller
                             }
                         }
                     })
-                    ->where(function ($q2) use ($userId) {
-                        $q2->where('status', '!=', 'private') // show public or active files
-                            ->orWhereIn('file_id', function ($subQ) use ($userId) {
-                                $subQ->select('file_id')
-                                    ->from('file_requests')
-                                    ->where('requested_by', $userId)
-                                    ->where('request_status', 'approved');
-                            });
-                    });
+                        ->where(function ($q2) use ($userId) {
+                            $q2->where('status', '!=', 'private') // show public or active files
+                                ->orWhereIn('file_id', function ($subQ) use ($userId) {
+                                    $subQ->select('file_id')
+                                        ->from('file_requests')
+                                        ->where('requested_by', $userId)
+                                        ->where('request_status', 'approved');
+                                });
+                        });
                 });
             }
-        }        
-    
+        }
+
         $files = $files->paginate(20)->appends(['subfolder' => $request->subfolder]);
 
-        // Fetch all approved requests for the current user
-        $approvedRequests = \App\Models\FileRequest::where('requested_by', $userId)
+        // Fetch all approved requests for the current user, eager load the file relation
+        $approvedRequests = \App\Models\FileRequest::with('file')
+            ->where('requested_by', $userId)
             ->where('request_status', 'approved')
             ->get();
+
+        // Extract the files (filter out nulls in case of missing files)
+        $grantedFiles = $approvedRequests->pluck('file')->filter();
+
 
         // Logging each approved request
         Log::info('Approved File Requests Summary', [
@@ -670,44 +706,44 @@ class StaffController extends Controller
         // Extract file IDs for use in the view
         $approvedFileRequests = $approvedRequests->pluck('file_id')->toArray();
 
-        
-    
+
+
         $fileVersions = FileVersions::whereIn('file_id', $files->pluck('file_id'))->get();
-    
+
         $uploadPath = public_path('storage/uploads');
         $subfolders = [];
-    
+
         if (\Illuminate\Support\Facades\File::exists($uploadPath)) {
             $subfolders = collect(\Illuminate\Support\Facades\File::directories($uploadPath))->map(function ($path) {
                 return basename($path);
             });
         }
-    
-        return view('staff.pages.StaffViewAllFilesActive', compact('fileVersions', 'files', 'subfolders', 'approvedFileRequests', 'role'));
+
+        return view('staff.pages.StaffViewAllFilesActive', compact('fileVersions', 'files', 'subfolders', 'approvedFileRequests', 'role', 'grantedFiles'));
     }
-    
+
     public function StaffeditPrimaryFile(Request $request, $file_id)
     {
         // Fetch the file
         $file = Files::findOrFail($file_id);
-    
+
         // Get subfolder path from query string
         $subfolder = $request->query('subfolder');
-    
+
         // Get the corresponding folder from DB
         $folder = Folder::where('path', 'uploads/' . $subfolder)->first();
-    
+
         if (!$folder) {
             return redirect()->back()->withErrors(['Folder not found.']);
         }
-    
+
         return view('staff.pages.StaffEditPrimaryFile', compact('file', 'folder'));
     }
 
     public function StaffupdatePrimaryFile(Request $request, $file_id)
     {
         $file = Files::findOrFail($file_id);
-        
+
         // Validate input
         $request->validate([
             'filename' => 'required|string|max:255',
@@ -718,7 +754,7 @@ class StaffController extends Controller
             'status' => 'required|string|in:active,inactive,pending,deactivated',
             'file' => 'nullable|file|max:5120', // Optional file upload, max 5MB
         ]);
-        
+
         // Fetch the folder path from the database
         $folderPath = $request->input('folder_path');
 
@@ -727,7 +763,7 @@ class StaffController extends Controller
         if (!$folder) {
             return redirect()->back()->with('error', 'Subfolder not found!');
         }
-        
+
 
         $folderPath = $folder->path; // e.g., 'uploads/wow'
 
@@ -735,18 +771,18 @@ class StaffController extends Controller
         if ($request->hasFile('file')) {
             $uploadedFile = $request->file('file');
             $newFileName = $uploadedFile->getClientOriginalName();
-        
+
             // Define the new file path
             $newFilePath = $folderPath . '/' . $newFileName;
-        
+
             // Delete the old file if it's a different file
             if ($file->file_path !== $newFilePath && Storage::disk('public')->exists($file->file_path)) {
                 Storage::disk('public')->delete($file->file_path);
             }
-        
+
             // Save the new file (overwrite if same name)
             Storage::disk('public')->putFileAs($folderPath, $uploadedFile, $newFileName);
-        
+
             // Update the file record
             $file->file_path = $newFilePath;
             $file->file_size = $uploadedFile->getSize();
@@ -778,9 +814,9 @@ class StaffController extends Controller
 
         // Pass subfolder info in redirect
         return redirect()->route('staff.active.files', ['subfolder' => request('subfolder')])
-                        ->with('success', 'File updated successfully!');
+            ->with('success', 'File updated successfully!');
     }
-    
+
 
     public function StaffeditFile($file_id)
     {
@@ -813,10 +849,11 @@ class StaffController extends Controller
         if (!session()->has('user')) {
             return redirect()->route('staff.upload')->with('error', 'Unauthorized: Please log in.');
         }
-    
-        $user = session('user'); // Get user from session
+
+        $user = auth()->user();
+        // Get user from session
         $file = Files::findOrFail($file_id);
-    
+
         // Validate input
         $request->validate([
             'filename' => 'required|string|max:255',
@@ -824,15 +861,15 @@ class StaffController extends Controller
             'category' => 'required|string|max:50',
             'file' => 'nullable|file|max:5120', // Optional file upload, max 5MB
         ]);
-    
+
         // Get the latest version number and increment it
         $latestVersion = FileVersions::where('file_id', $file->file_id)->max('version_number') ?? 0;
         $newVersion = $latestVersion + 1;
-    
+
         // Handle file upload
         if ($request->hasFile('file')) {
             $uploadedFile = $request->file('file');
-    
+
             // Generate a unique filename with the same name
             $newFileName = pathinfo($file->filename, PATHINFO_FILENAME) . '.' . $uploadedFile->getClientOriginalExtension();
             $filePath = $uploadedFile->storeAs('uploads/files', $newFileName, 'public'); // Store with new name
@@ -843,7 +880,7 @@ class StaffController extends Controller
             $fileSize = $file->file_size;
             $fileType = $file->file_type;
         }
-    
+
         // Store the new version in `file_versions`
         FileVersions::create([
             'file_id' => $file->file_id,
@@ -854,7 +891,7 @@ class StaffController extends Controller
             'file_type' => $fileType,
             'uploaded_by' => $user->id ?? null, // Use session user ID
         ]);
-    
+
         // Log the file update in `access_logs`
         AccessLog::create([
             'file_id' => $file->file_id,
@@ -862,11 +899,11 @@ class StaffController extends Controller
             'action' => 'Added File - Version ' . $newVersion,
             'access_time' => now()
         ]);
-    
+
         return redirect()->route('staff.editFile', $file_id)->with('success', 'New file version saved!');
     }
 
-    public function StaffViewFilesVersions(Request $request) 
+    public function StaffViewFilesVersions(Request $request)
     {
         // Fetch all file versions
         $query = FileVersions::query();
@@ -897,10 +934,10 @@ class StaffController extends Controller
     {
         // Find the file version
         $fileVersion = FileVersions::findOrFail($version_id);
-    
+
         // Update status to 'archived'
         $fileVersion->update(['status' => 'archived']);
-    
+
         // Insert into file_time_stamps with file_id in event_type
         FileTimeStamp::create([
             'file_id' => $fileVersion->file_id,
@@ -908,14 +945,14 @@ class StaffController extends Controller
             'event_type' => 'File ID ' . $fileVersion->file_id . ' Archived', // Include file_id in the message
             'timestamp' => now(),
         ]);
-    
+
         return redirect()->back()->with('success', 'File version archived successfully!');
     }
 
     public function StaffeditFileVersion($version_id)
     {
         $fileVersion = FileVersions::where('version_id', $version_id)->firstOrFail(); // Fetch file version by version_id
-    
+
         return view('staff.pages.StaffEditFileVersion', compact('fileVersion'));
     }
 
@@ -939,37 +976,37 @@ class StaffController extends Controller
     }
 
 
-    public function StaffArchivedViewFilesVersions(Request $request) 
+    public function StaffArchivedViewFilesVersions(Request $request)
     {
         // Fetch all archived file versions
         $fileVersionsQuery = FileVersions::where('status', 'archived');
-    
+
         // Fetch all archived files
         $filesQuery = Files::where('status', 'archived');
-    
+
         // Apply search filter
         if ($request->has('search') && !empty($request->search)) {
             $fileVersionsQuery->where('filename', 'LIKE', '%' . $request->search . '%');
             $filesQuery->where('filename', 'LIKE', '%' . $request->search . '%');
         }
-    
+
         // Apply file type filter
         if ($request->has('file_type') && !empty($request->file_type)) {
             $fileVersionsQuery->where('file_type', $request->file_type);
             $filesQuery->where('file_type', $request->file_type);
         }
-    
+
         // Apply category filter
         if ($request->has('category') && !empty($request->category)) {
             $fileVersionsQuery->where('category', $request->category);
             $filesQuery->where('category', $request->category);
         }
-    
+
         // Merge results and paginate
         $archivedFiles = $filesQuery->get();
         $archivedFileVersions = $fileVersionsQuery->get();
         $mergedResults = $archivedFiles->merge($archivedFileVersions)->sortByDesc('updated_at');
-    
+
         // Paginate manually
         $perPage = 6;
         $currentPage = request()->input('page', 1);
@@ -978,22 +1015,22 @@ class StaffController extends Controller
             'path' => request()->url(),
             'query' => request()->query(),
         ]);
-    
+
         return view('staff.pages.StaffArchivedFiles', compact('fileVersions'));
     }
-    
-    
 
-    
+
+
+
     public function StaffunarchiveFile($id)
     {
         // Check if the ID exists in file_versions first
         $fileVersion = FileVersions::where('version_id', $id)->first();
-    
+
         if ($fileVersion) {
             // Update status in file_versions
             $fileVersion->update(['status' => 'active']);
-    
+
             // Log unarchive event
             FileTimeStamp::create([
                 'file_id' => $fileVersion->file_id,
@@ -1001,17 +1038,17 @@ class StaffController extends Controller
                 'event_type' => 'File Version ID ' . $fileVersion->version_id . ' Unarchived',
                 'timestamp' => now(),
             ]);
-    
+
             return redirect()->back()->with('success', 'File version unarchived successfully!');
         }
-    
+
         // If not found in file_versions, check in files (for original files)
         $originalFile = Files::where('file_id', $id)->first() ?? 0;
-    
+
         if ($originalFile) {
             // Update status in files (original file)
             $originalFile->update(['status' => 'active']);
-    
+
             // Log unarchive event
             FileTimeStamp::create([
                 'file_id' => $originalFile->file_id,
@@ -1019,25 +1056,25 @@ class StaffController extends Controller
                 'event_type' => 'File ID ' . $originalFile->id . ' Unarchived',
                 'timestamp' => now(),
             ]);
-    
+
             return redirect()->back()->with('success', 'Original file unarchived successfully!');
         }
-    
+
         return redirect()->back()->with('error', 'File not found!');
     }
-    
+
 
     public function CountActiveFiles(Request $request)
     {
         // ✅ Count all active files
         $activeFilesCount = Files::where('status', 'active')->count();
-        
+
         // ✅ Count all pending files
         $pendingFilesCount = Files::where('status', 'pending')->count();
-    
+
         // ✅ Get filter type from request, default to 'all' (count all uploads)
-        $filter = $request->get('filter', 'all'); 
-    
+        $filter = $request->get('filter', 'all');
+
         // ✅ Apply the filter for recent uploads count
         switch ($filter) {
             case 'daily':
@@ -1053,20 +1090,20 @@ class StaffController extends Controller
                 $recentUploadsCount = Files::count();  // Count all uploads
                 break;
         }
-    
+
         // ✅ Get total storage used
         $uploadPath = storage_path('app/public/uploads'); // Absolute path
         $totalStorageUsed = $this->getFolderSize($uploadPath); // Get folder size
         $formattedStorage = $this->formatSizeUnits($totalStorageUsed); // Format size
-    
+
         // ✅ Fetch recent file activities (latest updated files)
         $recentFiles = Files::orderBy('updated_at', 'desc')->limit(10)->get();
-    
+
         // ✅ Return all necessary data to the view
         return view('staff.pages.StaffDashboardPage', compact(
-            'activeFilesCount', 
-            'pendingFilesCount', 
-            'recentUploadsCount', 
+            'activeFilesCount',
+            'pendingFilesCount',
+            'recentUploadsCount',
             'formattedStorage',
             'recentFiles',
             'filter' // Pass the filter to the view
@@ -1077,13 +1114,13 @@ class StaffController extends Controller
     {
         // ✅ Count all active files
         $activeFilesCount = Files::where('status', 'active')->count();
-        
+
         // ✅ Count all pending files
         $pendingFilesCount = Files::where('status', 'pending')->count();
-    
+
         // ✅ Get filter type from request, default to 'all' (count all uploads)
-        $filter = $request->get('filter', 'all'); 
-    
+        $filter = $request->get('filter', 'all');
+
         // ✅ Apply the filter for recent uploads count
         switch ($filter) {
             case 'daily':
@@ -1099,29 +1136,29 @@ class StaffController extends Controller
                 $recentUploadsCount = Files::count();  // Count all uploads
                 break;
         }
-    
+
         // ✅ Get total storage used
         $uploadPath = storage_path('app/public/uploads'); // Absolute path
         $totalStorageUsed = $this->getFolderSize($uploadPath); // Get folder size
         $formattedStorage = $this->formatSizeUnits($totalStorageUsed); // Format size
-    
+
         // ✅ Fetch recent file activities (latest updated files)
         $recentFiles = Files::orderBy('updated_at', 'desc')->limit(10)->get();
-    
+
         // ✅ Return all necessary data to the view
         return view('admin.pages.adminDashboardPage', compact(
-            'activeFilesCount', 
-            'pendingFilesCount', 
-            'recentUploadsCount', 
+            'activeFilesCount',
+            'pendingFilesCount',
+            'recentUploadsCount',
             'formattedStorage',
             'recentFiles',
             'filter' // Pass the filter to the view
         ));
     }
-    
-    
-    
-    
+
+
+
+
     /**
      * Get folder size in bytes.
      */
@@ -1133,7 +1170,7 @@ class StaffController extends Controller
         }
         return $size;
     }
-    
+
     /**
      * Convert bytes to human-readable format.
      */
@@ -1149,7 +1186,7 @@ class StaffController extends Controller
             return $bytes . ' Bytes';
         }
     }
-    
+
     /**
      * Count recent uploads based on file timestamps (last 24 hours).
      */
@@ -1157,7 +1194,7 @@ class StaffController extends Controller
     {
         $recentUploads = 0;
         $cutoffTime = Carbon::now()->subHours(24); // Get the time 24 hours ago
-    
+
         foreach (glob(rtrim($folder, '/') . '/*') as $file) {
             if (is_file($file)) {
                 $fileTime = Carbon::createFromTimestamp(filemtime($file)); // Get file modification time
@@ -1166,41 +1203,42 @@ class StaffController extends Controller
                 }
             }
         }
-    
+
         return $recentUploads;
     }
-        
-            
-    public function StaffTrashViewFilesVersions(Request $request) 
+
+
+    public function StaffTrashViewFilesVersions(Request $request)
     {
         // Ensure the user is logged in via session
         if (!session()->has('user')) {
             return redirect()->route('staff.upload')->with('error', 'Unauthorized: Please log in.');
         }
-    
-        $user = session('user'); // Get the logged-in user
-    
+
+        $user = auth()->user();
+        // Get the logged-in user
+
         // Fetch only trashed file versions uploaded by the logged-in user
         $query = FileVersions::where('uploaded_by', $user->id);
-    
+
         // Apply search filter
         if ($request->has('search') && !empty($request->search)) {
             $query->where('filename', 'LIKE', '%' . $request->search . '%');
         }
-    
+
         // Apply file type filter
         if ($request->has('file_type') && !empty($request->file_type)) {
             $query->where('file_type', $request->file_type);
         }
-    
+
         // Apply category filter
         if ($request->has('category') && !empty($request->category)) {
             $query->where('category', $request->category);
         }
-    
+
         // Get filtered results with pagination
         $fileVersions = $query->paginate(10);
-    
+
         return view('staff.pages.StaffTrashBinFiles', compact('fileVersions')); // Pass data to view
     }
 
@@ -1208,10 +1246,10 @@ class StaffController extends Controller
     {
         // Find the file version
         $fileVersion = FileVersions::findOrFail($version_id);
-    
+
         // Update status to 'active'
         $fileVersion->update(['status' => 'active']);
-    
+
         // Insert into file_time_stamps with file_id in event_type
         FileTimeStamp::create([
             'file_id' => $fileVersion->file_id,
@@ -1219,32 +1257,32 @@ class StaffController extends Controller
             'event_type' => 'File ID ' . $fileVersion->file_id . ' Restored from Trash', // Log restore event
             'timestamp' => now(),
         ]);
-    
+
         return redirect()->back()->with('success', 'File version restored successfully!');
     }
-    
+
 
     public function StaffupdateFileVersion(Request $request, $version_id)
     {
         // Fetch file version by version_id
         $fileVersion = FileVersions::where('version_id', $version_id)->firstOrFail();
-    
+
         // Validate input
         $request->validate([
             'filename' => 'required|string|max:255',
             'file_type' => 'required|string|max:10',
             'file' => 'nullable|file|max:5120', // Optional file upload, max 5MB
         ]);
-    
+
         // Track changes
         $changesMade = false;
-    
+
         // Handle file upload
         if ($request->hasFile('file')) {
             $uploadedFile = $request->file('file');
             $newFileName = $uploadedFile->getClientOriginalName();
             $filePath = $uploadedFile->storeAs('uploads/files', $newFileName, 'public'); // Store with new name
-    
+
             // Update file details
             $fileVersion->file_path = 'uploads/files/' . $newFileName;
             $fileVersion->file_size = $uploadedFile->getSize();
@@ -1252,16 +1290,16 @@ class StaffController extends Controller
             $fileVersion->updated_at = now();
             $changesMade = true;
         }
-    
+
         // Update other details
         if ($fileVersion->filename !== $request->filename) {
             $fileVersion->filename = $request->filename;
             $changesMade = true;
         }
-    
+
         if ($changesMade) {
             $fileVersion->save();
-    
+
             // Log the update in file_time_stamps
             FileTimeStamp::create([
                 'file_id' => $fileVersion->file_id,
@@ -1270,14 +1308,15 @@ class StaffController extends Controller
                 'timestamp' => now(),
             ]);
         }
-    
+
         return redirect()->route('staff.update')->with('success', 'File version updated successfully!');
     }
-    
+
 
     public function checkFileRequests(Request $request)
     {
-        $user = session('user'); // Get logged-in user from session
+        $user = auth()->user();
+        // Get logged-in user from session
 
         if (!$user) {
             return response()->json(['error' => 'Unauthorized'], 401);
@@ -1308,8 +1347,4 @@ class StaffController extends Controller
             'message' => "File ID {$approvedRequest->file_id} successfully accepted to storage. Please check your Active Files Section.",
         ]);
     }
-
-
-
-
 }

@@ -16,7 +16,7 @@ return new class extends Migration
             $table->unsignedInteger('folder_id');
             $table->unsignedInteger('user_id');
             $table->unsignedInteger('assigned_by')->nullable();
-            $table->text('note');
+            $table->text('note')->nullable();
             $table->string('status', 255)->nullable();
 
             $table->unique(['folder_id', 'user_id']);

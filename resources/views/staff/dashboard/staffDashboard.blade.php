@@ -1,7 +1,9 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
+    <meta name="csrf-token" content="{{ csrf_token() }}">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Staff</title>
     <link href="https://fonts.googleapis.com/css2?family=Lato:wght@400;700&display=swap" rel="stylesheet">
@@ -13,209 +15,108 @@
         body {
             font-family: 'Lato', sans-serif;
             zoom: 90%;
+            background: url("{{ asset('storage/uploads/bodybackground.png') }}") no-repeat center center fixed;
+            background-size: contain;
         }
     </style>
 </head>
-<body class="bg-gray-50 bg-cover bg-center" 
-      style="background: url('{{ asset('storage/uploads/bodybackground.png') }}') no-repeat center center fixed; 
-             background-size: contain;">
-             
+
+<body class="bg-gray-50 bg-cover bg-center">
+
     <div class="flex h-screen">
-        
-    <div id="sidebar" class="bg-gray-900 text-white w-66 space-y-6 py-8 px-6 transform -translate-x-full md:translate-x-0
+
+        <div id="sidebar" class="bg-gray-900 text-white w-66 space-y-6 py-8 px-6 transform -translate-x-full md:translate-x-0
      transition-transform duration-300 fixed top-0 bottom-0 z-40 overflow-y-auto">
-     
-        <div class="text-2xl font-bold flex justify-center">
-            <img src="{{ asset('storage/csitlogo.jpg') }}" alt="CSIT Logo" class="w-24 h-24 rounded-full">
-            <!-- <p><a href="#" class="text-white">Staff Panel</a></p>  -->
-        </div>
 
-
-            <!-- <div class="flex items-center bg-white text-white rounded-lg p-4 space-x-3 w-full">
-                <div class="w-12 h-12 bg-gray-600 flex items-center justify-center rounded-full">
-                    <i class="fas fa-user text-white text-2xl"></i>
-                </div>
-                <div class="flex flex-col">
-                    <p class="text-black text-sm">ID: {{ session('user')->id }}</p>
-                    <p class="text-lg font-semibold text-black">{{ session('user')->role }}</p>
-                    <p class="text-lg font-semibold text-black">{{ session('user')->role }}</p>
-                </div>
-            </div> -->
-
+            <div class="text-2xl font-bold flex justify-center">
+                <img src="{{ asset('storage/csitlogo.jpg') }}" alt="CSIT Logo" class="w-24 h-24 rounded-full">
+            </div>
 
             <nav class="space-y-8">
+                <a href="{{ route('staff.page.dashboard') }}" class="flex items-center text-white hover:text-white relative top-4">
+                    <i class="fas fa-thumbtack mr-5"></i> <span class='text-sm'> Dashboard </span>
+                </a>
 
-            <!-- <p class="text-white text-1xl font-bold">
-                <i class="fas fa-folder-open"></i> MAIN
-            </p> -->
+                <p class=" -m-6 mb-6 border-b border-white text-gray-200 pb-2"></p>
 
-            <a href="{{ route('staff.page.dashboard') }}" class="flex items-center text-white hover:text-white relative top-4">
-                <i class="fas fa-thumbtack mr-5"></i> <span class='text-sm'> Dashboard </span>
-            </a>
+                <p class="text-white text-1xl font-bold">
+                    <i class="fas fa-folder mr-5"></i> <span class='text-sm'> FILES </span>
+                </p>
 
+                <a href="{{ route('staff.upload') }}" class="flex items-center text-white hover:text-white ">
+                    <i class="fas fa-upload mr-5"></i> <span class='text-sm'> Upload </span>
+                </a>
 
-            <p class=" -m-6 mb-6 border-b border-white text-gray-200 pb-2">
-            </p>
+                <a href="{{ route('request.file.access') }}" class="flex items-center text-white hover:text-white ">
+                    <i class="fas fa-share-from-square mr-2"></i>
+                    <span class='text-sm ml-2'> Request File Access </span>
+                </a>
 
-            <p class="text-white text-1xl font-bold">
-                <i class="fas fa-folder mr-5"></i> <span class='text-sm'> FILES </span>
-            </p>
+                <a href="{{ route('request.folder.access') }}" class="flex items-center text-white hover:text-white ">
+                    <i class="fas fa-share-from-square mr-2"></i>
+                    <span class='text-sm ml-2'> Request Folder Access </span>
+                </a>
 
-            <!-- <a href="{{ route('staff.folders') }}" class="flex items-center text-white hover:text-white ">
-                <i class="fas fa-folder-open mr-5"></i> Folders
-            </a> -->
+                <a href="{{ route('staff.active.files') }}" class="flex items-center text-white hover:text-white ">
+                    <i class="fas fa-folder-open mr-4"></i> <span class='text-sm'> Files </span>
+                </a>
 
-            <a href="{{ route('staff.upload') }}" class="flex items-center text-white hover:text-white ">
-                <i class="fas fa-upload mr-5"></i> <span class='text-sm'>  Upload </span>
-            </a>
+                <a href="{{ route('staff.archived.files') }}" class="flex items-center text-white hover:text-white ">
+                    <i class="fas fa-bookmark mr-5"></i> <span class='text-sm'> Archived Files </span>
+                </a>
 
-            <a href="{{ route('request.file.access') }}" class="flex items-center text-white hover:text-white ">
-                <i class="fas fa-share-from-square mr-2"></i>
-                <span class='text-sm ml-2'>  Request File Access </span>
-            </a>
+                <p class="-m-6 mb-6 border-b border-white text-gray-200 pb-2"></p>
 
-            <a href="{{ route('request.folder.access') }}" class="flex items-center text-white hover:text-white ">
-                <i class="fas fa-share-from-square mr-2"></i>
-                <span class='text-sm ml-2'>  Request Folder Access </span>
-            </a>
+                <p class="text-white text-1xl font-bold mt-8">
+                    <i class="fas fa-file-text mr-5"></i> <span class='text-sm'> ACTIVITY </span>
+                </p>
 
-            <!-- <a href="{{ route('staff.files') }}" class="flex items-center text-white hover:text-white ">
-                <i class="fas fa-file-alt mr-5"></i>  My Uploads
-            </a>
+                <a href="{{ route ('timestamps.index')}}" class="flex items-center text-white hover:text-white ">
+                    <i class="fas fa-list mr-5"></i> <span class='text-sm'> File Timestamps </span>
+                </a>
 
-            <a href="{{ route('staff.pending.files') }}" class="flex items-center text-white hover:text-white  relative">
-                <i class="fas fa-file-alt mr-5"></i> Pending File Request
-
-                @if($pendingRequestCount > 0)
-                    <span class="ml-2 bg-red-500 text-white text-xs font-bold px-2 py-1 rounded-full absolute -top-2 -right-1">
-                        {{ $pendingRequestCount }}
-                    </span>
-                @endif
-            </a> -->
-
-            <!-- <p class="border-b border-white text-gray-200 pb-2">
-            </p> -->
-
-            <!-- <p class="text-white text-1xl font-bold">
-                <i class="fas fa-folder-open"></i> Manage Files
-            </p> -->
-
-            <a href="{{ route('staff.active.files') }}" class="flex items-center text-white hover:text-white ">
-                <i class="fas fa-folder-open mr-4"></i> <span class='text-sm'> Files </span>
-            </a>
-
-            <!-- <a href="{{ route('staff.update') }}" class="flex items-center text-white hover:text-white ">
-                <i class="fas fa-history mr-5"></i> File Versions
-            </a> -->
-
-            <a href="{{ route('staff.archived.files') }}" class="flex items-center text-white hover:text-white ">
-                <i class="fas fa-bookmark mr-5"></i> <span class='text-sm'> Archived Files </span>
-            </a>
-
-            
-            <!-- <a href="{{ route('staff.trash.bins') }}" class="flex items-center text-white hover:text-white ">
-                <i class="fas fa-trash-alt mr-5"></i> Trash Files
-            </a> -->
-
-            <p class="-m-6 mb-6 border-b border-white text-gray-200 pb-2">
-            </p>
-
-
-            <p class="text-white text-1xl font-bold mt-8">
-                <i class="fas fa-file-text mr-5"></i> <span class='text-sm'> ACTIVITY </span>
-            </p>
-
-            <a href="{{ route ('timestamps.index')}}" class="flex items-center text-white hover:text-white ">
-                <i class="fas fa-list mr-5"></i> <span class='text-sm'> File Timestamps </span>
-            </a>
-
-            <!-- @if (session('user')->role === 'staff') -->
                 <a href="{{ route('staff.logs.view') }}" class="flex items-center text-white hover:text-white ">
                     <i class="fas fa-inbox mr-5"></i> <span class='text-sm'> Activity Logs </span>
                 </a>
-            <!-- @elseif (session('user')->role === 'faculty') -->
-                <!-- <a href="{{ route('staff.logs.view') }}" class="flex items-center text-white hover:text-white ">
-                    <i class="fas fa-file mr-5"></i> Faculty Logs
-                </a> -->
-            <!-- @endif -->
 
-            <p class="-m-6 mb-6 border-b border-white text-gray-200 pb-2">
-            </p>
+                <p class="-m-6 mb-6 border-b border-white text-gray-200 pb-2"></p>
 
+                <a href="{{ url('/staff-logout') }}" class="flex items-center text-white hover:text-white mr-2"
+                    style="font-weight: bold" onclick="return confirmLogout();">
+                    <i class="fas fa-sign-out mr-2"></i>
+                    Logout
+                </a>
 
-            <a href="{{ url('/staff-logout') }}" class="flex items-center text-white hover:text-white mr-2" 
-            style="font-weight: bold" onclick="return confirmLogout();">
-            <i class="fas fa-sign-out mr-2"></i>
-            Logout
-            </a>
-
-            <script>
-                function confirmLogout() {
-                    return confirm("Are you sure you want to log out?");
-                }
-            </script>
-
-
+                <script>
+                    function confirmLogout() {
+                        return confirm("Are you sure you want to log out?");
+                    }
+                </script>
             </nav>
         </div>
 
         <div id="sidebarOverlay" class="fixed inset-0 bg-black opacity-50 hidden md:hidden" onclick="toggleSidebar()"></div>
 
         <div class="flex-1 flex flex-col ml-0 md:ml-64">
-           
-        <div class="flex justify-between items-center">
-            <!-- Page Title -->
-            <h1 class="text-2xl font-bold text-gray-800"></h1>
 
-            <div class="flex items-center space-x-6">
-        
-                <!-- User Profile (Right End) -->
-                <div class="flex items-center bg-white p-2 space-x-3 shadow-md overflow-hidden">
-                    <div class="w-12 h-12 bg-gray-600 flex items-center justify-center rounded-full">
-                        <i class="fas fa-user text-white text-2xl"></i>
-                    </div>
-                    <div class="flex flex-col">
-                        <p class="text-lg font-semibold text-black">{{ session('user')->name }}</p>
-                        <p class="text-lg font-semibold text-black">
-                            <span class="text-lg font-bold text-green-600">ONLINE: </span> {{ session('user')->role }}
-                        </p>
-                    </div>
+            <div class="flex justify-between items-center">
+                <h1 class="text-2xl font-bold text-gray-800"></h1>
 
-                   <!-- Notification Bell with Modal Trigger -->
-                    <!-- <button id="bellButton" class="text-gray-600 text-4xl focus:outline-none relative">
-                        <i class="fas fa-bell"></i>
-                        <span class="absolute top-0 right-0 bg-red-500 text-white text-xs font-bold rounded-full px-1.5 py-0.5">
-                            3
-                        </span>
-                    </button> -->
-
-                    <!-- Notification Modal (Hidden Initially) -->
-                    <!-- <div id="notificationModal" 
-                        class="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center hidden transition-all duration-300 ease-in-out">
-                        
-                        <div class="bg-white w-166 p-6 rounded-lg shadow-lg transform scale-95 opacity-0 transition-all duration-300 ease-in-out">
-                            <div class="flex justify-between items-center border-b pb-2">
-                                <h2 class="text-xl font-bold text-gray-800">Notifications</h2>
-                                <button id="closeModal" class="text-gray-600 text-2xl focus:outline-none">
-                                    <i class="fas fa-times"></i>
-                                </button>
-                            </div>
-                            
-                            <div class="mt-4">
-                                <p class="text-gray-600">🔔 You have new notifications!</p>
-                                <ul class="mt-2 space-y-2">
-                                    <li class="p-2 bg-gray-100 rounded">📢 System Update: New features added!</li>
-                                    <li class="p-2 bg-gray-100 rounded">📌 Reminder: Meeting at 3 PM.</li>
-                                    <li class="p-2 bg-gray-100 rounded">✉️ Message from Admin: Check your inbox.</li>
-                                </ul>
-                            </div>
+                <div class="flex items-center space-x-6">
+                    <div class="flex items-center bg-white p-2 space-x-3 shadow-md overflow-hidden">
+                        <div class="w-12 h-12 bg-gray-600 flex items-center justify-center rounded-full">
+                            <i class="fas fa-user text-white text-2xl"></i>
                         </div>
-                    </div> -->
-
+                        <div class="flex flex-col">
+                            <p class="text-lg font-semibold text-black">{{ auth()->user()->name }}</p>
+                            <p class="text-lg font-semibold text-black">
+                                <span class="text-lg font-bold text-green-600">ONLINE: </span> {{ ucfirst(auth()->user()->role->name ?? '-') }}
+                            </p>
+                        </div>
+                        <!-- Notification Bell and Modal are commented out -->
+                    </div>
                 </div>
             </div>
-        </div>
-
 
             <main class="p-4 sm: pt-7">
                 @yield('content')
@@ -247,16 +148,12 @@
         function showNotification(message) {
             document.getElementById("notificationMessage").innerText = message;
             let notification = document.getElementById("fileRequestNotification");
-            
-            // Show with slide-in animation
             notification.style.right = "20px";
             notification.style.opacity = "1";
         }
 
         function closeNotification() {
             let notification = document.getElementById("fileRequestNotification");
-            
-            // Hide with slide-out animation
             notification.style.right = "-300px";
             notification.style.opacity = "0";
         }
@@ -266,61 +163,65 @@
     </script>
 
     @if(session('success'))
-        <script>
-            alert("{{ session('success') }}");
-        </script>
-    @endif
     <script>
-        document.addEventListener("DOMContentLoaded", function () {
-        const bellButton = document.getElementById("bellButton");
-        const modal = document.getElementById("notificationModal");
-        const closeModal = document.getElementById("closeModal");
+        alert("{{ session('success') }}");
+    </script>
+    @endif
 
-        // Open Modal with Animation
-        bellButton.addEventListener("click", () => {
-            modal.classList.remove("hidden");
-            setTimeout(() => {
-                modal.children[0].classList.remove("scale-95", "opacity-0");
-                modal.children[0].classList.add("scale-100", "opacity-100");
-            }, 50);
-        });
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            // Only add event listeners if elements exist
+            const bellButton = document.getElementById("bellButton");
+            const modal = document.getElementById("notificationModal");
+            const closeModal = document.getElementById("closeModal");
 
-        // Close Modal with Animation
-        closeModal.addEventListener("click", () => {
-            modal.children[0].classList.remove("scale-100", "opacity-100");
-            modal.children[0].classList.add("scale-95", "opacity-0");
-            setTimeout(() => {
-                modal.classList.add("hidden");
-            }, 200);
-        });
+            if (bellButton && modal && closeModal) {
+                // Open Modal with Animation
+                bellButton.addEventListener("click", () => {
+                    modal.classList.remove("hidden");
+                    setTimeout(() => {
+                        modal.children[0].classList.remove("scale-95", "opacity-0");
+                        modal.children[0].classList.add("scale-100", "opacity-100");
+                    }, 50);
+                });
 
-        // Close Modal when clicking outside the box
-        modal.addEventListener("click", (event) => {
-            if (event.target === modal) {
-                closeModal.click();
+                // Close Modal with Animation
+                closeModal.addEventListener("click", () => {
+                    modal.children[0].classList.remove("scale-100", "opacity-100");
+                    modal.children[0].classList.add("scale-95", "opacity-0");
+                    setTimeout(() => {
+                        modal.classList.add("hidden");
+                    }, 200);
+                });
+
+                // Close Modal when clicking outside the box
+                modal.addEventListener("click", (event) => {
+                    if (event.target === modal) {
+                        closeModal.click();
+                    }
+                });
             }
-        });
         });
     </script>
     <script>
-        document.addEventListener("DOMContentLoaded", function () {
+        document.addEventListener("DOMContentLoaded", function() {
             const navLinks = document.querySelectorAll("#sidebar nav a");
 
             // Function to update active link state with smooth animation
             function setActiveLink(clickedLink) {
                 navLinks.forEach(link => {
                     link.classList.remove(
-                        "text-black", "bg-white", "shadow-md", "scale-105", 
+                        "text-black", "bg-white", "shadow-md", "scale-105",
                         "font-bold", "p-4", "rounded-lg"
                     );
                     link.classList.add("text-white", "hover:text-white", "transition-all", "duration-300", "ease-in-out");
                 });
 
                 clickedLink.classList.add(
-                    "text-black", "bg-white", "shadow-md", "scale-105", 
+                    "text-black", "bg-white", "shadow-md", "scale-105",
                     "font-bold", "p-4", "rounded-lg", "transition-all", "duration-300", "ease-in-out"
                 );
-                clickedLink.classList.remove("text-white", "hover:text-white"); 
+                clickedLink.classList.remove("text-white", "hover:text-white");
 
                 // Store the active link in localStorage to persist highlight
                 localStorage.setItem("activeNav", clickedLink.getAttribute("href"));
@@ -337,7 +238,7 @@
 
             // Add click event listener to each nav link
             navLinks.forEach(link => {
-                link.addEventListener("click", function () {
+                link.addEventListener("click", function() {
                     setActiveLink(this);
                 });
             });
@@ -370,5 +271,5 @@
     </script>
 
 </body>
-</html>
 
+</html>

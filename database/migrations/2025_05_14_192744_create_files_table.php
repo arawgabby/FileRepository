@@ -26,8 +26,7 @@ return new class extends Migration
 
             $table->string('level', 255)->nullable();
             $table->string('area', 255)->nullable();
-            $table->string('system_input', 255)->nullable();
-            $table->string('system_output', 255)->nullable();
+            $table->string('parameter', 255)->nullable();
             $table->timestamps();
         });
     }

@@ -23,7 +23,6 @@ class Files extends Model
         'category',
         'published_by',
         'year_published',
-        'uploaded_by',
         'description',
         'status',
     ];
@@ -33,5 +32,10 @@ class Files extends Model
     public function user()
     {
         return $this->belongsTo(User::class, 'uploaded_by');
+    }
+
+    public function folder()
+    {
+        return $this->belongsTo(Folder::class, 'uploaded_by', 'id');
     }
 }

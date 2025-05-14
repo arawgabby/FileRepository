@@ -10,11 +10,14 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Storage;
 use App\Models\Files;
+use App\Models\Role;
+use Illuminate\Support\Facades\Auth;
 use Symfony\Component\HttpFoundation\Response;
 
 
 class AdminAuthController extends Controller
 {
+    // Admin
     public function showAdminLoginForm()
     {
         return view('auth.AdminLogin');
@@ -26,15 +29,17 @@ class AdminAuthController extends Controller
             'name' => 'required|string|max:255',
             'email' => 'required|email|unique:users,email',
             'password' => 'required|string|min:6',
-            'role' => 'required|in:admin,user',
+            'role' => 'required|in:admin',
         ]);
 
         try {
+            $role = Role::where('name', $validated['role'])->firstOrFail();
+
             User::create([
                 'name' => $validated['name'],
                 'email' => $validated['email'],
                 'password' => Hash::make($validated['password']),
-                'role' => $validated['role'],
+                'role_id' => $role->id,
             ]);
 
             return redirect('/admin-signup')->with('success', 'Account created successfully!');
@@ -43,6 +48,8 @@ class AdminAuthController extends Controller
         }
     }
 
+
+    // Staff
     public function Staffstore(Request $request)
     {
         $validated = $request->validate([
@@ -53,11 +60,13 @@ class AdminAuthController extends Controller
         ]);
 
         try {
+            $role = Role::where('name', $validated['role'])->firstOrFail();
+
             User::create([
                 'name' => $validated['name'],
                 'email' => $validated['email'],
                 'password' => Hash::make($validated['password']),
-                'role' => $validated['role'],
+                'role_id' => $role->id,
             ]);
 
             return redirect('/staff-login')->with('success', 'Account created successfully! You can now log in.');
@@ -73,13 +82,14 @@ class AdminAuthController extends Controller
             'password' => 'required|string',
         ]);
 
-        // Find the user
         $user = User::where('email', $credentials['email'])->first();
 
         if ($user && Hash::check($credentials['password'], $user->password)) {
-            // Store user in session if you want
-            session(['user' => $user]);
-
+            // Only allow admin
+            if (!$user->isAdmin()) {
+                return redirect('/admin-login')->with('error', 'Access denied. Only admin can log in.');
+            }
+            Auth::login($user); // Use Laravel authentication
             return redirect()->route('admin.page.dashboard')->with('success', 'Login successful!');
         } else {
             return redirect('/admin-login')->with('error', 'Invalid email or password. Please try again.');
@@ -93,21 +103,15 @@ class AdminAuthController extends Controller
             'password' => 'required|string',
         ]);
 
-        // Find the user
         $user = User::where('email', $credentials['email'])->first();
 
-        // Check if user exists and password is correct
         if ($user && Hash::check($credentials['password'], $user->password)) {
-
-            // Check if the user's role is either 'faculty' or 'staff'
-            if ($user->role === 'faculty' || $user->role === 'staff') {
-                // Store user in session if you want
-                session(['user' => $user]);
-
-                return redirect()->route('staff.dashboard')->with('success', 'Login successful!');
-            } else {
+            // Only allow staff or faculty
+            if (!($user->isStaff() || $user->isFaculty())) {
                 return redirect('/staff-login')->with('error', 'Access denied. Only faculty or staff can log in.');
             }
+            Auth::login($user); // Use Laravel authentication
+            return redirect()->route('staff.dashboard')->with('success', 'Login successful!');
         } else {
             return redirect('/staff-login')->with('error', 'Invalid email or password. Please try again.');
         }
@@ -116,13 +120,13 @@ class AdminAuthController extends Controller
 
     public function logout()
     {
-        session()->forget('user'); // Clear the user session
+        Auth::logout();  // Clear the user session
         return redirect('/admin-login')->with('success', 'You have been logged out successfully.');
     }
 
     public function Stafflogout()
     {
-        session()->flush(); // Clear all session data
+        Auth::logout(); // Use Laravel logout
         return redirect('/staff-login')->with('success', 'You have been logged out successfully.');
     }
 

@@ -10,12 +10,10 @@ class AdminAuthMiddleware
 {
     public function handle(Request $request, Closure $next): Response
     {
-        if (!session()->has('user')) {
+        if (!auth()->check() || !auth()->user()->isAdmin()) {
             return redirect('/admin-login')->with('error', 'Unauthorized access. Please login first.');
         }
 
         return $next($request);
     }
-
-    
 }

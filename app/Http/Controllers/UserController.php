@@ -13,10 +13,10 @@ class UserController extends Controller
     {
         // Paginate users (10 per page) and order by created_at in descending order
         $users = User::orderBy('created_at', 'desc')->paginate(8);
-    
+
         return view('admin.pages.UsersView', compact('users'));
     }
-    
+
     public function AddUserViewBlade()
     {
         return view('admin.pages.AddUser'); // Ensure this blade file exists
@@ -37,12 +37,15 @@ class UserController extends Controller
         ]);
 
         try {
+            // Get the role_id from the roles table
+            $role = \App\Models\Role::where('name', $request->role)->firstOrFail();
+
             // Insert into the database
             User::create([
                 'name' => $request->name,
                 'email' => $request->email,
                 'password' => Hash::make($request->password), // Encrypt password
-                'role' => $request->role, // Use role from the form
+                'role_id' => $role->id, // Use role_id from roles table
                 'status' => $request->status,
                 'contact_number' => $request->contact_number, // Store contact number
             ]);
@@ -70,23 +73,22 @@ class UserController extends Controller
             'status' => 'required|in:active,inactive,pending,deactivated',
             'role' => 'required|in:admin,staff,faculty,user', // Validate role input
         ]);
-    
+
         $user = User::findOrFail($id);
         $user->name = $request->name;
         $user->email = $request->email;
         $user->status = $request->status;
-        $user->role = $request->role; // Save the role update
-    
+
+        // Get the role_id from the roles table
+        $role = \App\Models\Role::where('name', $request->role)->firstOrFail();
+        $user->role_id = $role->id; // Save the role_id update
+
         if ($request->filled('password')) {
             $user->password = Hash::make($request->password);
         }
-    
+
         $user->save();
-    
+
         return redirect()->route('admin.users')->with('success', 'User updated successfully!');
     }
-    
-
-
-
 }

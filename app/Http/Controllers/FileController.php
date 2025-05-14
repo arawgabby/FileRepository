@@ -128,10 +128,15 @@ class FileController extends Controller
 
         try {
             // Get the session user
-            $user = session('user');
+            $user = auth()->user();
 
             // Find the request by ID
             $fileRequest = FileRequest::findOrFail($validated['request_id']);
+
+            // Only allow the file owner to update the status
+            if ($fileRequest->file->uploaded_by !== $user->id) {
+                return back()->with('error', 'You are not authorized to update this request.');
+            }
 
             // Update status and processed_by
             $fileRequest->request_status = $validated['status'];
@@ -159,6 +164,7 @@ class FileController extends Controller
         }
 
         $access->status = $request->status;
+        $access->assigned_by = auth()->id();
         $access->save();
 
         return redirect()->back()->with('success', 'Status updated successfully.');
@@ -176,15 +182,15 @@ class FileController extends Controller
             // Accreditation fields validation
             'level' => 'required_if:category,accreditation|max:255',
             'area' => 'required_if:category,accreditation|max:255',
-            'system_input' => 'required_if:category,accreditation|max:255',
-            'system_output' => 'required_if:category,accreditation|max:255',
+            'parameter' => 'required_if:category,accreditation|max:255',
         ]);
 
         if (!session()->has('user')) {
             return response()->json(['message' => 'Unauthorized: Please log in.'], 403);
         }
 
-        $user = session('user');
+        $user = auth()->user();
+
 
         if ($request->hasFile('file')) {
             $file = $request->file('file');
@@ -213,8 +219,7 @@ class FileController extends Controller
             if ($request->category === 'accreditation') {
                 $fileData['level'] = $request->level;
                 $fileData['area'] = $request->area;
-                $fileData['system_input'] = $request->system_input;
-                $fileData['system_output'] = $request->system_output;
+                $fileData['parameter'] = $request->parameter;
             }
 
             $fileEntry = Files::create($fileData);
@@ -254,7 +259,8 @@ class FileController extends Controller
         try {
             Storage::disk('public')->deleteDirectory($fullPath);
 
-            $user = session('user');
+            $user = auth()->user();
+
 
             // Access log database entry
             AccessLog::create([
@@ -302,7 +308,8 @@ class FileController extends Controller
             Storage::disk('public')->makeDirectory($newPath);
 
             // Retrieve user from session
-            $user = session('user');
+            $user = auth()->user();
+
 
             // Insert into folders table
             Folder::create([
@@ -889,7 +896,8 @@ class FileController extends Controller
             return redirect()->back()->with('error', 'This file is already archived.');
         }
 
-        $user = session('user');
+        $user = auth()->user();
+
         if (!$user || !$user->isAdmin()) {
             return redirect()->back()->with('error', 'Unauthorized: You do not have permission.');
         }

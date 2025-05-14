@@ -27,10 +27,27 @@
                 <!-- Accreditation Extra Fields (hidden by default) -->
                 <div class="mb-4" id="accreditationFields" style="display: none;">
                     <label class="block text-lg font-bold text-gray-700 mb-2">Accreditation Details</label>
-                    <input type="text" name="level" id="level" class="mt-1 p-2 border rounded w-full mb-2" placeholder="Level">
-                    <input type="text" name="area" id="area" class="mt-1 p-2 border rounded w-full mb-2" placeholder="Area">
-                    <input type="text" name="system_input" id="system_input" class="mt-1 p-2 border rounded w-full mb-2" placeholder="System Input">
-                    <input type="text" name="system_output" id="system_output" class="mt-1 p-2 border rounded w-full" placeholder="System Output">
+                    <select name="level" id="level" class="mt-1 p-2 border rounded w-full mb-2" required>
+                        <option value="">Select Level</option>
+                        <option value="1">1</option>
+                        <option value="2">2</option>
+                        <option value="3">3</option>
+                        <option value="phase 1">Phase 1</option>
+                        <option value="phase 2">Phase 2</option>
+                        <option value="4">4</option>
+                    </select>
+                    <select name="area" id="area" class="mt-1 p-2 border rounded w-full mb-2" required>
+                        <option value="">Select Area</option>
+                        @for($i = 1; $i <= 10; $i++)
+                            <option value="{{ $i }}">{{ $i }}</option>
+                            @endfor
+                    </select>
+                    <select name="parameter" id="parameter" class="mt-1 p-2 border rounded w-full" required>
+                        <option value="">Select Parameter</option>
+                        <option value="System">System</option>
+                        <option value="Input">Input</option>
+                        <option value="Output">Output</option>
+                    </select>
                 </div>
 
                 <div class="mb-4">
@@ -45,7 +62,7 @@
 
                 <div class="mb-4">
                     <label for="published_by" class="block text-lg font-bold text-gray-700">Published By</label>
-                    <input type="text" name="published_by" id="published_by" class="p-2 border rounded w-full" value="{{ session('user')->name }}" readonly>
+                    <input type="text" name="published_by" id="published_by" class="p-2 border rounded w-full" value="{{ auth()->user()->name }}" readonly>
                 </div>
 
                 <div class="mb-4">
@@ -105,11 +122,9 @@
                 accreditationFields.style.display = "block";
             } else {
                 accreditationFields.style.display = "none";
-                // Optionally clear values
-                document.getElementById("level").value = "";
-                document.getElementById("area").value = "";
-                document.getElementById("system_input").value = "";
-                document.getElementById("system_output").value = "";
+                document.getElementById("level").selectedIndex = 0;
+                document.getElementById("area").selectedIndex = 0;
+                document.getElementById("parameter").selectedIndex = 0;
             }
         });
 
@@ -170,8 +185,7 @@
             if (categorySelect.value === "accreditation") {
                 formData.append("level", document.getElementById("level").value);
                 formData.append("area", document.getElementById("area").value);
-                formData.append("system_input", document.getElementById("system_input").value);
-                formData.append("system_output", document.getElementById("system_output").value);
+                formData.append("parameter", document.getElementById("parameter").value);
             }
 
             let uploadUrl = "{{ route('admin.uploadFiles') }}";

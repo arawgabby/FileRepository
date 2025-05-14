@@ -2,7 +2,6 @@
 
 namespace App\Models;
 
-// use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
@@ -21,7 +20,7 @@ class User extends Authenticatable
         'name',
         'email',
         'password',
-        'role',
+        'role_id',
         'contact_number',
     ];
 
@@ -45,8 +44,25 @@ class User extends Authenticatable
         'password' => 'hashed',
     ];
 
+    // Relationship to Role
+    public function role()
+    {
+        return $this->belongsTo(Role::class, 'role_id');
+    }
+
+    // Helper methods for role checks
     public function isAdmin()
     {
-        return $this->role === 'admin'; // Adjust this based on how roles are stored
+        return is_object($this->role) && isset($this->role->name) && $this->role->name === 'admin';
+    }
+
+    public function isStaff()
+    {
+        return is_object($this->role) && isset($this->role->name) && $this->role->name === 'staff';
+    }
+
+    public function isFaculty()
+    {
+        return is_object($this->role) && isset($this->role->name) && $this->role->name === 'faculty';
     }
 }

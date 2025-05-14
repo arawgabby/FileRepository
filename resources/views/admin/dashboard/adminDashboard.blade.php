@@ -171,7 +171,8 @@
                         <div class="flex flex-col">
                             <p class="text-sm font-semibold text-black">{{ session('user')->name }}</p>
                             <p class="text-sm font-semibold text-black">
-                                <span class="text-sm font-bold text-green-600">ONLINE: </span> {{ session('user')->role }}
+                                <span class="text-sm font-bold text-green-600">ONLINE: </span>
+                                {{ ucfirst(session('user')->role?->name ?? '-') }}
                             </p>
                         </div>
 
