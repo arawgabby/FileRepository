@@ -1,5 +1,5 @@
 @extends('staff.dashboard.staffDashboard')
-
+@section('title', 'Request File')
 @section('content')
 
 

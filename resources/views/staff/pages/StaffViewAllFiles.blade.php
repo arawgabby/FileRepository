@@ -1,7 +1,6 @@
 @extends('staff.dashboard.staffDashboard')
-
+@section('title', 'View All File')
 @section('content')
-<meta name="csrf-token" content="{{ csrf_token() }}">
 
 <style>
     td {
@@ -10,28 +9,27 @@
 </style>
 
 @if (session('success'))
-    <script>
-        alert("{{ session('success') }}");
-    </script>
+<script>
+    alert("{{ session('success') }}");
+</script>
 @endif
 
 @if (session('error'))
-    <script>
-        alert("{{ session('error') }}");
-    </script>
+<script>
+    alert("{{ session('error') }}");
+</script>
 @endif
 
 <div class="container mx-auto p-6 bg-white " style="box-shadow: 4px 4px 10px rgba(0, 0, 0, 0.1);">
 
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
 
-    <h1 style="font-size: 30px; font-weight: bold; margin-bottom: 12px" >My Uploads</h1>
+    <h1 style="font-size: 30px; font-weight: bold; margin-bottom: 12px">My Uploads</h1>
 
     <!-- Search & Filters -->
     <div class="mb-4 flex gap-4">
         <input type="text" id="searchInput" placeholder="Search files..."
             class="border rounded p-2 w-1/3">
-        
+
         <select id="fileTypeFilter" class="border rounded p-2">
             <option value="">All Types</option>
             <option value="pdf">Pdf</option>
@@ -69,67 +67,67 @@
         </thead>
         <tbody id="fileTableBody">
             @foreach($files as $file)
-                @if($file->status == 'pending') 
-                    <tr class="file-row">
-                        <td class="p-2 filename">00{{ $file->file_id }}</td>
-                        <td class="p-2 filename">{{ $file->filename }}</td>
-                        <td class="p-2 file-type">
-                            @php
-                                $fileType = strtolower($file->file_type);
-                            @endphp
-                            @if($fileType == 'pdf')
-                                <i class="fa-solid fa-file-pdf text-red-500"></i>
-                            @elseif(in_array($fileType, ['docx', 'doc']))
-                                <i class="fa-solid fa-file-word text-blue-500"></i>
-                            @elseif(in_array($fileType, ['pptx', 'ppt']))
-                                <i class="fa-solid fa-file-powerpoint text-orange-500"></i>
-                            @else
-                                <i class="fa-solid fa-file text-gray-500"></i>
-                            @endif
-                            {{ strtoupper($fileType) }}
-                        </td>
-                        <td class="p-2 category">{{ $file->category ?? 'No Category' }}</td>
-                        <td class="p-2">{{ $file->user ? $file->user->name : 'Unknown' }}</td>
-                        <td class="p-2 filename">{{ $file->created_at->diffForHumans() }}</td>
-                        <td class="p-2">
-                            <span class="px-3 py-1 text-white text-sm font-semibold rounded-[12px] 
+            @if($file->status == 'pending')
+            <tr class="file-row">
+                <td class="p-2 filename">00{{ $file->file_id }}</td>
+                <td class="p-2 filename">{{ $file->filename }}</td>
+                <td class="p-2 file-type">
+                    @php
+                    $fileType = strtolower($file->file_type);
+                    @endphp
+                    @if($fileType == 'pdf')
+                    <i class="fa-solid fa-file-pdf text-red-500"></i>
+                    @elseif(in_array($fileType, ['docx', 'doc']))
+                    <i class="fa-solid fa-file-word text-blue-500"></i>
+                    @elseif(in_array($fileType, ['pptx', 'ppt']))
+                    <i class="fa-solid fa-file-powerpoint text-orange-500"></i>
+                    @else
+                    <i class="fa-solid fa-file text-gray-500"></i>
+                    @endif
+                    {{ strtoupper($fileType) }}
+                </td>
+                <td class="p-2 category">{{ $file->category ?? 'No Category' }}</td>
+                <td class="p-2">{{ $file->user ? $file->user->name : 'Unknown' }}</td>
+                <td class="p-2 filename">{{ $file->created_at->diffForHumans() }}</td>
+                <td class="p-2">
+                    <span class="px-3 py-1 text-white text-sm font-semibold rounded-[12px] 
                                 @if($file->status == 'pending') bg-red-500 
                                 @elseif($file->status == 'approved') bg-green-500 
                                 @elseif($file->status == 'denied') bg-gray-500 
                                 @endif">
-                                {{ ucfirst($file->status) }}
-                            </span>
-                        </td>
-                        <td class="p-2">
-                            <div class="flex justify-center space-x-4">
-                                @if($file->status == 'active')
-                                    <a href="{{ route('files.download', basename($file->file_path)) }}" class="text-blue-500" title="Download">
-                                        <i class="fas fa-download"></i>
-                                    </a>
-                                    <a href="{{ route('admin.files.editPrimary', ['file_id' => $file->file_id]) }}" class="text-blue-500" title="Edit Primary File">
-                                        <i class="fas fa-edit"></i>
-                                    </a>
-                                    <a href="{{ route('admin.editFile', $file->file_id) }}" class="text-red-500" title="Upload New File Based on this version">
-                                        <i class="fas fa-upload"></i>
-                                    </a>
-                                @endif
-                                <form action="{{ route('staff.requestFile', ['file_id' => $file->file_id]) }}" method="POST" onsubmit="return confirmRequest();">
-                                    @csrf
-                                    <button type="submit" class="text-red-500" title="Request File To be Saved">
-                                        <i class="fas fa-file"></i>
-                                    </button>
-                                </form>
-                                <form action="{{ route('staff.files.trash', $file->file_id) }}" method="POST" onsubmit="return confirmTrash(event);">
-                                    @csrf
-                                    @method('PUT')
-                                    <button type="submit" class="text-blue-500 hover:text-blue-700" title="Cancel File Storing">
-                                        <i class="fas fa-cancel"></i>
-                                    </button>
-                                </form>
-                            </div>
-                        </td>
-                    </tr>
-                @endif
+                        {{ ucfirst($file->status) }}
+                    </span>
+                </td>
+                <td class="p-2">
+                    <div class="flex justify-center space-x-4">
+                        @if($file->status == 'active')
+                        <a href="{{ route('files.download', basename($file->file_path)) }}" class="text-blue-500" title="Download">
+                            <i class="fas fa-download"></i>
+                        </a>
+                        <a href="{{ route('admin.files.editPrimary', ['file_id' => $file->file_id]) }}" class="text-blue-500" title="Edit Primary File">
+                            <i class="fas fa-edit"></i>
+                        </a>
+                        <a href="{{ route('admin.editFile', $file->file_id) }}" class="text-red-500" title="Upload New File Based on this version">
+                            <i class="fas fa-upload"></i>
+                        </a>
+                        @endif
+                        <form action="{{ route('staff.requestFile', ['file_id' => $file->file_id]) }}" method="POST" onsubmit="return confirmRequest();">
+                            @csrf
+                            <button type="submit" class="text-red-500" title="Request File To be Saved">
+                                <i class="fas fa-file"></i>
+                            </button>
+                        </form>
+                        <form action="{{ route('staff.files.trash', $file->file_id) }}" method="POST" onsubmit="return confirmTrash(event);">
+                            @csrf
+                            @method('PUT')
+                            <button type="submit" class="text-blue-500 hover:text-blue-700" title="Cancel File Storing">
+                                <i class="fas fa-cancel"></i>
+                            </button>
+                        </form>
+                    </div>
+                </td>
+            </tr>
+            @endif
             @endforeach
         </tbody>
     </table>
@@ -152,7 +150,7 @@
     }
 </script>
 <script>
-    document.addEventListener("DOMContentLoaded", function () {
+    document.addEventListener("DOMContentLoaded", function() {
         const searchInput = document.getElementById("searchInput");
         const fileTypeFilter = document.getElementById("fileTypeFilter");
         const categoryFilter = document.getElementById("categoryFilter");

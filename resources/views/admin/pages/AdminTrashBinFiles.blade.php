@@ -1,7 +1,6 @@
 @extends('admin.dashboard.adminDashboard')
-
+@section('title', 'Trashbin')
 @section('content')
-<meta name="csrf-token" content="{{ csrf_token() }}">
 
 <style>
     td {
@@ -19,7 +18,7 @@
     <!-- Search & Filters -->
     <div class="mb-4 flex gap-4 mt-2">
         <input type="text" id="searchInput" placeholder="Search files..." class="border rounded p-2 w-1/4">
-        
+
         <select id="fileTypeFilter" class="border rounded p-4">
             <option value="">All Types</option>
             <option value="pdf">PDF</option>
@@ -42,55 +41,55 @@
         </thead>
         <tbody id="fileTableBody">
             @foreach($fileVersions as $fileVersion)
-                <tr class="file-row">
-                    <!-- <td class="p-4 border-b border-gray">{{ $fileVersion->file_id }}</td> -->
-                    <td class="p-4 border-b border-gray filename text-left">{{ $fileVersion->filename }}</td>
-                    <td class="p-4 border-b border-gray file-type">
-                        @php
-                            $fileType = strtolower($fileVersion->file_type);
-                        @endphp
+            <tr class="file-row">
+                <!-- <td class="p-4 border-b border-gray">{{ $fileVersion->file_id }}</td> -->
+                <td class="p-4 border-b border-gray filename text-left">{{ $fileVersion->filename }}</td>
+                <td class="p-4 border-b border-gray file-type">
+                    @php
+                    $fileType = strtolower($fileVersion->file_type);
+                    @endphp
 
-                        @if($fileType == 'pdf')
-                            <i class="fa-solid fa-file-pdf text-red-500"></i>
-                        @elseif($fileType == 'docx' || $fileType == 'doc')
-                            <i class="fa-solid fa-file-word text-blue-500"></i>
-                        @elseif($fileType == 'pptx' || $fileType == 'ppt')
-                            <i class="fa-solid fa-file-powerpoint text-orange-500"></i>
-                        @else
-                            <i class="fa-solid fa-file text-gray-500"></i>
-                        @endif
-                        {{ strtoupper($fileType) }}
-                    </td>
-                    <td class="p-4 border-b border-gray">{{ optional($fileVersion->user)->name ?? 'Unknown' }}</td>
-                    <td class="p-4 border-b border-gray">{{ $fileVersion->updated_at }}</td>
-                    <td class="p-4 border-b border-gray text-center">
-                        <div class="flex justify-center space-x-4">
-                            <a href="{{ route('admin.restore', $fileVersion->file_id) }}" 
-                                class="bg-blue-500 hover:bg-blue-700 text-white rounded-lg p-2 transition duration-300 " 
-                                title="Restore File"
-                                onclick="confirmRestore(event, {{ $fileVersion->file_id }})">
-                                <i class="fas fa-arrow-up"></i>
-                            </a>
+                    @if($fileType == 'pdf')
+                    <i class="fa-solid fa-file-pdf text-red-500"></i>
+                    @elseif($fileType == 'docx' || $fileType == 'doc')
+                    <i class="fa-solid fa-file-word text-blue-500"></i>
+                    @elseif($fileType == 'pptx' || $fileType == 'ppt')
+                    <i class="fa-solid fa-file-powerpoint text-orange-500"></i>
+                    @else
+                    <i class="fa-solid fa-file text-gray-500"></i>
+                    @endif
+                    {{ strtoupper($fileType) }}
+                </td>
+                <td class="p-4 border-b border-gray">{{ optional($fileVersion->user)->name ?? 'Unknown' }}</td>
+                <td class="p-4 border-b border-gray">{{ $fileVersion->updated_at }}</td>
+                <td class="p-4 border-b border-gray text-center">
+                    <div class="flex justify-center space-x-4">
+                        <a href="{{ route('admin.restore', $fileVersion->file_id) }}"
+                            class="bg-blue-500 hover:bg-blue-700 text-white rounded-lg p-2 transition duration-300 "
+                            title="Restore File"
+                            onclick="confirmRestore(event, {{ $fileVersion->file_id }})">
+                            <i class="fas fa-arrow-up"></i>
+                        </a>
 
-                            <form id="archive-form-{{ $fileVersion->file_id }}" 
-                                action="{{ route('admin.restore', $fileVersion->file_id) }}" 
-                                method="POST" 
-                                style="display: none;">
-                                @csrf
-                                @method('PUT')
-                            </form>
+                        <form id="archive-form-{{ $fileVersion->file_id }}"
+                            action="{{ route('admin.restore', $fileVersion->file_id) }}"
+                            method="POST"
+                            style="display: none;">
+                            @csrf
+                            @method('PUT')
+                        </form>
 
-                            <!-- Delete Button (No route yet) -->
-                            <a href="#" 
-                                class="bg-red-500 hover:bg-red-700 text-white rounded-lg p-2 transition duration-300" 
-                                title="Delete this file permanently"
-                                onclick="confirmDelete(event, {{ $fileVersion->file_id }})">
-                                <i class="fas fa-trash"></i>
-                            </a>
+                        <!-- Delete Button (No route yet) -->
+                        <a href="#"
+                            class="bg-red-500 hover:bg-red-700 text-white rounded-lg p-2 transition duration-300"
+                            title="Delete this file permanently"
+                            onclick="confirmDelete(event, {{ $fileVersion->file_id }})">
+                            <i class="fas fa-trash"></i>
+                        </a>
 
-                        </div>
-                    </td>
-                </tr>
+                    </div>
+                </td>
+            </tr>
             @endforeach
         </tbody>
     </table>
@@ -150,7 +149,7 @@
 </script>
 
 <script>
-    document.addEventListener("DOMContentLoaded", function () {
+    document.addEventListener("DOMContentLoaded", function() {
         const searchInput = document.getElementById("searchInput");
         const fileTypeFilter = document.getElementById("fileTypeFilter");
         const rows = document.querySelectorAll(".file-row");

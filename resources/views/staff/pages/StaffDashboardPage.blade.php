@@ -1,5 +1,5 @@
 @extends('staff.dashboard.staffDashboard')
-
+@section('title', 'Dashboard')
 @section('content')
 
 <div class="container mx-auto p-6 bg-white " style="box-shadow: 4px 4px 10px rgba(0, 0, 0, 0.1);">

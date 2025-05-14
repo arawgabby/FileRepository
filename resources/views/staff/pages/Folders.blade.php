@@ -1,5 +1,5 @@
 @extends('staff.dashboard.staffDashboard')
-
+@section('title', 'Folders')
 @section('content')
 
 <div class="container mx-auto p-6 bg-white " style="box-shadow: 4px 4px 10px rgba(0, 0, 0, 0.1);">
@@ -21,26 +21,26 @@
 
             <!-- Back Button -->
             @if ($parentPath)
-                <div class="mb-4">
-                    <a href="{{ route('staff.folders', ['path' => $parentPath]) }}" 
+            <div class="mb-4">
+                <a href="{{ route('staff.folders', ['path' => $parentPath]) }}"
                     class="text-blue-700 hover:underline text-sm">
-                        ← Back to {{ $parentPath }}
-                    </a>
-                </div>
+                    ← Back to {{ $parentPath }}
+                </a>
+            </div>
             @endif
 
             <!-- Folder List -->
             <div class="relative border-l-2 border-gray-300 ml-2 pl-6">
                 @forelse ($folderNames as $folder)
-                    <div class="flex items-center space-x-2 mb-4 relative">
-                        <div class="w-6 h-px bg-gray-400 absolute -left-6 top-1/2 transform -translate-y-1/2"></div>
-                        <i class="fas fa-folder text-blue-700 text-xl"></i>
-                        <a href="{{ route('staff.folders', ['path' => $basePath . '/' . $folder]) }}" class="hover:underline">
-                            {{ $folder }}
-                        </a>
-                    </div>
+                <div class="flex items-center space-x-2 mb-4 relative">
+                    <div class="w-6 h-px bg-gray-400 absolute -left-6 top-1/2 transform -translate-y-1/2"></div>
+                    <i class="fas fa-folder text-blue-700 text-xl"></i>
+                    <a href="{{ route('staff.folders', ['path' => $basePath . '/' . $folder]) }}" class="hover:underline">
+                        {{ $folder }}
+                    </a>
+                </div>
                 @empty
-                    <p class="text-gray-700">No folders found in {{ $basePath }}.</p>
+                <p class="text-gray-700">No folders found in {{ $basePath }}.</p>
                 @endforelse
             </div>
 
@@ -49,121 +49,119 @@
         <!-- Right Column: Action Button -->
         <div class="flex items-start justify-end gap-2">
 
-        <button
-            onclick="createSubfolder()"
-            class="bg-blue-600 hover:bg-blue-700 text-white font-semibold px-6 py-3  shadow-md transition duration-200"
-        >
-            + Add Subfolder
-        </button>
+            <button
+                onclick="createSubfolder()"
+                class="bg-blue-600 hover:bg-blue-700 text-white font-semibold px-6 py-3  shadow-md transition duration-200">
+                + Add Subfolder
+            </button>
 
-        <button
-            onclick="deleteSubfolder()"
-            class="bg-red-600 hover:bg-red-700 text-white font-semibold px-6 py-3  shadow-md transition duration-200"
-        >
-            🗑️ Delete Subfolder
-        </button>
+            <button
+                onclick="deleteSubfolder()"
+                class="bg-red-600 hover:bg-red-700 text-white font-semibold px-6 py-3  shadow-md transition duration-200">
+                🗑️ Delete Subfolder
+            </button>
 
         </div>
 
-<script>
-    function createSubfolder() {
-        const folderName = prompt("Enter subfolder name:");
-        if (folderName) {
-            fetch("{{ route('staff.folders.create') }}", {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                    "X-CSRF-TOKEN": "{{ csrf_token() }}"
-                },
-                body: JSON.stringify({
-                    folderName: folderName,
-                    basePath: "{{ $basePath }}"
-                })
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (data.success) {
-                    alert("Folder created successfully!");
-                    location.reload();
-                } else {
-                    alert("Error: " + data.message);
+        <script>
+            function createSubfolder() {
+                const folderName = prompt("Enter subfolder name:");
+                if (folderName) {
+                    fetch("{{ route('staff.folders.create') }}", {
+                            method: "POST",
+                            headers: {
+                                "Content-Type": "application/json",
+                                "X-CSRF-TOKEN": "{{ csrf_token() }}"
+                            },
+                            body: JSON.stringify({
+                                folderName: folderName,
+                                basePath: "{{ $basePath }}"
+                            })
+                        })
+                        .then(response => response.json())
+                        .then(data => {
+                            if (data.success) {
+                                alert("Folder created successfully!");
+                                location.reload();
+                            } else {
+                                alert("Error: " + data.message);
+                            }
+                        })
+                        .catch(error => {
+                            alert("An error occurred.");
+                            console.error(error);
+                        });
                 }
-            })
-            .catch(error => {
-                alert("An error occurred.");
-                console.error(error);
-            });
-        }
-    }
-
-    function deleteSubfolder() {
-        const folderName = prompt("Enter the exact name of the subfolder to delete:");
-        if (!folderName) return;
-
-        const confirmDelete = confirm(`Are you sure you want to delete the folder "${folderName}"? This cannot be undone.`);
-        if (!confirmDelete) return;
-
-        fetch("{{ route('staff.folders.delete') }}", {
-            method: "DELETE",
-            headers: {
-                "Content-Type": "application/json",
-                "X-CSRF-TOKEN": "{{ csrf_token() }}"
-            },
-            body: JSON.stringify({
-                folderName: folderName,
-                basePath: "{{ $basePath }}"
-            })
-        })
-        .then(response => response.json())
-        .then(data => {
-            if (data.success) {
-                alert("Folder deleted successfully.");
-                location.reload();
-            } else {
-                alert("Error: " + data.message);
             }
-        })
-        .catch(error => {
-            alert("An error occurred.");
-            console.error(error);
-        });
-    }
-</script>
 
-<script>
-    function createSubfolder() {
-        const folderName = prompt("Enter subfolder name:");
+            function deleteSubfolder() {
+                const folderName = prompt("Enter the exact name of the subfolder to delete:");
+                if (!folderName) return;
 
-        if (folderName) {
-            fetch("{{ route('staff.folders.create') }}", {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                    "X-CSRF-TOKEN": "{{ csrf_token() }}"
-                },
-                body: JSON.stringify({
-                    folderName: folderName,
-                    basePath: "{{ $basePath }}"
-                })
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (data.success) {
-                    alert("Folder created successfully!");
-                    location.reload();
-                } else {
-                    alert("Error: " + data.message);
+                const confirmDelete = confirm(`Are you sure you want to delete the folder "${folderName}"? This cannot be undone.`);
+                if (!confirmDelete) return;
+
+                fetch("{{ route('staff.folders.delete') }}", {
+                        method: "DELETE",
+                        headers: {
+                            "Content-Type": "application/json",
+                            "X-CSRF-TOKEN": "{{ csrf_token() }}"
+                        },
+                        body: JSON.stringify({
+                            folderName: folderName,
+                            basePath: "{{ $basePath }}"
+                        })
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            alert("Folder deleted successfully.");
+                            location.reload();
+                        } else {
+                            alert("Error: " + data.message);
+                        }
+                    })
+                    .catch(error => {
+                        alert("An error occurred.");
+                        console.error(error);
+                    });
+            }
+        </script>
+
+        <script>
+            function createSubfolder() {
+                const folderName = prompt("Enter subfolder name:");
+
+                if (folderName) {
+                    fetch("{{ route('staff.folders.create') }}", {
+                            method: "POST",
+                            headers: {
+                                "Content-Type": "application/json",
+                                "X-CSRF-TOKEN": "{{ csrf_token() }}"
+                            },
+                            body: JSON.stringify({
+                                folderName: folderName,
+                                basePath: "{{ $basePath }}"
+                            })
+                        })
+                        .then(response => response.json())
+                        .then(data => {
+                            if (data.success) {
+                                alert("Folder created successfully!");
+                                location.reload();
+                            } else {
+                                alert("Error: " + data.message);
+                            }
+                        })
+                        .catch(error => {
+                            alert("An error occurred.");
+                            console.error(error);
+                        });
                 }
-            })
-            .catch(error => {
-                alert("An error occurred.");
-                console.error(error);
-            });
-        }
-    }
-</script>
+            }
+        </script>
 
-        
+
     </div>
 
 </div>

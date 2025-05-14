@@ -1,5 +1,5 @@
 @extends('staff.dashboard.staffDashboard')
-
+@section('title', 'View All Files')
 @section('content')
 <style>
     td {

@@ -1,8 +1,8 @@
 @extends('staff.dashboard.staffDashboard')
-
+@section('title', 'Edit Primary File')
 @section('content')
 <div class="container mx-auto p-6 bg-white  shadow-md">
-    
+
     <a href="{{ route('staff.active.files') }}" class="text-gray-600 hover:text-gray-800 flex items-center mb-4">
         <i class="fas fa-arrow-left mr-2" style="font-size: 34px; font-weight: bold"></i>
     </a>

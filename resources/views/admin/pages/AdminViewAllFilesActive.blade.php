@@ -1,29 +1,39 @@
 @extends('admin.dashboard.admindashboard')
-
+@section('title', 'View All Files')
 @section('content')
-<meta name="csrf-token" content="{{ csrf_token() }}">
 
 <style>
-    td { text-align: center; }
-    .card-view { display: none; } /* Hide card view by default */
+    td {
+        text-align: center;
+    }
+
+    .card-view {
+        display: none;
+    }
+
+    /* Hide card view by default */
 </style>
 
 @if (session('success'))
-    <script>alert("{{ session('success') }}");</script>
+<script>
+    alert("{{ session('success') }}");
+</script>
 @endif
 
 @if (session('error'))
-    <script>alert("{{ session('error') }}");</script>
+<script>
+    alert("{{ session('error') }}");
+</script>
 @endif
 
 <div class="container mx-auto p-6 bg-white " style="box-shadow: 4px 4px 10px rgba(0, 0, 0, 0.1);">
 
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+
 
     <div class="flex justify-between items-center p-2">
         <h1 class="-m-6 mb-6 pb-2 text-4xl font-bold border-b border-gray-300 p-6">Files</h1>
         <span class="text-white text-2xl font-semibold bg-blue-400 p-4 rounded-lg" id="activeFileCount">0</span>
-        </div>
+    </div>
 
     <br>
 
@@ -44,9 +54,9 @@
             <select id="subfolderFilter" name="subfolder" class="border rounded p-1 text-sm mt-2" onchange="this.form.submit()">
                 <option value="">All files outside root folder</option>
                 @foreach ($subfolders as $folder)
-                    <option value="{{ $folder }}" {{ request('subfolder') === $folder ? 'selected' : '' }}>
-                        {{ ucfirst($folder) }}
-                    </option>
+                <option value="{{ $folder }}" {{ request('subfolder') === $folder ? 'selected' : '' }}>
+                    {{ ucfirst($folder) }}
+                </option>
                 @endforeach
             </select>
         </form>
@@ -57,7 +67,7 @@
         <select id="yearFilter" class="border rounded p-1 text-sm">
             <option value="all">All Years</option>
             @foreach($files->unique('year_published') as $file)
-                <option value="{{ $file->year_published }}">{{ $file->year_published }}</option>
+            <option value="{{ $file->year_published }}">{{ $file->year_published }}</option>
             @endforeach
         </select>
 
@@ -78,8 +88,8 @@
             <span>This section is read-only.</span>
         </div> -->
 
-        <!-- Table View -->
-        <!-- <div class="overflow-x-aut mb-12">
+    <!-- Table View -->
+    <!-- <div class="overflow-x-aut mb-12">
         <table class="min-w-full table-auto bg-white rounded-lg shadow-lg border">
             <thead class="bg-gray-100">
                 <tr>
@@ -145,60 +155,60 @@
     </div> -->
 
 
-  <!-- Card View -->
+    <!-- Card View -->
     <div id="cardView" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 mt-6 mb-12">
         @foreach($files as $file)
-            @if($file->status === 'active' || $file->status === 'private')
-            @php
-                    $folderName = explode('/', $file->file_path)[1] ?? 'unknown';
-                @endphp
+        @if($file->status === 'active' || $file->status === 'private')
+        @php
+        $folderName = explode('/', $file->file_path)[1] ?? 'unknown';
+        @endphp
 
-                <div class="bg-white rounded-lg shadow-lg p-6" 
-                data-subfolder="{{ $folderName }}"
-                data-created="{{ $file->created_at->format('Y-m-d') }}">
+        <div class="bg-white rounded-lg shadow-lg p-6"
+            data-subfolder="{{ $folderName }}"
+            data-created="{{ $file->created_at->format('Y-m-d') }}">
 
-                    <div class="flex justify-between gap-4">
+            <div class="flex justify-between gap-4">
 
-                    @if ($fileType == 'pdf')
-                        <i class="fa-solid fa-file-pdf text-red-500 text-2xl"></i>
-                    @elseif ($fileType == 'docx' || $fileType == 'doc')
-                        <i class="fa-solid fa-file-word text-blue-500 text-2xl"></i>
-                    @elseif ($fileType == 'pptx' || $fileType == 'ppt')
-                        <i class="fa-solid fa-file-powerpoint text-orange-500 text-2xl"></i>
-                    @elseif (in_array($fileType, ['jpg', 'jpeg', 'png', 'gif', 'webp']))
-                        <i class="fa-solid fa-file-image text-green-500 text-2xl"></i>
+                @if ($fileType == 'pdf')
+                <i class="fa-solid fa-file-pdf text-red-500 text-2xl"></i>
+                @elseif ($fileType == 'docx' || $fileType == 'doc')
+                <i class="fa-solid fa-file-word text-blue-500 text-2xl"></i>
+                @elseif ($fileType == 'pptx' || $fileType == 'ppt')
+                <i class="fa-solid fa-file-powerpoint text-orange-500 text-2xl"></i>
+                @elseif (in_array($fileType, ['jpg', 'jpeg', 'png', 'gif', 'webp']))
+                <i class="fa-solid fa-file-image text-green-500 text-2xl"></i>
+                @else
+                <i class="fa-solid fa-file text-gray-400 text-2xl"></i>
+                @endif
+
+                <span class="text-sm font-semibold break-words w-full block">{{ $file->filename }}</span>
+                <span class="font-semibold text-sm">{{ $file->year_published }}</span>
+
+            </div>
+
+
+            <div class="mt-2 text-sm text-gray-600">
+                <span class="font-semibold">
+                    Size:
+                    @if($file->file_size >= 1024 * 1024)
+                    {{ number_format($file->file_size / (1024 * 1024), 2) }} MB
                     @else
-                        <i class="fa-solid fa-file text-gray-400 text-2xl"></i>
+                    {{ number_format($file->file_size / 1024, 2) }} KB
                     @endif
+                </span>
+            </div>
 
-                        <span class="text-sm font-semibold break-words w-full block">{{ $file->filename }}</span>
-                        <span class="font-semibold text-sm">{{ $file->year_published }}</span>
+            <div class="mt-2 text-sm text-gray-600">
+                <span class="font-semibold">Publisher: {{ $file->published_by }}</span>
+            </div>
 
-                    </div>
-                    
-
-                    <div class="mt-2 text-sm text-gray-600">
-                        <span class="font-semibold">
-                            Size: 
-                            @if($file->file_size >= 1024 * 1024)
-                                {{ number_format($file->file_size / (1024 * 1024), 2) }} MB
-                            @else
-                                {{ number_format($file->file_size / 1024, 2) }} KB
-                            @endif
-                        </span>
-                    </div>
-
-                    <div class="mt-2 text-sm text-gray-600">
-                        <span class="font-semibold">Publisher: {{ $file->published_by }}</span>
-                    </div>  
-
-                    <span class="text-sm font-semibold py-1 px-3 rounded-lg 
+            <span class="text-sm font-semibold py-1 px-3 rounded-lg 
                         {{ $file->status === 'active' ? 'bg-green-500 text-white' : 'bg-gray-500 text-white' }}">
-                        {{ $file->status === 'active' ? 'Public' : 'Private' }}
-                    </span>
-                    
+                {{ $file->status === 'active' ? 'Public' : 'Private' }}
+            </span>
 
-                    <!-- <div class="flex items-center mt-2">
+
+            <!-- <div class="flex items-center mt-2">
                         @php
                             $fileType = strtolower($file->file_type);
                         @endphp
@@ -215,81 +225,81 @@
                         <span class="ml-2">{{ strtoupper($fileType) }}</span>
                     </div> -->
 
-                    <div class="flex justify-between items-center mt-4">
-                        <span class="text-sm text-gray-500">{{ $file->created_at->format('F j, Y H:i') }}</span>
-                        
-                        <div class="flex space-x-4">
-                            <a href="{{ route('admin.files.download', basename($file->file_path)) }}" class="text-blue-500" title="Download">
-                                <i class="fas fa-download text-sm"></i>
-                            </a>
-                            <a href="{{ route('admin.files.editPrimary', ['file_id' => $file->file_id]) }}" class="text-blue-500" title="Edit Primary File">
-                                <i class="fas fa-edit text-sm"></i>
-                            </a>
-                            <form action="{{ route('admin.files.archive.active', ['file_id' => $file->file_id]) }}" method="POST" onsubmit="return confirm('Are you sure you want to archive this file?')">
-                                @csrf
-                                <button type="submit" class="text-red-500" title="Archive this file">
-                                    <i class="fas fa-archive text-sm"></i>
-                                </button>
-                            </form>
+            <div class="flex justify-between items-center mt-4">
+                <span class="text-sm text-gray-500">{{ $file->created_at->format('F j, Y H:i') }}</span>
 
-                           <!-- Trigger Button (opens modal) -->
-                            <button type="button" onclick="openStatusDropdown({{ $file->file_id }})" class="text-yellow-500" title="Change Status">
-                                <i class="fas fa-pen-to-square text-sm"></i>
-                            </button>
+                <div class="flex space-x-4">
+                    <a href="{{ route('admin.files.download', basename($file->file_path)) }}" class="text-blue-500" title="Download">
+                        <i class="fas fa-download text-sm"></i>
+                    </a>
+                    <a href="{{ route('admin.files.editPrimary', ['file_id' => $file->file_id]) }}" class="text-blue-500" title="Edit Primary File">
+                        <i class="fas fa-edit text-sm"></i>
+                    </a>
+                    <form action="{{ route('admin.files.archive.active', ['file_id' => $file->file_id]) }}" method="POST" onsubmit="return confirm('Are you sure you want to archive this file?')">
+                        @csrf
+                        <button type="submit" class="text-red-500" title="Archive this file">
+                            <i class="fas fa-archive text-sm"></i>
+                        </button>
+                    </form>
 
-                            <!-- Hidden Form -->
-                            <form id="statusForm-{{ $file->file_id }}" action="{{ route('admin.files.changeStatus', ['file_id' => $file->file_id]) }}" method="POST" class="hidden">
-                                @csrf
-                                <input type="hidden" name="new_status" id="newStatusInput-{{ $file->file_id }}">
-                            </form>
+                    <!-- Trigger Button (opens modal) -->
+                    <button type="button" onclick="openStatusDropdown({{ $file->file_id }})" class="text-yellow-500" title="Change Status">
+                        <i class="fas fa-pen-to-square text-sm"></i>
+                    </button>
 
-                            <!-- Modal (simple dropdown) -->
-                            <div id="statusModal-{{ $file->file_id }}" class="hidden fixed inset-0 bg-gray-500 bg-opacity-50 flex items-center justify-center z-50">
-                                <div class="bg-white p-6 rounded-lg shadow-md">
-                                    <h3 class="text-lg font-semibold mb-4">Change Status</h3>
-                                    <label for="statusDropdown" class="block text-sm font-medium text-gray-700">Select Status</label>
-                                    <select id="statusDropdown-{{ $file->file_id }}" class="mt-2 mb-4 p-2 border border-gray-300 rounded">
-                                        <option value="active">Public</option>
-                                        <option value="private">Private</option>
-                                    </select>
-                                    <div class="flex justify-end">
-                                        <button type="button" onclick="submitStatusChange({{ $file->file_id }})" class="bg-blue-500 text-white px-4 py-2 rounded mr-2">Save</button>
-                                        <button type="button" onclick="closeStatusModal({{ $file->file_id }})" class="bg-gray-500 text-white px-4 py-2 rounded">Cancel</button>
-                                    </div>
-                                </div>
+                    <!-- Hidden Form -->
+                    <form id="statusForm-{{ $file->file_id }}" action="{{ route('admin.files.changeStatus', ['file_id' => $file->file_id]) }}" method="POST" class="hidden">
+                        @csrf
+                        <input type="hidden" name="new_status" id="newStatusInput-{{ $file->file_id }}">
+                    </form>
+
+                    <!-- Modal (simple dropdown) -->
+                    <div id="statusModal-{{ $file->file_id }}" class="hidden fixed inset-0 bg-gray-500 bg-opacity-50 flex items-center justify-center z-50">
+                        <div class="bg-white p-6 rounded-lg shadow-md">
+                            <h3 class="text-lg font-semibold mb-4">Change Status</h3>
+                            <label for="statusDropdown" class="block text-sm font-medium text-gray-700">Select Status</label>
+                            <select id="statusDropdown-{{ $file->file_id }}" class="mt-2 mb-4 p-2 border border-gray-300 rounded">
+                                <option value="active">Public</option>
+                                <option value="private">Private</option>
+                            </select>
+                            <div class="flex justify-end">
+                                <button type="button" onclick="submitStatusChange({{ $file->file_id }})" class="bg-blue-500 text-white px-4 py-2 rounded mr-2">Save</button>
+                                <button type="button" onclick="closeStatusModal({{ $file->file_id }})" class="bg-gray-500 text-white px-4 py-2 rounded">Cancel</button>
                             </div>
-
-                            <script>
-                                function openStatusDropdown(fileId) {
-                                    document.getElementById(`statusModal-${fileId}`).classList.remove('hidden');
-                                }
-
-                                function closeStatusModal(fileId) {
-                                    document.getElementById(`statusModal-${fileId}`).classList.add('hidden');
-                                }
-
-                                function submitStatusChange(fileId) {
-                                    const selectedStatus = document.getElementById(`statusDropdown-${fileId}`).value;
-
-                                    document.getElementById(`newStatusInput-${fileId}`).value = selectedStatus;
-                                    document.getElementById(`statusForm-${fileId}`).submit();
-
-                                    alert("Status changed to " + (selectedStatus === 'active' ? 'Public' : 'Private'));
-                                    closeStatusModal(fileId);
-                                }
-                            </script>
-
-
-                            <form action="{{ route('admin.trash.files', ['file_id' => $file->file_id]) }}" method="POST" onsubmit="return confirm('Are you sure you want to move this file to trash?');">
-                                @csrf
-                                <button type="submit" class="text-black" title="Move File to Trash">
-                                    <i class="fas fa-circle-xmark text-sm"></i>
-                                </button>
-                            </form>
                         </div>
                     </div>
+
+                    <script>
+                        function openStatusDropdown(fileId) {
+                            document.getElementById(`statusModal-${fileId}`).classList.remove('hidden');
+                        }
+
+                        function closeStatusModal(fileId) {
+                            document.getElementById(`statusModal-${fileId}`).classList.add('hidden');
+                        }
+
+                        function submitStatusChange(fileId) {
+                            const selectedStatus = document.getElementById(`statusDropdown-${fileId}`).value;
+
+                            document.getElementById(`newStatusInput-${fileId}`).value = selectedStatus;
+                            document.getElementById(`statusForm-${fileId}`).submit();
+
+                            alert("Status changed to " + (selectedStatus === 'active' ? 'Public' : 'Private'));
+                            closeStatusModal(fileId);
+                        }
+                    </script>
+
+
+                    <form action="{{ route('admin.trash.files', ['file_id' => $file->file_id]) }}" method="POST" onsubmit="return confirm('Are you sure you want to move this file to trash?');">
+                        @csrf
+                        <button type="submit" class="text-black" title="Move File to Trash">
+                            <i class="fas fa-circle-xmark text-sm"></i>
+                        </button>
+                    </form>
                 </div>
-            @endif
+            </div>
+        </div>
+        @endif
         @endforeach
     </div>
 
@@ -302,7 +312,7 @@
 
 <!--For search filter ni siya-->
 <script>
-    document.addEventListener("DOMContentLoaded", function () {
+    document.addEventListener("DOMContentLoaded", function() {
         const searchInput = document.getElementById("searchInput");
         const fileTypeFilter = document.getElementById("fileTypeFilter");
         const subfolderFilter = document.getElementById("subfolderFilter");
@@ -335,7 +345,7 @@
                 card.style.display = shouldShow ? "block" : "none";
             });
         }
-        
+
 
         // Event listeners
         searchInput.addEventListener("input", filterCards);
@@ -344,17 +354,15 @@
         yearFilter.addEventListener("change", filterCards);
         dateFilter.addEventListener("change", filterCards);
     });
-
-    
 </script>
 
 <!--For year filter-->
 <script>
-    document.addEventListener("DOMContentLoaded", function () {
+    document.addEventListener("DOMContentLoaded", function() {
         const yearFilter = document.getElementById("yearFilter");
         const cards = document.querySelectorAll("#cardView > div");
 
-        yearFilter.addEventListener("change", function () {
+        yearFilter.addEventListener("change", function() {
             const selectedYear = this.value;
 
             cards.forEach(card => {
@@ -374,7 +382,7 @@
 <script>
     const subfolderFilter = document.getElementById("subfolderFilter");
 
-    subfolderFilter.addEventListener("change", function () {
+    subfolderFilter.addEventListener("change", function() {
         const selectedSubfolder = this.value.toLowerCase();
 
         document.querySelectorAll("#cardView > div").forEach(card => {
@@ -407,7 +415,7 @@
 </script>
 
 <script>
-    document.addEventListener("DOMContentLoaded", function () {
+    document.addEventListener("DOMContentLoaded", function() {
         const searchInput = document.getElementById("searchInput");
         const fileTypeFilter = document.getElementById("fileTypeFilter");
         const categoryFilter = document.getElementById("categoryFilter");
@@ -442,7 +450,7 @@
 </script>
 
 <script>
-    document.addEventListener("DOMContentLoaded", function () {
+    document.addEventListener("DOMContentLoaded", function() {
         // Count the visible file rows
         function updateFileCount() {
             const visibleRows = document.querySelectorAll(".file-row");
@@ -456,62 +464,61 @@
 </script>
 
 <script>
-    document.addEventListener("DOMContentLoaded", function () {
-    function updateFileCount() {
-        const tableRows = document.querySelectorAll(".file-row:not([style*='display: none'])").length;
-        const cardItems = document.querySelectorAll("#cardView > div:not([style*='display: none'])").length;
-        const totalCount = tableRows + cardItems; 
-        document.getElementById("activeFileCount").textContent = totalCount;
-    }
-
-    // Update file count after filtering
-    function setupFilters() {
-        const searchInput = document.getElementById("searchInput");
-        const fileTypeFilter = document.getElementById("fileTypeFilter");
-        const categoryFilter = document.getElementById("categoryFilter");
-
-        function filterFiles() {
-            const searchText = searchInput.value.toLowerCase();
-            const selectedFileType = fileTypeFilter.value.toLowerCase();
-            const selectedCategory = categoryFilter.value.toLowerCase();
-
-            // Filter Table Rows
-            document.querySelectorAll(".file-row").forEach(row => {
-                const filename = row.querySelector(".filename").textContent.toLowerCase();
-                const fileType = row.querySelector(".file-type").textContent.toLowerCase();
-                const category = row.querySelector(".category").textContent.toLowerCase();
-
-                const matchesSearch = filename.includes(searchText);
-                const matchesFileType = selectedFileType === "" || fileType.includes(selectedFileType);
-                const matchesCategory = selectedCategory === "" || category.includes(selectedCategory);
-
-                row.style.display = matchesSearch && matchesFileType && matchesCategory ? "" : "none";
-            });
-
-            // Filter Cards
-            document.querySelectorAll("#cardView > div").forEach(card => {
-                const fileName = card.querySelector("span.font-semibold").textContent.toLowerCase();
-                const fileType = card.querySelector("span.ml-2").textContent.toLowerCase();
-                const category = card.dataset.category ? card.dataset.category.toLowerCase() : "";
-
-                const matchesSearch = fileName.includes(searchText);
-                const matchesFileType = selectedFileType === "" || fileType.includes(selectedFileType);
-                const matchesCategory = selectedCategory === "" || category.includes(selectedCategory);
-
-                card.style.display = matchesSearch && matchesFileType && matchesCategory ? "block" : "none";
-            });
-
-            updateFileCount();
+    document.addEventListener("DOMContentLoaded", function() {
+        function updateFileCount() {
+            const tableRows = document.querySelectorAll(".file-row:not([style*='display: none'])").length;
+            const cardItems = document.querySelectorAll("#cardView > div:not([style*='display: none'])").length;
+            const totalCount = tableRows + cardItems;
+            document.getElementById("activeFileCount").textContent = totalCount;
         }
 
-        searchInput.addEventListener("input", filterFiles);
-        fileTypeFilter.addEventListener("change", filterFiles);
-        categoryFilter.addEventListener("change", filterFiles);
-    }
+        // Update file count after filtering
+        function setupFilters() {
+            const searchInput = document.getElementById("searchInput");
+            const fileTypeFilter = document.getElementById("fileTypeFilter");
+            const categoryFilter = document.getElementById("categoryFilter");
 
-    setupFilters();
-    updateFileCount(); // Run count on load
+            function filterFiles() {
+                const searchText = searchInput.value.toLowerCase();
+                const selectedFileType = fileTypeFilter.value.toLowerCase();
+                const selectedCategory = categoryFilter.value.toLowerCase();
+
+                // Filter Table Rows
+                document.querySelectorAll(".file-row").forEach(row => {
+                    const filename = row.querySelector(".filename").textContent.toLowerCase();
+                    const fileType = row.querySelector(".file-type").textContent.toLowerCase();
+                    const category = row.querySelector(".category").textContent.toLowerCase();
+
+                    const matchesSearch = filename.includes(searchText);
+                    const matchesFileType = selectedFileType === "" || fileType.includes(selectedFileType);
+                    const matchesCategory = selectedCategory === "" || category.includes(selectedCategory);
+
+                    row.style.display = matchesSearch && matchesFileType && matchesCategory ? "" : "none";
+                });
+
+                // Filter Cards
+                document.querySelectorAll("#cardView > div").forEach(card => {
+                    const fileName = card.querySelector("span.font-semibold").textContent.toLowerCase();
+                    const fileType = card.querySelector("span.ml-2").textContent.toLowerCase();
+                    const category = card.dataset.category ? card.dataset.category.toLowerCase() : "";
+
+                    const matchesSearch = fileName.includes(searchText);
+                    const matchesFileType = selectedFileType === "" || fileType.includes(selectedFileType);
+                    const matchesCategory = selectedCategory === "" || category.includes(selectedCategory);
+
+                    card.style.display = matchesSearch && matchesFileType && matchesCategory ? "block" : "none";
+                });
+
+                updateFileCount();
+            }
+
+            searchInput.addEventListener("input", filterFiles);
+            fileTypeFilter.addEventListener("change", filterFiles);
+            categoryFilter.addEventListener("change", filterFiles);
+        }
+
+        setupFilters();
+        updateFileCount(); // Run count on load
     });
-
 </script>
 @endsection

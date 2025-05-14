@@ -1,7 +1,6 @@
 @extends('staff.dashboard.staffDashboard')
-
+@section('title', 'Staff Archived')
 @section('content')
-<meta name="csrf-token" content="{{ csrf_token() }}">
 
 <style>
     td {
@@ -17,7 +16,7 @@
     </h1>
 
     <!-- Search & Filters -->
-    <div class="mb-4 flex gap-4 justify-end">    
+    <div class="mb-4 flex gap-4 justify-end">
 
         <select id="fileTypeFilter" class="border rounded">
             <option value="">All Types</option>
@@ -46,57 +45,57 @@
         </thead>
         <tbody id="fileTableBody">
             @foreach($fileVersions as $file)
-                <tr class="file-row border-b border-gray-300 {{ $loop->odd ? 'bg-gray-20' : '' }}">
-                    <!-- <td class="p-2">{{ $file->file_id ?? 'N/A' }}</td> -->
-                    <!-- <td class="p-2">
+            <tr class="file-row border-b border-gray-300 {{ $loop->odd ? 'bg-gray-20' : '' }}">
+                <!-- <td class="p-2">{{ $file->file_id ?? 'N/A' }}</td> -->
+                <!-- <td class="p-2">
                         {{ $file->version_id ? 'Version ' . $file->version_id : 'Original' }}
                     </td> -->
-                    <td class="p-2 file-type">
-                        @php
-                            $fileType = strtolower($file->file_type);
-                        @endphp
-                        @if($fileType == 'pdf')
-                            <i class="fa-solid fa-file-pdf text-red-500"></i>
-                        @elseif($fileType == 'docx' || $fileType == 'doc')
-                            <i class="fa-solid fa-file-word text-blue-500"></i>
-                        @elseif($fileType == 'pptx' || $fileType == 'ppt')
-                            <i class="fa-solid fa-file-powerpoint text-orange-500"></i>
-                        @else
-                            <i class="fa-solid fa-file text-gray-500"></i>
-                        @endif
-                        {{ strtoupper($fileType) }}
-                    </td>
-                    <td class="p-2 filename">{{ $file->filename }}</td>
-                    <td class="p-2 filename">
-                        @php
-                            $sizeInKB = $file->file_size / 1024; // Convert bytes to KB
-                            $sizeFormatted = $sizeInKB >= 1024 
-                                ? number_format($sizeInKB / 1024, 2) . ' MB'  // Convert KB to MB if >= 1024 KB
-                                : number_format($sizeInKB, 2) . ' KB';  // Keep in KB if less than 1024 KB
-                        @endphp
-                        {{ $sizeFormatted }}
-                    </td>
-                    <td class="p-2">{{ optional($file->user)->name ?? 'Unknown' }}</td>
-                    <td class="p-2 filename">{{ $file->created_at->format('F j, Y g:i A') }}</td>
-                    <td class="p-2 text-center">
-                        <div class="flex justify-center space-x-4">
-                        <a href="{{ route('staff.unarchiveFile', $file->version_id ?: $file->file_id) }}" 
-                        class="bg-gray-800 text-white px-4 py-2 rounded-lg flex items-center justify-center hover:bg-gray-800 transition"
-                        title="Unarchive"
-                        onclick="confirmArchive(event, '{{ $file->version_id ?: $file->file_id }}')">
-                        <i class="fas fa-box-open text-white text-lg"></i>
+                <td class="p-2 file-type">
+                    @php
+                    $fileType = strtolower($file->file_type);
+                    @endphp
+                    @if($fileType == 'pdf')
+                    <i class="fa-solid fa-file-pdf text-red-500"></i>
+                    @elseif($fileType == 'docx' || $fileType == 'doc')
+                    <i class="fa-solid fa-file-word text-blue-500"></i>
+                    @elseif($fileType == 'pptx' || $fileType == 'ppt')
+                    <i class="fa-solid fa-file-powerpoint text-orange-500"></i>
+                    @else
+                    <i class="fa-solid fa-file text-gray-500"></i>
+                    @endif
+                    {{ strtoupper($fileType) }}
+                </td>
+                <td class="p-2 filename">{{ $file->filename }}</td>
+                <td class="p-2 filename">
+                    @php
+                    $sizeInKB = $file->file_size / 1024; // Convert bytes to KB
+                    $sizeFormatted = $sizeInKB >= 1024
+                    ? number_format($sizeInKB / 1024, 2) . ' MB' // Convert KB to MB if >= 1024 KB
+                    : number_format($sizeInKB, 2) . ' KB'; // Keep in KB if less than 1024 KB
+                    @endphp
+                    {{ $sizeFormatted }}
+                </td>
+                <td class="p-2">{{ optional($file->user)->name ?? 'Unknown' }}</td>
+                <td class="p-2 filename">{{ $file->created_at->format('F j, Y g:i A') }}</td>
+                <td class="p-2 text-center">
+                    <div class="flex justify-center space-x-4">
+                        <a href="{{ route('staff.unarchiveFile', $file->version_id ?: $file->file_id) }}"
+                            class="bg-gray-800 text-white px-4 py-2 rounded-lg flex items-center justify-center hover:bg-gray-800 transition"
+                            title="Unarchive"
+                            onclick="confirmArchive(event, '{{ $file->version_id ?: $file->file_id }}')">
+                            <i class="fas fa-box-open text-white text-lg"></i>
                         </a>
 
-                            <form id="archive-form-{{ $file->version_id ?: $file->file_id }}" 
-                                action="{{ route('staff.unarchiveFile', $file->version_id ?: $file->file_id) }}" 
-                                method="POST" 
-                                style="display: none;">
-                                @csrf
-                                @method('PUT')
-                            </form>
-                        </div>
-                    </td>
-                </tr>
+                        <form id="archive-form-{{ $file->version_id ?: $file->file_id }}"
+                            action="{{ route('staff.unarchiveFile', $file->version_id ?: $file->file_id) }}"
+                            method="POST"
+                            style="display: none;">
+                            @csrf
+                            @method('PUT')
+                        </form>
+                    </div>
+                </td>
+            </tr>
             @endforeach
         </tbody>
 
@@ -126,7 +125,7 @@
 </script>
 
 <script>
-    document.addEventListener("DOMContentLoaded", function () {
+    document.addEventListener("DOMContentLoaded", function() {
         const searchInput = document.getElementById("searchInput");
         const fileTypeFilter = document.getElementById("fileTypeFilter");
         const rows = document.querySelectorAll(".file-row");

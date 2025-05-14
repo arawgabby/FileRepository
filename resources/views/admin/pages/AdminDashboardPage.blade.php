@@ -1,8 +1,7 @@
 @extends('admin.dashboard.adminDashboard')
-
+@section('title', 'Dashboard')
 @section('content')
 
-<meta name="csrf-token" content="{{ csrf_token() }}">
 
 <div class="container mx-auto p-6 bg-white " style="box-shadow: 4px 4px 10px rgba(0, 0, 0, 0.1);">
 
@@ -27,7 +26,7 @@
     <h2 class="text-2xl font-semibold text-gray-700 mb-4 pt-4 border-b border-gray">Dashboard</h2>
 
     <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4">
-        
+
         <!-- Active Files Card -->
         <div class="bg-white  shadow-md p-4 flex items-center justify-between border-left">
             <div>
@@ -83,18 +82,18 @@
 
     <br>
 
-     <!-- Cards Container -->
-     <h2 class="text-2xl font-semibold text-gray-700 mb-4 pt-4 border-b border-gray pb-2">Users</h2>
+    <!-- Cards Container -->
+    <h2 class="text-2xl font-semibold text-gray-700 mb-4 pt-4 border-b border-gray pb-2">Users</h2>
 
-     <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 ">
-        
+    <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 ">
+
         <!-- Active Files Card -->
         <div class="bg-white  shadow-md p-4 flex items-center justify-between border-left">
             <div>
                 <h2 class="text-xl font-semibold text-gray-500">Total Users</h2>
                 <br>
                 <p class="text-2xl font-bold text-gray-900">{{ $totalUsers }}</p>
-                </div>
+            </div>
             <i class="fas fa-user text-2xl text-blue-500"></i>
         </div>
 
@@ -105,7 +104,7 @@
                 <h2 class="text-xl font-semibold text-gray-500">Users This Month</h2>
                 <br>
                 <p class="text-2xl font-bold text-gray-900">{{ $usersThisMonth }}</p>
-                </div>
+            </div>
             <i class="fas fa-users text-2xl text-yellow-500"></i>
         </div>
 
@@ -115,7 +114,7 @@
                 <h2 class="text-xl font-semibold text-gray-500">Users Today</h2>
                 <br>
                 <p class="text-2xl font-bold text-gray-900">{{ $usersToday }}</p>
-                </div>
+            </div>
             <i class="fas fa-circle-user text-2xl text-gray-500"></i>
         </div>
 
@@ -126,31 +125,31 @@
                 <br>
 
                 <p class="text-2xl font-bold text-gray-900">{{ $activeUsers }}</p>
-                </div>
+            </div>
             <i class="fas fa-circle-check text-2xl text-gray-800"></i>
         </div>
 
 
 
     </div>
-    
+
     <!-- Recent Activities Section -->
     <div class="mt-6 bg-white p-4">
-    <h2 class="text-2xl font-semibold text-gray-700 mb-4">📌 Recent Activities</h2>
+        <h2 class="text-2xl font-semibold text-gray-700 mb-4">📌 Recent Activities</h2>
 
-    <!-- Scrollable Table Container -->
-    <div class="max-h-80 overflow-y-auto border-left pt-4 ">
-        <table class="w-full border-left-collapse">
-            <thead class="top-0 bg-gray-100">
-                <tr>
-                    <th class="border-left px-4 py-2 text-left">File Name</th>
-                    <th class="border-left px-4 py-2 text-left">Accessed By</th>
-                    <th class="border-left px-4 py-2 text-left">Action</th>
-                    <th class="border-left px-4 py-2 text-left">Access Time</th>
-                </tr>
-            </thead>
-            <tbody>
-                @foreach ($recentFiles as $file)
+        <!-- Scrollable Table Container -->
+        <div class="max-h-80 overflow-y-auto border-left pt-4 ">
+            <table class="w-full border-left-collapse">
+                <thead class="top-0 bg-gray-100">
+                    <tr>
+                        <th class="border-left px-4 py-2 text-left">File Name</th>
+                        <th class="border-left px-4 py-2 text-left">Accessed By</th>
+                        <th class="border-left px-4 py-2 text-left">Action</th>
+                        <th class="border-left px-4 py-2 text-left">Access Time</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach ($recentFiles as $file)
                     <tr class="hover:bg-gray-50">
                         <td class="border-left border-left-gray-200 px-4 py-2">{{ $file->filename }}</td>
                         <td class="border-left border-left-gray-200 px-4 py-2">
@@ -164,11 +163,11 @@
                         </td>
                         <td class="border-left border-left-gray-200 px-4 py-2">{{ $file->updated_at->format('F j, Y - g:i A') }}</td>
                     </tr>
-                @endforeach
-            </tbody>
-        </table>
+                    @endforeach
+                </tbody>
+            </table>
+        </div>
     </div>
-</div>
 
 
 
