@@ -650,7 +650,7 @@ class StaffController extends Controller
                             'folder' => $subfolder,
                         ]);
 
-                        // session()->flash('unauthorized_alert', 'You are unauthorized to access this private folder.');
+                        session()->flash('unauthorized_alert', 'You are unauthorized to access this private folder.');
 
                         $files = Files::whereRaw('0 = 1')->paginate(20);
                         $fileVersions = collect();
