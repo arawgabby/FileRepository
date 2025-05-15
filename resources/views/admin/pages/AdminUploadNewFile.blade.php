@@ -39,15 +39,29 @@
                     </select>
                     <select name="area" id="area" class="mt-1 p-2 border rounded w-full mb-2">
                         <option value="">Select Area</option>
-                        @for($i = 1; $i <= 10; $i++)
-                            <option value="{{ $i }}">{{ $i }}</option>
-                            @endfor
+                        <option value="1">1-VISION, MISION, GOALS AND OBJECTIVES</option>
+                        <option value="2">2-FACULTY</option>
+                        <option value="3">3-CURRICULUM AND INSTRUCTIONS</option>
+                        <option value="4">4-SUPPORT TO STUDENTS</option>
+                        <option value="5">5-RESEARCH</option>
+                        <option value="6">6-EXTENSION AND COMMUNITY ENVOLVEMENT</option>
+                        <option value="7">7-LIBRARY</option>
+                        <option value="8">8-PHYSICAL PLANT AND FACILITIES</option>
+                        <option value="9">9-LABORATORIES</option>
+                        <option value="10">10-ADMINISTRATION</option>
                     </select>
-                    <select name="parameter" id="parameter" class="mt-1 p-2 border rounded w-full">
+                    <select name="parameter" id="parameter" class="mt-1 p-2 border rounded w-full mb-2">
                         <option value="">Select Parameter</option>
                         <option value="System">System</option>
                         <option value="Input">Input</option>
                         <option value="Output">Output</option>
+                    </select>
+                    <!-- Character A-Z (hidden by default, shown when parameter is selected) -->
+                    <select name="character" id="character" class="mt-1 p-2 border rounded w-full" style="display: none;">
+                        <option value="">Select Character</option>
+                        @foreach(range('A','Z') as $char)
+                        <option value="{{ $char }}">{{ $char }}</option>
+                        @endforeach
                     </select>
                 </div>
 
@@ -124,6 +138,18 @@
         const accreditationFields = document.getElementById("accreditationFields");
         const publishedByInput = document.getElementById("published_by");
         const authorsField = document.getElementById("authorsField");
+
+        const parameterSelect = document.getElementById("parameter");
+        const characterSelect = document.getElementById("character");
+
+        parameterSelect.addEventListener("change", function() {
+            if (this.value !== "") {
+                characterSelect.style.display = "block";
+            } else {
+                characterSelect.style.display = "none";
+                characterSelect.selectedIndex = 0;
+            }
+        });
 
         // Show/hide accreditation fields, authors, and manage Published By field
         categorySelect.addEventListener("change", function() {
@@ -209,6 +235,10 @@
                 formData.append("level", document.getElementById("level").value);
                 formData.append("area", document.getElementById("area").value);
                 formData.append("parameter", document.getElementById("parameter").value);
+
+                if (parameterSelect.value !== "") {
+                    formData.append("character", characterSelect.value);
+                }
             }
 
             // Append authors if visible
