@@ -31,24 +31,32 @@
                     <label class="block text-lg font-bold text-gray-700 mb-2">Accreditation Details</label>
                     <select name="level" id="level" class="mt-1 p-2 border rounded w-full mb-2">
                         <option value="">Select Level</option>
-                        <option value="1">1</option>
-                        <option value="2">2</option>
-                        <option value="3">3</option>
+                        <option value="Level 1">Level 1</option>
+                        <option value="Level 2">Level 2</option>
+                        <option value="Level 3">Level 3</option>
                         <option value="phase 1">Phase 1</option>
                         <option value="phase 2">Phase 2</option>
-                        <option value="4">4</option>
+                        <option value="Level 4">Level 4</option>
                     </select>
                     <select name="area" id="area" class="mt-1 p-2 border rounded w-full mb-2">
                         <option value="">Select Area</option>
-                        @for($i = 1; $i <= 10; $i++)
-                            <option value="{{ $i }}">{{ $i }}</option>
-                            @endfor
+                        <option value="1">1-VISION, MISION, GOALS AND OBJECTIVES</option>
+                        <option value="2">2-FACULTY</option>
+                        <option value="3">3-CURRICULUM AND INSTRUCTIONS</option>
+                        <option value="4">4-SUPPORT TO STUDENTS</option>
+                        <option value="5">5-RESEARCH</option>
+                        <option value="6">6-EXTENSION AND COMMUNITY ENVOLVEMENT</option>
+                        <option value="7">7-LIBRARY</option>
+                        <option value="8">8-PHYSICAL PLANT AND FACILITIES</option>
+                        <option value="9">9-LABORATORIES</option>
+                        <option value="10">10-ADMINISTRATION</option>
                     </select>
-                    <select name="parameter" id="parameter" class="mt-1 p-2 border rounded w-full">
-                        <option value="">Select Parameter</option>
-                        <option value="System">System</option>
-                        <option value="Input">Input</option>
-                        <option value="Output">Output</option>
+                    <!-- Merged Parameter + Character -->
+                    <select name="parameter_character" id="parameter_character" class="mt-1 p-2 border rounded w-full mb-2">
+                        <option value="">Select Parameter A-Z</option>
+                        @foreach(range('A','Z') as $char)
+                        <option value="{{ $char }}">{{ $char }}</option>
+                        @endforeach
                     </select>
                 </div>
 
@@ -61,7 +69,6 @@
                 <select name="folder" id="folder" class="mt-1 p-2 border rounded w-full">
                     <option value="">Root (uploads/)</option>
                     @foreach($subfolders as $folder)
-
                     @if($folder->status === 'private' && !$folder->user_has_access)
                     <option value="{{ $folder->name }}" disabled class="text-red-500">
                         {{ $folder->name }} (Private – cannot insert file)
@@ -71,16 +78,13 @@
                         {{ $folder->name }}{{ $folder->status === 'private' ? ' (Private – access approved)' : '' }}
                     </option>
                     @endif
-
                     @endforeach
                 </select>
-
 
                 <div class="mb-4" id="publishedByField">
                     <label for="published_by" class="block text-lg font-bold text-gray-700">Published By</label>
                     <input type="text" name="published_by" id="published_by" class="p-2 border rounded w-full" value="{{ auth()->user()->name }}" readonly>
                 </div>
-
 
                 <div class="mb-4">
                     <label for="year_published" class="block text-lg font-bold text-gray-700">Year Published</label>
@@ -132,7 +136,6 @@
         const fileDetails = document.getElementById("fileDetails");
         const categorySelect = document.getElementById("category");
         const accreditationFields = document.getElementById("accreditationFields");
-
         const publishedByInput = document.getElementById("published_by");
         const authorsField = document.getElementById("authorsField");
 
@@ -146,16 +149,12 @@
                 accreditationFields.style.display = "none";
                 authorsField.style.display = "block";
                 document.getElementById("level").selectedIndex = 0;
-                document.getElementById("area").selectedIndex = 0;
-                document.getElementById("parameter").selectedIndex = 0;
                 publishedByInput.readOnly = false;
                 publishedByInput.value = "";
             } else {
                 accreditationFields.style.display = "none";
                 authorsField.style.display = "none";
                 document.getElementById("level").selectedIndex = 0;
-                document.getElementById("area").selectedIndex = 0;
-                document.getElementById("parameter").selectedIndex = 0;
                 publishedByInput.readOnly = true;
                 publishedByInput.value = "{{ auth()->user()->name }}";
             }
@@ -210,7 +209,6 @@
                 return;
             }
 
-
             let formData = new FormData(this);
             let fileInput = document.getElementById("file");
 
@@ -229,7 +227,7 @@
             if (categorySelect.value === "accreditation") {
                 formData.append("level", document.getElementById("level").value);
                 formData.append("area", document.getElementById("area").value);
-                formData.append("parameter", document.getElementById("parameter").value);
+                formData.append("parameter_character", document.getElementById("parameter_character").value);
             }
 
             // Append authors if visible

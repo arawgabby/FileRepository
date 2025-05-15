@@ -117,7 +117,7 @@ class StaffController extends Controller
             'action' => 'required|in:approved,rejected',
         ]);
 
-        $fileRequest = \App\Models\FileRequest::findOrFail($id);
+        $fileRequest = FileRequest::findOrFail($id);
         $fileRequest->request_status = $request->action;
         $fileRequest->save();
 
@@ -289,8 +289,8 @@ class StaffController extends Controller
                         Storage::disk('public')->makeDirectory($currentPath, 0775, true);
                     }
                     // Register in folders table if not exists
-                    if (!\App\Models\Folder::where('path', $currentPath)->where('name', $folderName)->exists()) {
-                        \App\Models\Folder::create([
+                    if (!Folder::where('path', $currentPath)->where('name', $folderName)->exists()) {
+                        Folder::create([
                             'name' => $folderName,
                             'path' => $currentPath,
                             'status' => 'private', // or your default
@@ -306,8 +306,8 @@ class StaffController extends Controller
                     Storage::disk('public')->makeDirectory($uploadPath, 0775, true);
                 }
                 // Register in folders table if not exists
-                if ($folder && !\App\Models\Folder::where('path', $uploadPath)->where('name', $folder)->exists()) {
-                    \App\Models\Folder::create([
+                if ($folder && !Folder::where('path', $uploadPath)->where('name', $folder)->exists()) {
+                    Folder::create([
                         'name' => $folder,
                         'path' => $uploadPath,
                         'status' => 'private', // or your default
@@ -683,7 +683,7 @@ class StaffController extends Controller
         $files = $files->paginate(20)->appends($request->all());
 
         // Fetch all approved requests for the current user, eager load the file relation
-        $approvedRequests = \App\Models\FileRequest::with('file')
+        $approvedRequests = FileRequest::with('file')
             ->where('requested_by', $userId)
             ->where('request_status', 'approved')
             ->get();
