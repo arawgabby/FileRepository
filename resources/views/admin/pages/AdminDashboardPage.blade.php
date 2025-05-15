@@ -5,23 +5,6 @@
 
 <div class="container mx-auto p-6 bg-white " style="box-shadow: 4px 4px 10px rgba(0, 0, 0, 0.1);">
 
-    <!-- @if(session('user')->role === 'faculty')
-        <img src="{{ asset('storage/uploads/dashboardbackgroundfaculty.png') }}" 
-            alt="Dashboard Background" 
-            class="h-74 w-auto   object-cover">
-    @elseif(session('user')->role === 'staff')
-        <img src="{{ asset('storage/uploads/dashboardbackgroundstaff.png') }}"  
-            alt="Dashboard Background" 
-            class="h-74 w-auto  object-cover">
-    @elseif(session('user')->role === 'admin')
-        <img src="{{ asset('storage/uploads/dashboardbackgroundadmin.png') }}"  
-            alt="Dashboard Background" 
-            class="h-74 w-auto  object-cover">
-    @endif -->
-
-
-    <!-- <br> -->
-
     <!-- Cards Container -->
     <h2 class="text-2xl font-semibold text-gray-700 mb-4 pt-4 border-b border-gray">Dashboard</h2>
 

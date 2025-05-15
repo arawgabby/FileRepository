@@ -27,7 +27,7 @@
                 <!-- Accreditation Extra Fields (hidden by default) -->
                 <div class="mb-4" id="accreditationFields" style="display: none;">
                     <label class="block text-lg font-bold text-gray-700 mb-2">Accreditation Details</label>
-                    <select name="level" id="level" class="mt-1 p-2 border rounded w-full mb-2" required>
+                    <select name="level" id="level" class="mt-1 p-2 border rounded w-full mb-2">
                         <option value="">Select Level</option>
                         <option value="1">1</option>
                         <option value="2">2</option>
@@ -36,13 +36,13 @@
                         <option value="phase 2">Phase 2</option>
                         <option value="4">4</option>
                     </select>
-                    <select name="area" id="area" class="mt-1 p-2 border rounded w-full mb-2" required>
+                    <select name="area" id="area" class="mt-1 p-2 border rounded w-full mb-2">
                         <option value="">Select Area</option>
                         @for($i = 1; $i <= 10; $i++)
                             <option value="{{ $i }}">{{ $i }}</option>
                             @endfor
                     </select>
-                    <select name="parameter" id="parameter" class="mt-1 p-2 border rounded w-full" required>
+                    <select name="parameter" id="parameter" class="mt-1 p-2 border rounded w-full">
                         <option value="">Select Parameter</option>
                         <option value="System">System</option>
                         <option value="Input">Input</option>

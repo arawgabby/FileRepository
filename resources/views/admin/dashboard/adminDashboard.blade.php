@@ -35,7 +35,7 @@
 
 
             <!-- @if(session()->has('user'))
-                <p>Welcome, {{ session('user')->name }}!</p>
+                <p>Welcome, {{ auth()->user()->name }}!</p>
             @endif -->
 
             <div class="text-2xl font-bold">
@@ -169,7 +169,7 @@
                             <i class="fas fa-user text-white text-2xl"></i>
                         </div>
                         <div class="flex flex-col">
-                            <p class="text-sm font-semibold text-black">{{ session('user')->name }}</p>
+                            <p class="text-sm font-semibold text-black">{{ auth()->user()->name }}</p>
                             <p class="text-sm font-semibold text-black">
                                 <span class="text-sm font-bold text-green-600">ONLINE: </span>
                                 {{ ucfirst(session('user')->role?->name ?? '-') }}

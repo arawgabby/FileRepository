@@ -185,19 +185,69 @@ class FileController extends Controller
             'parameter' => 'required_if:category,accreditation|max:255',
         ]);
 
-        if (!session()->has('user')) {
+        $user = auth()->user();
+        if (!$user) {
             return response()->json(['message' => 'Unauthorized: Please log in.'], 403);
         }
-
-        $user = auth()->user();
-
 
         if ($request->hasFile('file')) {
             $file = $request->file('file');
             $filename = $file->getClientOriginalName();
 
-            $folder = trim($request->input('folder'));
-            $uploadPath = 'uploads' . ($folder ? '/' . $folder : '');
+            // Dynamic upload path based on category
+            $category = trim($request->input('category'));
+
+            if ($category === 'accreditation') {
+                $level = trim($request->input('level'));
+                $area = trim($request->input('area'));
+                $parameter = trim($request->input('parameter'));
+
+                // Build each part of the path and register in folders table if not exists
+                $basePath = 'uploads';
+                $paths = [
+                    $category,
+                    $level,
+                    $area,
+                    $parameter
+                ];
+                $currentPath = $basePath;
+                foreach ($paths as $folderName) {
+                    $currentPath .= '/' . $folderName;
+                    // Create the folder in storage if it doesn't exist
+                    if (!Storage::disk('public')->exists($currentPath)) {
+                        Storage::disk('public')->makeDirectory($currentPath, 0775, true);
+                    }
+                    // Register in folders table if not exists
+                    if (!\App\Models\Folder::where('path', $currentPath)->where('name', $folderName)->exists()) {
+                        \App\Models\Folder::create([
+                            'name' => $folderName,
+                            'path' => $currentPath,
+                            'status' => 'private', // or your default
+                            'user_id' => $user->id,
+                        ]);
+                    }
+                }
+                $uploadPath = $currentPath;
+            } else {
+                $folder = trim($request->input('folder'));
+                $uploadPath = 'uploads/' . $category . ($folder ? '/' . $folder : '');
+                if (!Storage::disk('public')->exists($uploadPath)) {
+                    Storage::disk('public')->makeDirectory($uploadPath, 0775, true);
+                }
+                // Register in folders table if not exists
+                if ($folder && !\App\Models\Folder::where('path', $uploadPath)->where('name', $folder)->exists()) {
+                    \App\Models\Folder::create([
+                        'name' => $folder,
+                        'path' => $uploadPath,
+                        'status' => 'private', // or your default
+                        'user_id' => $user->id,
+                    ]);
+                }
+            }
+
+            if (!Storage::disk('public')->exists($uploadPath)) {
+                Storage::disk('public')->makeDirectory($uploadPath, 0775, true);
+            }
 
             $filePath = $file->storeAs($uploadPath, $filename, 'public');
 
@@ -208,18 +258,21 @@ class FileController extends Controller
                 'file_size' => $file->getSize(),
                 'file_type' => $file->getClientOriginalExtension(),
                 'uploaded_by' => $user->id,
-                'category' => $request->category,
+                'category' => $category,
                 'published_by' => $request->published_by,
                 'year_published' => (string) $request->year_published,
                 'description' => $request->description ?? null,
                 'status' => 'active',
             ];
 
-            // Add accreditation fields if category is accreditation
-            if ($request->category === 'accreditation') {
-                $fileData['level'] = $request->level;
-                $fileData['area'] = $request->area;
-                $fileData['parameter'] = $request->parameter;
+            if ($request->filled('level')) {
+                $fileData['level'] = $request->input('level');
+            }
+            if ($request->filled('area')) {
+                $fileData['area'] = $request->input('area');
+            }
+            if ($request->filled('parameter')) {
+                $fileData['parameter'] = $request->input('parameter');
             }
 
             $fileEntry = Files::create($fileData);

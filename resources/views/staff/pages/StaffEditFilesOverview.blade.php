@@ -17,7 +17,7 @@
     </h1>
 
     <!-- @if(session()->has('user'))
-            <p>Welcome, {{ session('user')->name }}!</p>
+            <p>Welcome, {{ auth()->user()->name }}!</p>
         @endif -->
 
     <!-- Search & Filters -->
