@@ -609,107 +609,61 @@ class StaffController extends Controller
     public function activeFiles(Request $request)
     {
         $files = Files::query();
-        $subfolder = $request->get('subfolder');
-
         $user = auth()->user();
-
         $userId = $user->id ?? null;
         $role = $user->role ?? null;
 
+        // Get accreditation filters from request
+        $category = $request->get('category');
+        $level = $request->get('level');
+        $area = $request->get('area');
+        $parameter = $request->get('parameter');
+        $subfolder = $request->get('subfolder');
+
+        // Logging for debug
         Log::info('--- Incoming activeFiles Request ---', [
             'subfolder' => $subfolder,
+            'category' => $category,
+            'level' => $level,
+            'area' => $area,
+            'parameter' => $parameter,
             'user_id' => $userId,
             'role' => $role,
         ]);
 
-        // Check access to selected subfolder if it exists
-        if ($subfolder) {
-            $folder = Folder::where('name', $subfolder)->first();
-
-            Log::info('Folder Lookup', [
-                'folder_found' => $folder ? true : false,
-                'folder_id' => $folder->id ?? null,
-                'folder_status' => $folder->status ?? null,
-            ]);
-
-            if ($folder && $folder->status === 'private') {
-
-                if ($role !== 'admin') {
-                    $hasAccess = \App\Models\FolderAccess::where('folder_id', $folder->id)
-                        ->where('user_id', $userId)
-                        ->where('status', 'approved')
-                        ->exists();
-
-                    Log::info('Folder Access Check', [
-                        'has_approved_access' => $hasAccess,
-                    ]);
-
-                    if (!$hasAccess) {
-                        Log::warning('Unauthorized access attempt to private folder', [
-                            'user_id' => $userId,
-                            'folder' => $subfolder,
-                        ]);
-
-                        session()->flash('unauthorized_alert', 'You are unauthorized to access this private folder.');
-
-                        $files = Files::whereRaw('0 = 1')->paginate(20);
-                        $fileVersions = collect();
-
-                        $uploadPath = public_path('storage/uploads');
-                        $subfolders = [];
-
-                        if (\Illuminate\Support\Facades\File::exists($uploadPath)) {
-                            $subfolders = collect(\Illuminate\Support\Facades\File::directories($uploadPath))->map(function ($path) {
-                                return basename($path);
-                            });
-                        }
-
-                        return view('staff.pages.StaffViewAllFilesActive', compact('fileVersions', 'files', 'subfolders'));
-                    } else {
-                        Log::info('User is authorized to access this private folder.', [
-                            'user_id' => $userId,
-                            'folder' => $subfolder,
-                        ]);
-                    }
-                }
-            }
-        }
-
-        // Apply filters
-        if ($request->has('search') && !empty($request->search)) {
-            $files->where('filename', 'LIKE', '%' . $request->search . '%');
-        }
-
-        if ($request->has('file_type') && !empty($request->file_type)) {
-            $files->where('file_type', $request->file_type);
-        }
-
-        if (!empty($subfolder)) {
+        // Accreditation path filter
+        if (
+            $category === 'accreditation' &&
+            !empty($level) &&
+            !empty($area) &&
+            !empty($parameter)
+        ) {
+            $accreditationPath = "uploads/accreditation/{$level}/{$area}/{$parameter}/%";
+            $files->where('file_path', 'like', $accreditationPath);
+        } elseif (!empty($subfolder)) {
+            // Fallback to subfolder filter
             $files->where('file_path', 'LIKE', 'uploads/' . $subfolder . '/%');
         } else {
             if ($role !== 'admin') {
                 // Fetch private folders the user DOES NOT have access to
                 $privateFolders = Folder::where('status', 'private')->pluck('name')->toArray();
-
                 $deniedFolderAccess = FolderAccess::where('user_id', $userId)
                     ->where('status', 'approved')
                     ->pluck('folder_id')
                     ->toArray();
-
                 $allowedPrivateFolders = Folder::whereIn('id', $deniedFolderAccess)->pluck('name')->toArray();
 
                 // Filter out files inside private folders that the user doesn't have access to
                 $files->where(function ($query) use ($userId, $privateFolders, $allowedPrivateFolders) {
                     $query->where(function ($q) use ($privateFolders, $allowedPrivateFolders) {
                         foreach ($privateFolders as $folder) {
-                            // Skip folders that user has approved access to
                             if (!in_array($folder, $allowedPrivateFolders)) {
                                 $q->where('file_path', 'not like', 'uploads/' . $folder . '/%');
                             }
                         }
                     })
                         ->where(function ($q2) use ($userId) {
-                            $q2->where('status', '!=', 'private') // show public or active files
+                            $q2->where('status', '!=', 'private')
                                 ->orWhereIn('file_id', function ($subQ) use ($userId) {
                                     $subQ->select('file_id')
                                         ->from('file_requests')
@@ -721,7 +675,17 @@ class StaffController extends Controller
             }
         }
 
-        $files = $files->paginate(20)->appends(['subfolder' => $request->subfolder]);
+        // Apply search filter
+        if ($request->has('search') && !empty($request->search)) {
+            $files->where('filename', 'LIKE', '%' . $request->search . '%');
+        }
+
+        // Apply file type filter
+        if ($request->has('file_type') && !empty($request->file_type)) {
+            $files->where('file_type', $request->file_type);
+        }
+
+        $files = $files->paginate(20)->appends($request->all());
 
         // Fetch all approved requests for the current user, eager load the file relation
         $approvedRequests = \App\Models\FileRequest::with('file')
@@ -732,27 +696,24 @@ class StaffController extends Controller
         // Extract the files (filter out nulls in case of missing files)
         $grantedFiles = $approvedRequests->pluck('file')->filter();
 
-
         // Logging each approved request
         Log::info('Approved File Requests Summary', [
             'user_id' => $userId,
             'total_approved' => $approvedRequests->count(),
         ]);
 
-        foreach ($approvedRequests as $request) {
+        foreach ($approvedRequests as $requestObj) {
             Log::info('Approved Request Detail', [
-                'request_id' => $request->request_id ?? $request->id, // depending on your column
-                'file_id' => $request->file_id,
-                'requested_by' => $request->requested_by,
-                'request_status' => $request->request_status,
-                'created_at' => optional($request->created_at)->toDateTimeString(),
+                'request_id' => $requestObj->request_id ?? $requestObj->id,
+                'file_id' => $requestObj->file_id,
+                'requested_by' => $requestObj->requested_by,
+                'request_status' => $requestObj->request_status,
+                'created_at' => optional($requestObj->created_at)->toDateTimeString(),
             ]);
         }
 
         // Extract file IDs for use in the view
         $approvedFileRequests = $approvedRequests->pluck('file_id')->toArray();
-
-
 
         $fileVersions = FileVersions::whereIn('file_id', $files->pluck('file_id'))->get();
 
@@ -765,7 +726,14 @@ class StaffController extends Controller
             });
         }
 
-        return view('staff.pages.StaffViewAllFilesActive', compact('fileVersions', 'files', 'subfolders', 'approvedFileRequests', 'role', 'grantedFiles'));
+        return view('staff.pages.StaffViewAllFilesActive', compact(
+            'fileVersions',
+            'files',
+            'subfolders',
+            'approvedFileRequests',
+            'role',
+            'grantedFiles'
+        ));
     }
 
     public function StaffeditPrimaryFile(Request $request, $file_id)
