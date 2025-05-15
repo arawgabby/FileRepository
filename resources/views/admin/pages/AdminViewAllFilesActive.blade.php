@@ -75,27 +75,17 @@
         <input type="date" id="dateFilter" class="border rounded p-1 text-sm">
 
         <input type="text" id="searchInput" placeholder="Search files..." class="border rounded p-1 w-1/4 text-sm">
-
-
     </div>
 
-    <!-- <div class="mt-2 flex items-center text-red-600 text-sm mb-2">
-        <i class="fas fa-info-circle mr-2"></i>
-        <span>File versions on this section cannot be downloaded. Go to file versions section to download your selected file version. Thank you.</span>
-        </div>
-        <div class="mt-2 flex items-center text-red-600 text-sm mb-2">
-            <i class="fas fa-info-circle mr-2"></i>
-            <span>This section is read-only.</span>
-        </div> -->
-
     <!-- Table View -->
-    <!-- <div class="overflow-x-aut mb-12">
+    <div class="overflow-x-aut mb-12">
         <table class="min-w-full table-auto bg-white rounded-lg shadow-lg border">
             <thead class="bg-gray-100">
                 <tr>
                     <th class="px-4 py-2 text-left text-sm font-semibold text-gray-600">Filename</th>
                     <th class="px-4 py-2 text-left text-sm font-semibold text-gray-600">Year Published</th>
                     <th class="px-4 py-2 text-left text-sm font-semibold text-gray-600">Size</th>
+                    <th class="px-4 py-2 text-left text-sm font-semibold text-gray-600">Authors</th> <!-- Add this line -->
                     <th class="px-4 py-2 text-left text-sm font-semibold text-gray-600">Publisher</th>
                     <th class="px-4 py-2 text-left text-sm font-semibold text-gray-600">File Type</th>
                     <th class="px-4 py-2 text-left text-sm font-semibold text-gray-600">Actions</th>
@@ -103,204 +93,99 @@
             </thead>
             <tbody>
                 @foreach($files as $file)
-                    @if($file->status == 'active')
-                        @php
-                            $folderName = explode('/', $file->file_path)[1] ?? 'unknown';
-                            $fileType = strtolower($file->file_type);
-                        @endphp
-                        <tr class="border-t">
-                            <td class="px-4 py-3 text-sm text-gray-800">{{ $file->filename }}</td>
-                            <td class="px-4 py-3 text-sm text-gray-600">{{ $file->year_published }}</td>
-                            <td class="px-4 py-3 text-sm text-gray-600">
-                                @if($file->file_size >= 1024 * 1024)
-                                    {{ number_format($file->file_size / (1024 * 1024), 2) }} MB
-                                @else
-                                    {{ number_format($file->file_size / 1024, 2) }} KB
-                                @endif
-                            </td>
-                            <td class="px-4 py-3 text-sm text-gray-600">{{ $file->published_by }}</td>
-                            <td class="px-4 py-3 text-sm text-gray-600">
-                                @if($fileType == 'pdf')
-                                    <i class="fa-solid fa-file-pdf text-red-500 text-xl"></i>
-                                @elseif($fileType == 'docx' || $fileType == 'doc')
-                                    <i class="fa-solid fa-file-word text-blue-500 text-xl"></i>
-                                @elseif($fileType == 'pptx' || $fileType == 'ppt')
-                                    <i class="fa-solid fa-file-powerpoint text-orange-500 text-xl"></i>
-                                @else
-                                    <i class="fa-solid fa-file text-gray-500 text-xl"></i>
-                                @endif
-                                {{ strtoupper($fileType) }}
-                            </td>
-                            <td class="px-4 py-3 text-sm text-gray-600">
-                                <div class="flex space-x-4">
-                                    <a href="{{ route('staff.files.download', basename($file->file_path)) }}" class="text-blue-500" title="Download">
-                                        <i class="fas fa-download"></i>
-                                    </a>
-                                    <a href="{{ route('staff.files.editPrimary', ['file_id' => $file->file_id]) }}" class="text-blue-500" title="Edit Primary File">
-                                        <i class="fas fa-edit"></i>
-                                    </a>
-                                    <form action="{{ route('files.archive.active', ['file_id' => $file->file_id]) }}" method="POST" onsubmit="return confirm('Are you sure you want to archive this file?')">
-                                        @csrf
-                                        <button type="submit" class="text-red-500" title="Archive this file">
-                                            <i class="fas fa-archive"></i>
-                                        </button>
-                                    </form>
-                                </div>
-                            </td>
-                        </tr>
-                    @endif
+                @if($file->status == 'active')
+                @php
+                $folderName = explode('/', $file->file_path)[1] ?? 'unknown';
+                $fileType = strtolower($file->file_type);
+                @endphp
+
+                <tr class="border-t file-row">
+                    <td class="px-4 py-3 text-sm text-gray-800 filename">{{ $file->filename }}</td>
+                    <td class="px-4 py-3 text-sm text-gray-600 year">{{ $file->year_published }}</td>
+                    <td class="px-4 py-3 text-sm text-gray-600">
+                        @if($file->file_size >= 1024 * 1024)
+                        {{ number_format($file->file_size / (1024 * 1024), 2) }} MB
+                        @else
+                        {{ number_format($file->file_size / 1024, 2) }} KB
+                        @endif
+                    </td>
+                    <td class="px-4 py-3 text-sm text-gray-600">{{ $file->authors }}</td> <!-- Display authors here -->
+                    <td class="px-4 py-3 text-sm text-gray-600">{{ $file->published_by }}</td>
+                    <td class="px-4 py-3 text-sm text-gray-600 file-type">
+                        @if($fileType == 'pdf')
+                        <i class="fa-solid fa-file-pdf text-red-500 text-xl"></i>
+                        @elseif($fileType == 'docx' || $fileType == 'doc')
+                        <i class="fa-solid fa-file-word text-blue-500 text-xl"></i>
+                        @elseif($fileType == 'pptx' || $fileType == 'ppt')
+                        <i class="fa-solid fa-file-powerpoint text-orange-500 text-xl"></i>
+                        @else
+                        <i class="fa-solid fa-file text-gray-500 text-xl"></i>
+                        @endif
+                        {{ strtoupper($fileType) }}
+                    </td>
+                    <td class="px-4 py-3 text-sm text-gray-600">
+                        <div class="flex space-x-4">
+                            <a href="{{ route('staff.files.download', basename($file->file_path)) }}" class="text-blue-500" title="Download">
+                                <i class="fas fa-download text-sm"></i>
+                            </a>
+                            <a href="{{ route('staff.files.editPrimary', ['file_id' => $file->file_id]) }}" class="text-blue-500" title="Edit Primary File">
+                                <i class="fas fa-edit"></i>
+                            </a>
+                            <form action="{{ route('files.archive.active', ['file_id' => $file->file_id]) }}" method="POST" onsubmit="return confirm('Are you sure you want to archive this file?')">
+                                @csrf
+                                <button type="submit" class="text-red-500" title="Archive this file">
+                                    <i class="fas fa-archive"></i>
+                                </button>
+                            </form>
+                        </div>
+                    </td>
+                    <td class="hidden created-date">{{ \Carbon\Carbon::parse($file->created_at)->format('Y-m-d') }}</td>
+                </tr>
+                @endif
                 @endforeach
+
+                {{-- Show granted files (approved FileRequests) --}}
+                @if(isset($grantedFiles) && $grantedFiles->count())
+                @foreach($grantedFiles as $file)
+                @php
+                $fileType = strtolower($file->file_type);
+                @endphp
+                <tr class="border-t file-row bg-green-50">
+                    <td class="px-4 py-3 text-sm text-gray-800 filename">{{ $file->filename }}</td>
+                    <td class="px-4 py-3 text-sm text-gray-600 year">{{ $file->year_published }}</td>
+                    <td class="px-4 py-3 text-sm text-gray-600">
+                        @if($file->file_size >= 1024 * 1024)
+                        {{ number_format($file->file_size / (1024 * 1024), 2) }} MB
+                        @else
+                        {{ number_format($file->file_size / 1024, 2) }} KB
+                        @endif
+                    </td>
+                    <td class="px-4 py-3 text-sm text-gray-600">{{ $file->published_by }}</td>
+                    <td class="px-4 py-3 text-sm text-gray-600 file-type">
+                        @if($fileType == 'pdf')
+                        <i class="fa-solid fa-file-pdf text-red-500 text-xl"></i>
+                        @elseif($fileType == 'docx' || $fileType == 'doc')
+                        <i class="fa-solid fa-file-word text-blue-500 text-xl"></i>
+                        @elseif($fileType == 'pptx' || $fileType == 'ppt')
+                        <i class="fa-solid fa-file-powerpoint text-orange-500 text-xl"></i>
+                        @else
+                        <i class="fa-solid fa-file text-gray-500 text-xl"></i>
+                        @endif
+                        {{ strtoupper($fileType) }}
+                    </td>
+                    <td class="px-4 py-3 text-sm text-gray-600">
+                        <div class="flex space-x-4">
+                            <a href="{{ route('staff.files.download', basename($file->file_path)) }}" class="text-blue-500" title="Download">
+                                <i class="fas fa-download text-sm"></i>
+                            </a>
+                        </div>
+                    </td>
+                    <td class="hidden created-date">{{ \Carbon\Carbon::parse($file->created_at)->format('Y-m-d') }}</td>
+                </tr>
+                @endforeach
+                @endif
             </tbody>
         </table>
-    </div> -->
-
-
-    <!-- Card View -->
-    <div id="cardView" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 mt-6 mb-12">
-        @foreach($files as $file)
-        @if($file->status === 'active' || $file->status === 'private')
-        @php
-        $folderName = explode('/', $file->file_path)[1] ?? 'unknown';
-        @endphp
-
-        <div class="bg-white rounded-lg shadow-lg p-6"
-            data-subfolder="{{ $folderName }}"
-            data-created="{{ $file->created_at->format('Y-m-d') }}">
-
-            <div class="flex justify-between gap-4">
-
-                @if ($fileType == 'pdf')
-                <i class="fa-solid fa-file-pdf text-red-500 text-2xl"></i>
-                @elseif ($fileType == 'docx' || $fileType == 'doc')
-                <i class="fa-solid fa-file-word text-blue-500 text-2xl"></i>
-                @elseif ($fileType == 'pptx' || $fileType == 'ppt')
-                <i class="fa-solid fa-file-powerpoint text-orange-500 text-2xl"></i>
-                @elseif (in_array($fileType, ['jpg', 'jpeg', 'png', 'gif', 'webp']))
-                <i class="fa-solid fa-file-image text-green-500 text-2xl"></i>
-                @else
-                <i class="fa-solid fa-file text-gray-400 text-2xl"></i>
-                @endif
-
-                <span class="text-sm font-semibold break-words w-full block">{{ $file->filename }}</span>
-                <span class="font-semibold text-sm">{{ $file->year_published }}</span>
-
-            </div>
-
-
-            <div class="mt-2 text-sm text-gray-600">
-                <span class="font-semibold">
-                    Size:
-                    @if($file->file_size >= 1024 * 1024)
-                    {{ number_format($file->file_size / (1024 * 1024), 2) }} MB
-                    @else
-                    {{ number_format($file->file_size / 1024, 2) }} KB
-                    @endif
-                </span>
-            </div>
-
-            <div class="mt-2 text-sm text-gray-600">
-                <span class="font-semibold">Publisher: {{ $file->published_by }}</span>
-            </div>
-
-            <span class="text-sm font-semibold py-1 px-3 rounded-lg 
-                        {{ $file->status === 'active' ? 'bg-green-500 text-white' : 'bg-gray-500 text-white' }}">
-                {{ $file->status === 'active' ? 'Public' : 'Private' }}
-            </span>
-
-
-            <!-- <div class="flex items-center mt-2">
-                        @php
-                            $fileType = strtolower($file->file_type);
-                        @endphp
-
-                        @if($fileType == 'pdf')
-                            <i class="fa-solid fa-file-pdf text-red-500 text-1xl"></i>
-                        @elseif($fileType == 'docx' || $fileType == 'doc')
-                            <i class="fa-solid fa-file-word text-blue-500 text-1xl"></i>
-                        @elseif($fileType == 'pptx' || $fileType == 'ppt')
-                            <i class="fa-solid fa-file-powerpoint text-orange-500 text-1xl"></i>
-                        @else
-                            <i class="fa-solid fa-file text-gray-500 text-1xl"></i>
-                        @endif
-                        <span class="ml-2">{{ strtoupper($fileType) }}</span>
-                    </div> -->
-
-            <div class="flex justify-between items-center mt-4">
-                <span class="text-sm text-gray-500">{{ $file->created_at->format('F j, Y H:i') }}</span>
-
-                <div class="flex space-x-4">
-                    <a href="{{ route('admin.files.download', basename($file->file_path)) }}" class="text-blue-500" title="Download">
-                        <i class="fas fa-download text-sm"></i>
-                    </a>
-                    <a href="{{ route('admin.files.editPrimary', ['file_id' => $file->file_id]) }}" class="text-blue-500" title="Edit Primary File">
-                        <i class="fas fa-edit text-sm"></i>
-                    </a>
-                    <form action="{{ route('admin.files.archive.active', ['file_id' => $file->file_id]) }}" method="POST" onsubmit="return confirm('Are you sure you want to archive this file?')">
-                        @csrf
-                        <button type="submit" class="text-red-500" title="Archive this file">
-                            <i class="fas fa-archive text-sm"></i>
-                        </button>
-                    </form>
-
-                    <!-- Trigger Button (opens modal) -->
-                    <button type="button" onclick="openStatusDropdown({{ $file->file_id }})" class="text-yellow-500" title="Change Status">
-                        <i class="fas fa-pen-to-square text-sm"></i>
-                    </button>
-
-                    <!-- Hidden Form -->
-                    <form id="statusForm-{{ $file->file_id }}" action="{{ route('admin.files.changeStatus', ['file_id' => $file->file_id]) }}" method="POST" class="hidden">
-                        @csrf
-                        <input type="hidden" name="new_status" id="newStatusInput-{{ $file->file_id }}">
-                    </form>
-
-                    <!-- Modal (simple dropdown) -->
-                    <div id="statusModal-{{ $file->file_id }}" class="hidden fixed inset-0 bg-gray-500 bg-opacity-50 flex items-center justify-center z-50">
-                        <div class="bg-white p-6 rounded-lg shadow-md">
-                            <h3 class="text-lg font-semibold mb-4">Change Status</h3>
-                            <label for="statusDropdown" class="block text-sm font-medium text-gray-700">Select Status</label>
-                            <select id="statusDropdown-{{ $file->file_id }}" class="mt-2 mb-4 p-2 border border-gray-300 rounded">
-                                <option value="active">Public</option>
-                                <option value="private">Private</option>
-                            </select>
-                            <div class="flex justify-end">
-                                <button type="button" onclick="submitStatusChange({{ $file->file_id }})" class="bg-blue-500 text-white px-4 py-2 rounded mr-2">Save</button>
-                                <button type="button" onclick="closeStatusModal({{ $file->file_id }})" class="bg-gray-500 text-white px-4 py-2 rounded">Cancel</button>
-                            </div>
-                        </div>
-                    </div>
-
-                    <script>
-                        function openStatusDropdown(fileId) {
-                            document.getElementById(`statusModal-${fileId}`).classList.remove('hidden');
-                        }
-
-                        function closeStatusModal(fileId) {
-                            document.getElementById(`statusModal-${fileId}`).classList.add('hidden');
-                        }
-
-                        function submitStatusChange(fileId) {
-                            const selectedStatus = document.getElementById(`statusDropdown-${fileId}`).value;
-
-                            document.getElementById(`newStatusInput-${fileId}`).value = selectedStatus;
-                            document.getElementById(`statusForm-${fileId}`).submit();
-
-                            alert("Status changed to " + (selectedStatus === 'active' ? 'Public' : 'Private'));
-                            closeStatusModal(fileId);
-                        }
-                    </script>
-
-
-                    <form action="{{ route('admin.trash.files', ['file_id' => $file->file_id]) }}" method="POST" onsubmit="return confirm('Are you sure you want to move this file to trash?');">
-                        @csrf
-                        <button type="submit" class="text-black" title="Move File to Trash">
-                            <i class="fas fa-circle-xmark text-sm"></i>
-                        </button>
-                    </form>
-                </div>
-            </div>
-        </div>
-        @endif
-        @endforeach
     </div>
 
     <!-- Pagination -->

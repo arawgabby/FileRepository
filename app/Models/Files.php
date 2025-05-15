@@ -19,6 +19,7 @@ class Files extends Model
         'file_path',
         'file_size',
         'file_type',
+        'authors',
         'uploaded_by',
         'category',
         'published_by',

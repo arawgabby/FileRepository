@@ -91,6 +91,7 @@
                         {{ number_format($file->file_size / 1024, 2) }} KB
                         @endif
                     </td>
+                    <td class="px-4 py-3 text-sm text-gray-600">{{ $file->authors }}</td>
                     <td class="px-4 py-3 text-sm text-gray-600">{{ $file->published_by }}</td>
                     <td class="px-4 py-3 text-sm text-gray-600 file-type">
                         @if($fileType == 'pdf')

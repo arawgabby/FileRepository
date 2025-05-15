@@ -17,6 +17,7 @@
                 <div class="mb-4">
                     <label for="category" class="block text-lg font-bold text-gray-700">Enter File Category Type</label>
                     <select name="category" id="category" class="mt-1 p-2 border rounded w-full" required>
+                        <option value="">Select Category</option>
                         <option value="capstone">Capstone</option>
                         <option value="thesis">Thesis</option>
                         <option value="faculty_request">Faculty Request</option>
@@ -28,7 +29,7 @@
                 <!-- Accreditation Extra Fields (hidden by default) -->
                 <div class="mb-4" id="accreditationFields" style="display: none;">
                     <label class="block text-lg font-bold text-gray-700 mb-2">Accreditation Details</label>
-                    <select name="level" id="level" class="mt-1 p-2 border rounded w-full mb-2" required>
+                    <select name="level" id="level" class="mt-1 p-2 border rounded w-full mb-2">
                         <option value="">Select Level</option>
                         <option value="1">1</option>
                         <option value="2">2</option>
@@ -37,18 +38,24 @@
                         <option value="phase 2">Phase 2</option>
                         <option value="4">4</option>
                     </select>
-                    <select name="area" id="area" class="mt-1 p-2 border rounded w-full mb-2" required>
+                    <select name="area" id="area" class="mt-1 p-2 border rounded w-full mb-2">
                         <option value="">Select Area</option>
                         @for($i = 1; $i <= 10; $i++)
                             <option value="{{ $i }}">{{ $i }}</option>
                             @endfor
                     </select>
-                    <select name="parameter" id="parameter" class="mt-1 p-2 border rounded w-full" required>
+                    <select name="parameter" id="parameter" class="mt-1 p-2 border rounded w-full">
                         <option value="">Select Parameter</option>
                         <option value="System">System</option>
                         <option value="Input">Input</option>
                         <option value="Output">Output</option>
                     </select>
+                </div>
+
+                <!-- Authors Field (hidden by default) -->
+                <div class="mb-4" id="authorsField" style="display: none;">
+                    <label for="authors" class="block text-lg font-bold text-gray-700">Authors</label>
+                    <input type="text" name="authors" id="authors" class="p-2 border rounded w-full" placeholder="Enter authors, separated by comma">
                 </div>
 
                 <select name="folder" id="folder" class="mt-1 p-2 border rounded w-full">
@@ -69,7 +76,7 @@
                 </select>
 
 
-                <div class="mb-4">
+                <div class="mb-4" id="publishedByField">
                     <label for="published_by" class="block text-lg font-bold text-gray-700">Published By</label>
                     <input type="text" name="published_by" id="published_by" class="p-2 border rounded w-full" value="{{ auth()->user()->name }}" readonly>
                 </div>
@@ -126,14 +133,31 @@
         const categorySelect = document.getElementById("category");
         const accreditationFields = document.getElementById("accreditationFields");
 
+        const publishedByInput = document.getElementById("published_by");
+        const authorsField = document.getElementById("authorsField");
+
         categorySelect.addEventListener("change", function() {
             if (this.value === "accreditation") {
                 accreditationFields.style.display = "block";
-            } else {
+                authorsField.style.display = "none";
+                publishedByInput.readOnly = true;
+                publishedByInput.value = "{{ auth()->user()->name }}";
+            } else if (this.value === "capstone" || this.value === "thesis") {
                 accreditationFields.style.display = "none";
+                authorsField.style.display = "block";
                 document.getElementById("level").selectedIndex = 0;
                 document.getElementById("area").selectedIndex = 0;
                 document.getElementById("parameter").selectedIndex = 0;
+                publishedByInput.readOnly = false;
+                publishedByInput.value = "";
+            } else {
+                accreditationFields.style.display = "none";
+                authorsField.style.display = "none";
+                document.getElementById("level").selectedIndex = 0;
+                document.getElementById("area").selectedIndex = 0;
+                document.getElementById("parameter").selectedIndex = 0;
+                publishedByInput.readOnly = true;
+                publishedByInput.value = "{{ auth()->user()->name }}";
             }
         });
 
@@ -206,6 +230,11 @@
                 formData.append("level", document.getElementById("level").value);
                 formData.append("area", document.getElementById("area").value);
                 formData.append("parameter", document.getElementById("parameter").value);
+            }
+
+            // Append authors if visible
+            if (categorySelect.value === "capstone" || categorySelect.value === "thesis") {
+                formData.append("authors", document.getElementById("authors").value);
             }
 
             let uploadUrl = "{{ route('staff.uploadFile') }}";

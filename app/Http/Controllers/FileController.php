@@ -183,6 +183,8 @@ class FileController extends Controller
             'level' => 'required_if:category,accreditation|max:255',
             'area' => 'required_if:category,accreditation|max:255',
             'parameter' => 'required_if:category,accreditation|max:255',
+
+            'authors' => 'nullable|required_if:category,capstone,thesis|string|max:500',
         ]);
 
         $user = auth()->user();
@@ -264,6 +266,10 @@ class FileController extends Controller
                 'description' => $request->description ?? null,
                 'status' => 'active',
             ];
+
+            if (in_array($category, ['capstone', 'thesis'])) {
+                $fileData['authors'] = $request->input('authors');
+            }
 
             if ($request->filled('level')) {
                 $fileData['level'] = $request->input('level');

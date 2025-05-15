@@ -17,6 +17,7 @@ return new class extends Migration
             $table->string('file_path', 255);
             $table->integer('file_size');
             $table->string('file_type', 50);
+            $table->string('authors', 500)->nullable();
             $table->string('published_by', 255)->default('null');
             $table->string('year_published', 255)->default('null');
             $table->unsignedInteger('uploaded_by');
