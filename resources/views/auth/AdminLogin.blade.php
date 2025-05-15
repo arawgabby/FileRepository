@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -11,20 +12,21 @@
         }
     </style>
 </head>
+
 <body class="flex items-center justify-center min-h-screen bg-gray-100 bg-contain bg-no-repeat bg-center"
-      style="background-image: url('{{ asset('storage/uploads/loginbackground.png') }}');">
+    style="background-image: url('{{ asset('storage/uploads/loginbackground.png') }}');">
 
     <!-- Success/Error Alerts -->
     @if(session('success'))
-        <script>
-            alert("{{ session('success') }}");
-        </script>
+    <script>
+        alert("{{ session('success') }}");
+    </script>
     @endif
 
     @if(session('error'))
-        <script>
-            alert("{{ session('error') }}");
-        </script>
+    <script>
+        alert("{{ session('error') }}");
+    </script>
     @endif
 
     <div class="bg-white p-8  shadow-md w-full max-w-md">
@@ -50,18 +52,16 @@
             <!-- Submit Button -->
             <div>
                 <button type="submit"
-                        class="w-full bg-indigo-800 text-white py-2 px-4 rounded-lg hover:bg-indigo-700 transition">
+                    class="w-full bg-indigo-800 text-white py-2 px-4 rounded-lg hover:bg-indigo-700 transition">
                     Login
                 </button>
             </div>
         </form>
 
-        <p class="mt-4 text-center text-sm text-gray-600">
-            Don't have an account?
-            <a href="{{ url('/admin-signup') }}" class="text-indigo-600 hover:underline">Sign up</a>
-        </p>
+
 
     </div>
 
 </body>
+
 </html>

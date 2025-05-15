@@ -21,7 +21,7 @@ Route::get('/admin-login', function () {
 });
 Route::get('/staff-login', function () {
     return view('auth.StaffLogin');
-});
+})->name('auth.StaffLogin');
 Route::get('/admin-signup', function () {
     return view('auth.AdminSignup');
 });
