@@ -273,14 +273,22 @@ class StaffController extends Controller
                 $area = trim($request->input('area'));
                 $parameter = trim($request->input('parameter'));
 
+                $parameter = trim($request->input('parameter'));
+                $character = trim($request->input('character'));
+
+                $mergedLevel = 'Level' . '-' . $level;
+                $mergedArea = 'Area' . '-' . $area;
+                $mergedParameterChar = $parameter . '-' . $character;
+
                 // Build each part of the path and register in folders table if not exists
                 $basePath = 'uploads';
                 $paths = [
                     $category,
-                    $level,
-                    $area,
-                    $parameter
+                    $mergedLevel,
+                    $mergedArea,
+                    $mergedParameterChar
                 ];
+
                 $currentPath = $basePath;
                 foreach ($paths as $folderName) {
                     $currentPath .= '/' . $folderName;

@@ -172,6 +172,11 @@ class FileController extends Controller
 
     public function AdminuploadFile(Request $request)
     {
+        Log::info('Admin upload file request', [
+            'user_id' => auth()->id(),
+            'request_data' => $request->all()
+        ]);
+
         $request->validate([
             'file' => 'required|file|max:502400',
             'category' => 'required|in:capstone,thesis,faculty_request,accreditation,admin_docs',
@@ -203,14 +208,19 @@ class FileController extends Controller
                 $level = trim($request->input('level'));
                 $area = trim($request->input('area'));
                 $parameter = trim($request->input('parameter'));
+                $character = trim($request->input('character'));
+
+                $mergedLevel = 'Level' . '-' . $level;
+                $mergedArea = 'Area' . '-' . $area;
+                $mergedParameterChar = $parameter . '-' . $character;
 
                 // Build each part of the path and register in folders table if not exists
                 $basePath = 'uploads';
                 $paths = [
                     $category,
-                    $level,
-                    $area,
-                    $parameter
+                    $mergedLevel,
+                    $mergedArea,
+                    $mergedParameterChar
                 ];
                 $currentPath = $basePath;
                 foreach ($paths as $folderName) {
