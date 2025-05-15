@@ -403,15 +403,14 @@ class StaffController extends Controller
 
     public function StaffviewFiles(Request $request)
     {
-        // Ensure the user is logged in via session
-        if (!session()->has('user')) {
+        // Use Laravel Auth, no session check
+        $user = auth()->user();
+        if (!$user) {
             return redirect()->route('staff.upload')->with('error', 'Unauthorized: Please log in.');
         }
 
-        $user = auth()->user(); // Get logged-in user from session
-
         // Fetch primary files uploaded by the logged-in user
-        $files = Files::where('uploaded_by', $user->id); // Use session user ID
+        $files = Files::where('uploaded_by', $user->id);
 
         // Apply search filter
         if ($request->has('search') && !empty($request->search)) {
@@ -483,13 +482,11 @@ class StaffController extends Controller
 
     public function StaffmoveToTrash(Request $request, $id)
     {
-        // Ensure the user is logged in via session
-        if (!session()->has('user')) {
+        // Use Laravel Auth, no session check
+        $user = auth()->user();
+        if (!$user) {
             return redirect()->back()->with('error', 'Unauthorized: Please log in.');
         }
-
-        $user = auth()->user();
-        // Get logged-in user from session
 
         // Find the file by file_id
         $file = Files::where('file_id', $id)->first();
@@ -504,7 +501,7 @@ class StaffController extends Controller
         // ✅ Log the action in access_logs
         AccessLog::create([
             'file_id' => $file->file_id, // Ensure valid file_id
-            'accessed_by' => $user->id, // Get user ID from session
+            'accessed_by' => $user->id,
             'action' => 'File moved to trash (File ID: ' . $file->file_id . ')',
             'access_time' => now(),
         ]);
@@ -539,13 +536,10 @@ class StaffController extends Controller
 
     public function requestFile(Request $request, $file_id)
     {
-        // Ensure the user is logged in via session
-        if (!session()->has('user')) {
+        $user = auth()->user();
+        if (!$user) {
             return redirect()->route('staff.upload')->with('error', 'Unauthorized: Please log in.');
         }
-
-        $user = auth()->user();
-        // Get logged-in user
 
         // Check if the file exists before proceeding
         $file = Files::find($file_id);
@@ -585,12 +579,10 @@ class StaffController extends Controller
 
     public function pendingAndDeniedFileRequests()
     {
-        if (!session()->has('user')) {
+        $user = auth()->user();
+        if (!$user) {
             return redirect()->route('staff.upload')->with('error', 'Unauthorized: Please log in.');
         }
-
-        $user = auth()->user();
-
 
         $fileRequests = FileRequest::where('requested_by', $user->id)
             ->whereIn('request_status', ['pending', 'denied'])
@@ -658,7 +650,7 @@ class StaffController extends Controller
                             'folder' => $subfolder,
                         ]);
 
-                        session()->flash('unauthorized_alert', 'You are unauthorized to access this private folder.');
+                        // session()->flash('unauthorized_alert', 'You are unauthorized to access this private folder.');
 
                         $files = Files::whereRaw('0 = 1')->paginate(20);
                         $fileVersions = collect();
@@ -900,12 +892,11 @@ class StaffController extends Controller
 
     public function StaffupdateFile(Request $request, $file_id)
     {
-        if (!session()->has('user')) {
+        $user = auth()->user();
+        if (!$user) {
             return redirect()->route('staff.upload')->with('error', 'Unauthorized: Please log in.');
         }
 
-        $user = auth()->user();
-        // Get user from session
         $file = Files::findOrFail($file_id);
 
         // Validate input
@@ -943,13 +934,13 @@ class StaffController extends Controller
             'file_path' => $filePath,
             'file_size' => $fileSize,
             'file_type' => $fileType,
-            'uploaded_by' => $user->id ?? null, // Use session user ID
+            'uploaded_by' => $user->id,
         ]);
 
         // Log the file update in `access_logs`
         AccessLog::create([
             'file_id' => $file->file_id,
-            'accessed_by' => $user->id ?? null, // Ensure user is logged in
+            'accessed_by' => $user->id,
             'action' => 'Added File - Version ' . $newVersion,
             'access_time' => now()
         ]);
@@ -1264,13 +1255,10 @@ class StaffController extends Controller
 
     public function StaffTrashViewFilesVersions(Request $request)
     {
-        // Ensure the user is logged in via session
-        if (!session()->has('user')) {
+        $user = auth()->user();
+        if (!$user) {
             return redirect()->route('staff.upload')->with('error', 'Unauthorized: Please log in.');
         }
-
-        $user = auth()->user();
-        // Get the logged-in user
 
         // Fetch only trashed file versions uploaded by the logged-in user
         $query = FileVersions::where('uploaded_by', $user->id);

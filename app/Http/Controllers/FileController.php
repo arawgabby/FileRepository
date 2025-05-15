@@ -939,7 +939,8 @@ class FileController extends Controller
 
     public function archiveFileAdmin($file_id)
     {
-        if (!session()->has('user')) {
+        $user = auth()->user();
+        if (!$user) {
             return redirect()->route('admin.upload')->with('error', 'Unauthorized: Please log in.');
         }
 
@@ -949,9 +950,7 @@ class FileController extends Controller
             return redirect()->back()->with('error', 'This file is already archived.');
         }
 
-        $user = auth()->user();
-
-        if (!$user || !$user->isAdmin()) {
+        if (!$user->isAdmin()) {
             return redirect()->back()->with('error', 'Unauthorized: You do not have permission.');
         }
 

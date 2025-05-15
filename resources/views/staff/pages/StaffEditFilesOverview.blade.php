@@ -16,10 +16,6 @@
         View File Versions
     </h1>
 
-    <!-- @if(session()->has('user'))
-            <p>Welcome, {{ auth()->user()->name }}!</p>
-        @endif -->
-
     <!-- Search & Filters -->
     <div class="mb-4 flex gap-4">
         <input type="text" id="searchInput" placeholder="Search files..." class="border rounded p-2 w-1/3">

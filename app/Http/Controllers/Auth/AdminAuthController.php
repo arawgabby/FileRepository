@@ -138,12 +138,11 @@ class AdminAuthController extends Controller
             'category' => 'required|in:capstone,thesis,faculty_request,accreditation,admin_docs',
         ]);
 
-        // Ensure the user is logged in via session
-        if (!session()->has('user')) {
+        // Use Laravel Auth instead of session
+        $user = auth()->user();
+        if (!$user) {
             return redirect()->route('admin.upload')->with('error', 'Unauthorized: Please log in.');
         }
-
-        $user = session('user'); // Get user data from session
 
         if ($request->hasFile('file')) {
             $file = $request->file('file');
@@ -155,7 +154,7 @@ class AdminAuthController extends Controller
                 'file_path' => $filePath,
                 'file_size' => $file->getSize(),
                 'file_type' => $file->getClientOriginalExtension(),
-                'uploaded_by' => $user->id, // Use session user ID
+                'uploaded_by' => $user->id, // Use auth user ID
                 'category' => $request->category,
             ]);
 
@@ -164,7 +163,6 @@ class AdminAuthController extends Controller
 
         return redirect()->route('admin.upload')->with('error', 'File upload failed.');
     }
-
     public function viewFiles(Request $request)
     {
         // Fetch primary files
@@ -297,11 +295,12 @@ class AdminAuthController extends Controller
 
     public function updateFile(Request $request, $file_id)
     {
-        if (!session()->has('user')) {
+        // Use Laravel Auth instead of session
+        $user = auth()->user();
+        if (!$user) {
             return redirect()->route('admin.upload')->with('error', 'Unauthorized: Please log in.');
         }
 
-        $user = session('user'); // Get user from session
         $file = Files::findOrFail($file_id);
 
         // Validate input
@@ -339,13 +338,13 @@ class AdminAuthController extends Controller
             'file_path' => $filePath,
             'file_size' => $fileSize,
             'file_type' => $fileType,
-            'uploaded_by' => $user->id ?? null, // Use session user ID
+            'uploaded_by' => $user->id, // Use auth user ID
         ]);
 
         // Log the file update in `access_logs`
         AccessLog::create([
             'file_id' => $file->file_id,
-            'accessed_by' => $user->id ?? null, // Ensure user is logged in
+            'accessed_by' => $user->id,
             'action' => 'Added File - Version ' . $newVersion,
             'access_time' => now()
         ]);

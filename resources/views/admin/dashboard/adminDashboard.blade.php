@@ -33,11 +33,6 @@
                 <!-- <p><a href="#" class="text-white">Staff Panel</a></p>  -->
             </div>
 
-
-            <!-- @if(session()->has('user'))
-                <p>Welcome, {{ auth()->user()->name }}!</p>
-            @endif -->
-
             <div class="text-2xl font-bold">
                 <!-- <img src="{{ asset('product-images/efvlogo.png') }}" alt="EFV Logo" class="w-25 h-25"> -->
                 <p style="margin-top: 4px; text-align: center"><a href="#" class="text-white">Admin</a></p>
