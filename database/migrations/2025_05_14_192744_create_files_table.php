@@ -21,13 +21,14 @@ return new class extends Migration
             $table->string('published_by', 255)->default('null');
             $table->string('year_published', 255)->default('null');
             $table->unsignedInteger('uploaded_by');
-            $table->enum('category', ['capstone', 'thesis', 'faculty_request', 'accreditation', 'admin_docs']);
+            $table->string('category', 255)->default('null'); // ['capstone', 'thesis', 'faculty_request', 'accreditation', 'admin_docs', 'custom_location']
             $table->string('description', 255)->default('null');
             $table->string('status', 225)->default('pending');
 
             $table->string('level', 255)->nullable();
             $table->string('area', 255)->nullable();
             $table->string('parameter', 255)->nullable();
+            $table->string('character', 255)->nullable();
             $table->timestamps();
         });
     }

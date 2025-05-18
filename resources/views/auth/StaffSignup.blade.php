@@ -1,25 +1,27 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Admin Login</title>
+    <title>Staff/Faculty Signup</title>
     <script src="https://cdn.tailwindcss.com"></script>
 </head>
+
 <body class="flex items-center justify-center min-h-screen bg-gray-100 bg-contain bg-no-repeat bg-center"
-      style="background-image: url('{{ asset('storage/uploads/loginbackground.png') }}');">
-      
+    style="background-image: url('{{ asset('storage/uploads/loginbackground.png') }}');">
+
     <!-- Alert Handling (This will show browser alerts based on session message) -->
     @if(session('success'))
-        <script>
-            alert("{{ session('success') }}");
-        </script>
+    <script>
+        alert("{{ session('success') }}");
+    </script>
     @endif
 
     @if(session('error'))
-        <script>
-            alert("{{ session('error') }}");
-        </script>
+    <script>
+        alert("{{ session('error') }}");
+    </script>
     @endif
 
     <div class="bg-white p-8  shadow-md w-full max-w-md">
@@ -53,7 +55,7 @@
             <div>
                 <label for="role" class="block text-sm font-medium text-gray-700">Role</label>
                 <select id="role" name="role" required
-                        class="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-lg shadow-sm focus:ring-indigo-500 focus:border-indigo-500">
+                    class="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-lg shadow-sm focus:ring-indigo-500 focus:border-indigo-500">
                     <option value="staff">Staff</option>
                     <option value="faculty">Faculty</option>
                 </select>
@@ -62,7 +64,7 @@
             <!-- Submit Button -->
             <div>
                 <button type="submit"
-                        class="w-full bg-indigo-600 text-white py-2 px-4 rounded-lg hover:bg-indigo-700 transition">
+                    class="w-full bg-indigo-600 text-white py-2 px-4 rounded-lg hover:bg-indigo-700 transition">
                     Sign Up
                 </button>
             </div>

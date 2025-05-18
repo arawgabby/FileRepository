@@ -46,13 +46,14 @@
             <option value="pdf">Pdf</option>
             <option value="docx">Docx</option>
             <option value="pptx">Pptx</option>
+            <option value="xlsx">Xlsx</option>
         </select>
 
 
         <label for="subfolderFilter" class="block text-sm font-medium text-gray-700 mt-2">Subfolder</label>
         <form method="GET" action="{{ route('admin.active.files') }}">
             <select id="subfolderFilter" name="subfolder" class="border rounded p-1 text-sm mt-2" onchange="this.form.submit()">
-                <option value="">All files outside root folder</option>
+                <option value="">All files</option>
                 @foreach ($subfolders as $folder)
                 <option value="{{ $folder }}" {{ request('subfolder') === $folder ? 'selected' : '' }}>
                     {{ ucfirst($folder) }}
@@ -118,6 +119,8 @@
                         <i class="fa-solid fa-file-word text-blue-500 text-xl"></i>
                         @elseif($fileType == 'pptx' || $fileType == 'ppt')
                         <i class="fa-solid fa-file-powerpoint text-orange-500 text-xl"></i>
+                        @elseif($fileType == 'xlsx' || $fileType == 'xls')
+                        <i class="fa-solid fa-file-excel text-green-500 text-xl"></i>
                         @else
                         <i class="fa-solid fa-file text-gray-500 text-xl"></i>
                         @endif
@@ -195,7 +198,7 @@
 
 </div>
 
-<!--For search filter ni siya-->
+
 <script>
     document.addEventListener("DOMContentLoaded", function() {
         const searchInput = document.getElementById("searchInput");
@@ -203,207 +206,79 @@
         const subfolderFilter = document.getElementById("subfolderFilter");
         const yearFilter = document.getElementById("yearFilter");
         const dateFilter = document.getElementById("dateFilter");
+        const tableRows = document.querySelectorAll(".file-row");
         const cards = document.querySelectorAll('#cardView > div[data-created]');
 
-        function filterCards() {
-            const searchText = searchInput.value.toLowerCase();
-            const selectedFileType = fileTypeFilter.value.toLowerCase();
-            const selectedSubfolder = subfolderFilter.value.toLowerCase();
-            const selectedYear = yearFilter.value;
-            const selectedDate = dateFilter.value; // e.g., "2025-04-12"
+        function formatToMMDDYYYY(dateStr) {
+            if (!dateStr) return "";
+            const [year, month, day] = dateStr.split("-");
+            return `${month}/${day}/${year}`;
+        }
 
+        function filterFiles() {
+            const searchText = searchInput ? searchInput.value.toLowerCase() : "";
+            const selectedFileType = fileTypeFilter ? fileTypeFilter.value.toLowerCase() : "";
+            const selectedSubfolder = subfolderFilter ? subfolderFilter.value.toLowerCase() : "";
+            const selectedYear = yearFilter ? yearFilter.value : "all";
+            const selectedDate = dateFilter ? dateFilter.value : "";
+
+            // Table rows filter
+            tableRows.forEach(row => {
+                const filename = row.querySelector(".filename") ? row.querySelector(".filename").textContent.toLowerCase() : "";
+                const fileType = row.querySelector(".file-type") ? row.querySelector(".file-type").textContent.toLowerCase() : "";
+                const year = row.querySelector(".year") ? row.querySelector(".year").textContent.trim() : "";
+                const createdDateCell = row.querySelector(".created-date");
+                let rowDate = createdDateCell ? createdDateCell.textContent.trim() : "";
+                if (/^\d{4}-\d{2}-\d{2}$/.test(rowDate)) {
+                    rowDate = formatToMMDDYYYY(rowDate);
+                }
+
+                let matches = true;
+                if (searchText && !filename.includes(searchText)) matches = false;
+                if (selectedFileType && !fileType.includes(selectedFileType)) matches = false;
+                if (selectedYear !== "all" && year !== selectedYear) matches = false;
+                if (selectedDate) {
+                    const selectedDateMMDDYYYY = formatToMMDDYYYY(selectedDate);
+                    if (rowDate !== selectedDateMMDDYYYY) matches = false;
+                }
+                // Subfolder filter is not applied to table rows
+
+                row.style.display = matches ? "" : "none";
+            });
+
+            // Card view filter
             cards.forEach(card => {
-                const fileName = card.querySelector("span.font-semibold").textContent.toLowerCase();
-                const fileType = card.querySelector("span.ml-2").textContent.toLowerCase();
+                const fileName = card.querySelector("span.font-semibold") ? card.querySelector("span.font-semibold").textContent.toLowerCase() : "";
+                const fileType = card.querySelector("span.ml-2") ? card.querySelector("span.ml-2").textContent.toLowerCase() : "";
                 const folder = card.dataset.subfolder ? card.dataset.subfolder.toLowerCase() : "";
-                const createdDate = card.dataset.created; // data-created="2025-04-12"
-                const year = card.querySelector("span.font-semibold:last-child").textContent;
+                const createdDate = card.dataset.created;
+                const year = card.querySelector("span.font-semibold:last-child") ? card.querySelector("span.font-semibold:last-child").textContent : "";
 
-                const matchesSearch = searchText === "" || fileName.includes(searchText);
-                const matchesFileType = selectedFileType === "" || fileType.includes(selectedFileType);
-                const matchesSubfolder = selectedSubfolder === "" || folder === selectedSubfolder;
-                const matchesYear = selectedYear === "all" || year === selectedYear;
-                const matchesDate = selectedDate === "" || createdDate === selectedDate;
+                let matches = true;
+                if (searchText && !fileName.includes(searchText)) matches = false;
+                if (selectedFileType && !fileType.includes(selectedFileType)) matches = false;
+                if (selectedSubfolder && folder !== selectedSubfolder) matches = false;
+                if (selectedYear !== "all" && year !== selectedYear) matches = false;
+                if (selectedDate && createdDate !== selectedDate) matches = false;
 
-                const shouldShow = matchesSearch && matchesFileType && matchesSubfolder && matchesYear && matchesDate;
-
-                card.style.display = shouldShow ? "block" : "none";
+                card.style.display = matches ? "block" : "none";
             });
+
+            // Update file count
+            const visibleRows = Array.from(tableRows).filter(row => row.style.display !== "none").length;
+            const visibleCards = Array.from(cards).filter(card => card.style.display !== "none").length;
+            document.getElementById("activeFileCount").textContent = visibleRows + visibleCards;
         }
 
+        // Add event listeners with null checks
+        if (searchInput) searchInput.addEventListener("input", filterFiles);
+        if (fileTypeFilter) fileTypeFilter.addEventListener("change", filterFiles);
+        if (subfolderFilter) subfolderFilter.addEventListener("change", filterFiles);
+        if (yearFilter) yearFilter.addEventListener("change", filterFiles);
+        if (dateFilter) dateFilter.addEventListener("change", filterFiles);
 
-        // Event listeners
-        searchInput.addEventListener("input", filterCards);
-        fileTypeFilter.addEventListener("change", filterCards);
-        subfolderFilter.addEventListener("change", filterCards);
-        yearFilter.addEventListener("change", filterCards);
-        dateFilter.addEventListener("change", filterCards);
-    });
-</script>
-
-<!--For year filter-->
-<script>
-    document.addEventListener("DOMContentLoaded", function() {
-        const yearFilter = document.getElementById("yearFilter");
-        const cards = document.querySelectorAll("#cardView > div");
-
-        yearFilter.addEventListener("change", function() {
-            const selectedYear = this.value;
-
-            cards.forEach(card => {
-                const yearElement = card.querySelector("div.flex.justify-between span:nth-child(2)");
-                const fileYear = yearElement ? yearElement.textContent.trim() : "";
-
-                if (selectedYear === "all" || fileYear === selectedYear) {
-                    card.style.display = "block";
-                } else {
-                    card.style.display = "none";
-                }
-            });
-        });
-    });
-</script>
-
-<script>
-    const subfolderFilter = document.getElementById("subfolderFilter");
-
-    subfolderFilter.addEventListener("change", function() {
-        const selectedSubfolder = this.value.toLowerCase();
-
-        document.querySelectorAll("#cardView > div").forEach(card => {
-            const subfolder = card.dataset.subfolder ? card.dataset.subfolder.toLowerCase() : "";
-
-            if (selectedSubfolder === "" || subfolder === selectedSubfolder) {
-                card.style.display = "block";
-            } else {
-                card.style.display = "none";
-            }
-        });
-
-        updateFileCount && updateFileCount();
-    });
-</script>
-
-<script>
-    function toggleView() {
-        document.getElementById("tableView").classList.toggle("hidden");
-        document.getElementById("cardView").classList.toggle("hidden");
-    }
-</script>
-
-<script>
-    function confirmTrash(fileId) {
-        if (confirm("Are you sure you want to put this on trash this file?")) {
-            document.getElementById('archive-form-' + fileId).submit();
-        }
-    }
-</script>
-
-<script>
-    document.addEventListener("DOMContentLoaded", function() {
-        const searchInput = document.getElementById("searchInput");
-        const fileTypeFilter = document.getElementById("fileTypeFilter");
-        const categoryFilter = document.getElementById("categoryFilter");
-        const rows = document.querySelectorAll(".file-row");
-
-        function filterTable() {
-            const searchText = searchInput.value.toLowerCase();
-            const selectedFileType = fileTypeFilter.value.toLowerCase();
-            const selectedCategory = categoryFilter.value.toLowerCase();
-
-            rows.forEach(row => {
-                const filename = row.querySelector(".filename").textContent.toLowerCase();
-                const fileType = row.querySelector(".file-type").textContent.toLowerCase();
-                const category = row.querySelector(".category").textContent.toLowerCase();
-
-                const matchesSearch = filename.includes(searchText);
-                const matchesFileType = selectedFileType === "" || fileType === selectedFileType;
-                const matchesCategory = selectedCategory === "" || category === selectedCategory;
-
-                if (matchesSearch && matchesFileType && matchesCategory) {
-                    row.style.display = "";
-                } else {
-                    row.style.display = "none";
-                }
-            });
-        }
-
-        searchInput.addEventListener("input", filterTable);
-        fileTypeFilter.addEventListener("change", filterTable);
-        categoryFilter.addEventListener("change", filterTable);
-    });
-</script>
-
-<script>
-    document.addEventListener("DOMContentLoaded", function() {
-        // Count the visible file rows
-        function updateFileCount() {
-            const visibleRows = document.querySelectorAll(".file-row");
-            const count = visibleRows.length;
-            document.getElementById("activeFileCount").textContent = count;
-        }
-
-        // Run count function on load
-        updateFileCount();
-    });
-</script>
-
-<script>
-    document.addEventListener("DOMContentLoaded", function() {
-        function updateFileCount() {
-            const tableRows = document.querySelectorAll(".file-row:not([style*='display: none'])").length;
-            const cardItems = document.querySelectorAll("#cardView > div:not([style*='display: none'])").length;
-            const totalCount = tableRows + cardItems;
-            document.getElementById("activeFileCount").textContent = totalCount;
-        }
-
-        // Update file count after filtering
-        function setupFilters() {
-            const searchInput = document.getElementById("searchInput");
-            const fileTypeFilter = document.getElementById("fileTypeFilter");
-            const categoryFilter = document.getElementById("categoryFilter");
-
-            function filterFiles() {
-                const searchText = searchInput.value.toLowerCase();
-                const selectedFileType = fileTypeFilter.value.toLowerCase();
-                const selectedCategory = categoryFilter.value.toLowerCase();
-
-                // Filter Table Rows
-                document.querySelectorAll(".file-row").forEach(row => {
-                    const filename = row.querySelector(".filename").textContent.toLowerCase();
-                    const fileType = row.querySelector(".file-type").textContent.toLowerCase();
-                    const category = row.querySelector(".category").textContent.toLowerCase();
-
-                    const matchesSearch = filename.includes(searchText);
-                    const matchesFileType = selectedFileType === "" || fileType.includes(selectedFileType);
-                    const matchesCategory = selectedCategory === "" || category.includes(selectedCategory);
-
-                    row.style.display = matchesSearch && matchesFileType && matchesCategory ? "" : "none";
-                });
-
-                // Filter Cards
-                document.querySelectorAll("#cardView > div").forEach(card => {
-                    const fileName = card.querySelector("span.font-semibold").textContent.toLowerCase();
-                    const fileType = card.querySelector("span.ml-2").textContent.toLowerCase();
-                    const category = card.dataset.category ? card.dataset.category.toLowerCase() : "";
-
-                    const matchesSearch = fileName.includes(searchText);
-                    const matchesFileType = selectedFileType === "" || fileType.includes(selectedFileType);
-                    const matchesCategory = selectedCategory === "" || category.includes(selectedCategory);
-
-                    card.style.display = matchesSearch && matchesFileType && matchesCategory ? "block" : "none";
-                });
-
-                updateFileCount();
-            }
-
-            searchInput.addEventListener("input", filterFiles);
-            fileTypeFilter.addEventListener("change", filterFiles);
-            categoryFilter.addEventListener("change", filterFiles);
-        }
-
-        setupFilters();
-        updateFileCount(); // Run count on load
+        // Initial count/filter
+        filterFiles();
     });
 </script>
 @endsection

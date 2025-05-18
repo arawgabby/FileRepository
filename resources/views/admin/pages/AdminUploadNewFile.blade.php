@@ -22,6 +22,7 @@
                         <option value="faculty_request">Faculty Request</option>
                         <option value="accreditation">Accreditation</option>
                         <option value="admin_docs">Admin Documents</option>
+                        <option value="custom_location">Custom Location</option>
                     </select>
                 </div>
 
@@ -79,6 +80,7 @@
                         <option value="{{ $subfolder }}">{{ $subfolder }}</option>
                         @endforeach
                     </select>
+                    <span id="folderNote" class="text-sm text-gray-500 hidden">Folder selection is not required for Capstone, Thesis, Accreditation, Faculty Request & Admin Docs. Subfolders will be created automatically.</span>
                 </div>
 
                 <div class="mb-4" id="publishedByField">
@@ -138,6 +140,8 @@
         const accreditationFields = document.getElementById("accreditationFields");
         const publishedByInput = document.getElementById("published_by");
         const authorsField = document.getElementById("authorsField");
+        const folderSelect = document.getElementById("folder");
+        const folderNote = document.getElementById("folderNote");
 
         const parameterSelect = document.getElementById("parameter");
         const characterSelect = document.getElementById("character");
@@ -151,13 +155,20 @@
             }
         });
 
-        // Show/hide accreditation fields, authors, and manage Published By field
+        // Show/hide accreditation fields, authors, and manage Published By field and folder select
         categorySelect.addEventListener("change", function() {
             if (this.value === "accreditation") {
                 accreditationFields.style.display = "block";
                 authorsField.style.display = "none";
                 publishedByInput.readOnly = true;
                 publishedByInput.value = "{{ auth()->user()->name }}";
+                // Disable folder selection for accreditation
+                folderSelect.value = "";
+                folderSelect.disabled = true;
+                folderNote.classList.remove("hidden");
+
+
+
             } else if (this.value === "capstone" || this.value === "thesis") {
                 accreditationFields.style.display = "none";
                 authorsField.style.display = "block";
@@ -166,6 +177,12 @@
                 document.getElementById("parameter").selectedIndex = 0;
                 publishedByInput.readOnly = false;
                 publishedByInput.value = "";
+                // Enable folder selection
+                folderSelect.value = "";
+                folderSelect.disabled = true;
+                folderNote.classList.remove("hidden");
+                // folderSelect.disabled = false;
+                // folderNote.classList.add("hidden");
             } else {
                 accreditationFields.style.display = "none";
                 authorsField.style.display = "none";
@@ -174,6 +191,9 @@
                 document.getElementById("parameter").selectedIndex = 0;
                 publishedByInput.readOnly = true;
                 publishedByInput.value = "{{ auth()->user()->name }}";
+                // Enable folder selection
+                folderSelect.disabled = false;
+                folderNote.classList.add("hidden");
             }
         });
 
@@ -239,6 +259,11 @@
                 if (parameterSelect.value !== "") {
                     formData.append("character", characterSelect.value);
                 }
+                // Do NOT append folder for accreditation
+                formData.delete("folder");
+            } else {
+                // Append folder if not accreditation
+                formData.set("folder", folderSelect.value);
             }
 
             // Append authors if visible

@@ -174,12 +174,12 @@ class FileController extends Controller
     {
         Log::info('Admin upload file request', [
             'user_id' => auth()->id(),
+            'selected_folder' => $request->input('folder'),
             'request_data' => $request->all()
         ]);
-
         $request->validate([
             'file' => 'required|file|max:502400',
-            'category' => 'required|in:capstone,thesis,faculty_request,accreditation,admin_docs',
+            'category' => 'required|in:capstone,thesis,faculty_request,accreditation,admin_docs,custom_location',
             'published_by' => 'required|string|max:255',
             'year_published' => 'required|string|regex:/^\d{4}$/',
             'description' => 'nullable|string|max:1000',
@@ -188,7 +188,7 @@ class FileController extends Controller
             'level' => 'required_if:category,accreditation|max:255',
             'area' => 'required_if:category,accreditation|max:255',
             'parameter' => 'required_if:category,accreditation|max:255',
-
+            'character' => 'required_if:category,accreditation|max:255',
             'authors' => 'nullable|required_if:category,capstone,thesis|string|max:500',
         ]);
 
@@ -201,53 +201,80 @@ class FileController extends Controller
             $file = $request->file('file');
             $filename = $file->getClientOriginalName();
 
-            // Dynamic upload path based on category
-            $category = trim($request->input('category'));
+            // Use selected_folder as custom category if set, else use category
+            $selected_folder = trim($request->input('folder'));
+            $category = ($selected_folder !== '' && $selected_folder !== null) ? $selected_folder : trim($request->input('category'));
 
-            if ($category === 'accreditation') {
+            if ($request->input('category') === 'accreditation') {
                 $level = trim($request->input('level'));
                 $area = trim($request->input('area'));
                 $parameter = trim($request->input('parameter'));
                 $character = trim($request->input('character'));
 
-                $mergedLevel = 'Level' . '-' . $level;
-                $mergedArea = 'Area' . '-' . $area;
+                $mergedLevel = 'Level-' . $level;
+                $mergedArea = 'Area-' . $area;
                 $mergedParameterChar = $parameter . '-' . $character;
 
-                // Build each part of the path and register in folders table if not exists
-                $basePath = 'uploads';
-                $paths = [
-                    $category,
-                    $mergedLevel,
-                    $mergedArea,
-                    $mergedParameterChar
-                ];
-                $currentPath = $basePath;
-                foreach ($paths as $folderName) {
-                    $currentPath .= '/' . $folderName;
-                    // Create the folder in storage if it doesn't exist
-                    if (!Storage::disk('public')->exists($currentPath)) {
-                        Storage::disk('public')->makeDirectory($currentPath, 0775, true);
+                // Build the full path
+                $basePath = 'uploads/' . $category;
+                $levelPath = $basePath . '/' . $mergedLevel;
+                $areaPath = $levelPath . '/' . $mergedArea;
+                $parameterCharPath = $areaPath . '/' . $mergedParameterChar;
+
+                // Create directories if not exist
+                foreach ([$basePath, $levelPath, $areaPath, $parameterCharPath] as $path) {
+                    if (!Storage::disk('public')->exists($path)) {
+                        Storage::disk('public')->makeDirectory($path, 0775, true);
                     }
-                    // Register in folders table if not exists
-                    if (!\App\Models\Folder::where('path', $currentPath)->where('name', $folderName)->exists()) {
+                }
+
+                // Register each folder level if not exists
+                $folderPaths = [
+                    ['name' => $category, 'path' => $basePath],
+                    ['name' => $mergedLevel, 'path' => $levelPath],
+                    ['name' => $mergedArea, 'path' => $areaPath],
+                    ['name' => $mergedParameterChar, 'path' => $parameterCharPath],
+                ];
+
+                foreach ($folderPaths as $folderInfo) {
+                    if (!\App\Models\Folder::where('path', $folderInfo['path'])->where('name', $folderInfo['name'])->exists()) {
                         \App\Models\Folder::create([
-                            'name' => $folderName,
-                            'path' => $currentPath,
-                            'status' => 'private', // or your default
+                            'name' => $folderInfo['name'],
+                            'path' => $folderInfo['path'],
+                            'status' => 'public',
                             'user_id' => $user->id,
                         ]);
                     }
                 }
-                $uploadPath = $currentPath;
+
+                // $uploadPath is always the deepest
+                $uploadPath = $parameterCharPath;
             } else {
-                $folder = trim($request->input('folder'));
-                $uploadPath = 'uploads/' . $category . ($folder ? '/' . $folder : '');
+                $folder = $selected_folder;
+                $basePath = 'uploads/' . $category;
+
+                // Always register the category as a folder if not exists
+                if (!\App\Models\Folder::where('path', $basePath)->where('name', $category)->exists()) {
+                    \App\Models\Folder::create([
+                        'name' => $category,
+                        'path' => $basePath,
+                        'status' => 'private',
+                        'user_id' => $user->id,
+                    ]);
+                }
+
+                // Only append folder if it's set and different from category
+                if ($folder && $folder !== $category) {
+                    $uploadPath = $basePath . '/' . $folder;
+                } else {
+                    $uploadPath = $basePath;
+                }
+
                 if (!Storage::disk('public')->exists($uploadPath)) {
                     Storage::disk('public')->makeDirectory($uploadPath, 0775, true);
                 }
                 // Register in folders table if not exists
-                if ($folder && !\App\Models\Folder::where('path', $uploadPath)->where('name', $folder)->exists()) {
+                if ($folder && $folder !== $category && !\App\Models\Folder::where('path', $uploadPath)->where('name', $folder)->exists()) {
                     \App\Models\Folder::create([
                         'name' => $folder,
                         'path' => $uploadPath,
@@ -270,14 +297,14 @@ class FileController extends Controller
                 'file_size' => $file->getSize(),
                 'file_type' => $file->getClientOriginalExtension(),
                 'uploaded_by' => $user->id,
-                'category' => $category,
+                'category' => $category, // This is either selected_folder or category
                 'published_by' => $request->published_by,
                 'year_published' => (string) $request->year_published,
                 'description' => $request->description ?? null,
                 'status' => 'active',
             ];
 
-            if (in_array($category, ['capstone', 'thesis'])) {
+            if (in_array($request->input('category'), ['capstone', 'thesis'])) {
                 $fileData['authors'] = $request->input('authors');
             }
 
@@ -289,6 +316,9 @@ class FileController extends Controller
             }
             if ($request->filled('parameter')) {
                 $fileData['parameter'] = $request->input('parameter');
+            }
+            if ($request->filled('character')) {
+                $fileData['character'] = $request->input('character');
             }
 
             $fileEntry = Files::create($fileData);

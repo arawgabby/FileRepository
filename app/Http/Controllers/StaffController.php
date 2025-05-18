@@ -89,19 +89,22 @@ class StaffController extends Controller
     {
         $userId = auth()->id();
 
-        // Only show files that are private and NOT uploaded by the current user
-        $files = Files::whereHas('folder', function ($query) {
-            $query->where('status', 'private');
-        })
-            ->where('uploaded_by', '!=', $userId)
-            ->get();
+        // Get all private folder paths
+        $privateFolderPaths = \App\Models\Folder::where('status', 'private')->pluck('path')->toArray();
 
-        $requests = FileRequest::with('file')
+        // Only show files that are in folders with status 'private'
+        $files = \App\Models\Files::where(function ($query) use ($privateFolderPaths) {
+            foreach ($privateFolderPaths as $path) {
+                $query->orWhere('file_path', 'like', $path . '/%');
+            }
+        })->get();
+
+        $requests = \App\Models\FileRequest::with('file')
             ->where('requested_by', $userId)
             ->latest()
             ->get();
 
-        $myFileRequests = FileRequest::with('file', 'requester')
+        $myFileRequests = \App\Models\FileRequest::with('file', 'requester')
             ->whereHas('file', function ($q) use ($userId) {
                 $q->where('uploaded_by', $userId);
             })
@@ -249,7 +252,7 @@ class StaffController extends Controller
     {
         $request->validate([
             'file' => 'required|file|max:502400',
-            'category' => 'required|in:capstone,thesis,faculty_request,accreditation,admin_docs',
+            'category' => 'required|in:capstone,thesis,faculty_request,accreditation,admin_docs,custom_location',
             'published_by' => 'required|string|max:255',
             'year_published' => 'required|string|regex:/^\d{4}$/',
             'description' => 'nullable|string|max:1000',
@@ -257,68 +260,97 @@ class StaffController extends Controller
             'level' => 'required_if:category,accreditation|max:255',
             'area' => 'required_if:category,accreditation|max:255',
             'parameter' => 'required_if:category,accreditation|max:255',
-
+            'character' => 'required_if:category,accreditation|max:255',
             'authors' => 'nullable|required_if:category,capstone,thesis|string|max:500',
         ]);
 
         $user = auth()->user();
+        if (!$user) {
+            return response()->json(['message' => 'Unauthorized: Please log in.'], 403);
+        }
 
         if ($request->hasFile('file')) {
             $file = $request->file('file');
             $filename = $file->getClientOriginalName();
-            $category = trim($request->input('category'));
 
-            if ($category === 'accreditation') {
+            // Use selected_folder as custom category if set, else use category
+            $selected_folder = trim($request->input('folder'));
+            $category = ($selected_folder !== '' && $selected_folder !== null) ? $selected_folder : trim($request->input('category'));
+
+            if ($request->input('category') === 'accreditation') {
                 $level = trim($request->input('level'));
                 $area = trim($request->input('area'));
                 $parameter = trim($request->input('parameter'));
-
-                $parameter = trim($request->input('parameter'));
                 $character = trim($request->input('character'));
 
-                $mergedLevel = 'Level' . '-' . $level;
-                $mergedArea = 'Area' . '-' . $area;
+                $mergedLevel = 'Level-' . $level;
+                $mergedArea = 'Area-' . $area;
                 $mergedParameterChar = $parameter . '-' . $character;
 
-                // Build each part of the path and register in folders table if not exists
-                $basePath = 'uploads';
-                $paths = [
-                    $category,
-                    $mergedLevel,
-                    $mergedArea,
-                    $mergedParameterChar
+                // Build the full path
+                $basePath = 'uploads/' . $category;
+                $levelPath = $basePath . '/' . $mergedLevel;
+                $areaPath = $levelPath . '/' . $mergedArea;
+                $parameterCharPath = $areaPath . '/' . $mergedParameterChar;
+
+                // Create directories if not exist
+                foreach ([$basePath, $levelPath, $areaPath, $parameterCharPath] as $path) {
+                    if (!Storage::disk('public')->exists($path)) {
+                        Storage::disk('public')->makeDirectory($path, 0775, true);
+                    }
+                }
+
+                // Register each folder level if not exists
+                $folderPaths = [
+                    ['name' => $category, 'path' => $basePath],
+                    ['name' => $mergedLevel, 'path' => $levelPath],
+                    ['name' => $mergedArea, 'path' => $areaPath],
+                    ['name' => $mergedParameterChar, 'path' => $parameterCharPath],
                 ];
 
-                $currentPath = $basePath;
-                foreach ($paths as $folderName) {
-                    $currentPath .= '/' . $folderName;
-                    // Create the folder in storage if it doesn't exist
-                    if (!Storage::disk('public')->exists($currentPath)) {
-                        Storage::disk('public')->makeDirectory($currentPath, 0775, true);
-                    }
-                    // Register in folders table if not exists
-                    if (!Folder::where('path', $currentPath)->where('name', $folderName)->exists()) {
-                        Folder::create([
-                            'name' => $folderName,
-                            'path' => $currentPath,
-                            'status' => 'private', // or your default
+                foreach ($folderPaths as $folderInfo) {
+                    if (!\App\Models\Folder::where('path', $folderInfo['path'])->where('name', $folderInfo['name'])->exists()) {
+                        \App\Models\Folder::create([
+                            'name' => $folderInfo['name'],
+                            'path' => $folderInfo['path'],
+                            'status' => 'public',
                             'user_id' => $user->id,
                         ]);
                     }
                 }
-                $uploadPath = $currentPath;
+
+                // $uploadPath is always the deepest
+                $uploadPath = $parameterCharPath;
             } else {
-                $folder = trim($request->input('folder'));
-                $uploadPath = 'uploads/' . $category . ($folder ? '/' . $folder : '');
+                $folder = $selected_folder;
+                $basePath = 'uploads/' . $category;
+
+                // Always register the category as a folder if not exists
+                if (!\App\Models\Folder::where('path', $basePath)->where('name', $category)->exists()) {
+                    \App\Models\Folder::create([
+                        'name' => $category,
+                        'path' => $basePath,
+                        'status' => 'public',
+                        'user_id' => $user->id,
+                    ]);
+                }
+
+                // Only append folder if it's set and different from category
+                if ($folder && $folder !== $category) {
+                    $uploadPath = $basePath . '/' . $folder;
+                } else {
+                    $uploadPath = $basePath;
+                }
+
                 if (!Storage::disk('public')->exists($uploadPath)) {
                     Storage::disk('public')->makeDirectory($uploadPath, 0775, true);
                 }
                 // Register in folders table if not exists
-                if ($folder && !Folder::where('path', $uploadPath)->where('name', $folder)->exists()) {
-                    Folder::create([
+                if ($folder && !\App\Models\Folder::where('path', $uploadPath)->where('name', $folder)->exists()) {
+                    \App\Models\Folder::create([
                         'name' => $folder,
                         'path' => $uploadPath,
-                        'status' => 'private', // or your default
+                        'status' => 'public', // or your default
                         'user_id' => $user->id,
                     ]);
                 }
@@ -330,6 +362,7 @@ class StaffController extends Controller
 
             $filePath = $file->storeAs($uploadPath, $filename, 'public');
 
+            // Prepare data for file entry
             $fileData = [
                 'filename' => $filename,
                 'file_path' => $filePath,
@@ -355,6 +388,9 @@ class StaffController extends Controller
             }
             if ($request->filled('parameter')) {
                 $fileData['parameter'] = $request->input('parameter');
+            }
+            if ($request->filled('character')) {
+                $fileData['character'] = $request->input('character');
             }
 
             $fileEntry = Files::create($fileData);
@@ -644,38 +680,42 @@ class StaffController extends Controller
             $accreditationPath = "uploads/accreditation/{$level}/{$area}/{$parameter}/%";
             $files->where('file_path', 'like', $accreditationPath);
         } elseif (!empty($subfolder)) {
-            // Fallback to subfolder filter
             $files->where('file_path', 'LIKE', 'uploads/' . $subfolder . '/%');
-        } else {
-            if ($role !== 'admin') {
-                // Fetch private folders the user DOES NOT have access to
-                $privateFolders = Folder::where('status', 'private')->pluck('name')->toArray();
-                $deniedFolderAccess = FolderAccess::where('user_id', $userId)
-                    ->where('status', 'approved')
-                    ->pluck('folder_id')
-                    ->toArray();
-                $allowedPrivateFolders = Folder::whereIn('id', $deniedFolderAccess)->pluck('name')->toArray();
+        }
 
-                // Filter out files inside private folders that the user doesn't have access to
-                $files->where(function ($query) use ($userId, $privateFolders, $allowedPrivateFolders) {
-                    $query->where(function ($q) use ($privateFolders, $allowedPrivateFolders) {
-                        foreach ($privateFolders as $folder) {
-                            if (!in_array($folder, $allowedPrivateFolders)) {
-                                $q->where('file_path', 'not like', 'uploads/' . $folder . '/%');
-                            }
-                        }
-                    })
-                        ->where(function ($q2) use ($userId) {
-                            $q2->where('status', '!=', 'private')
-                                ->orWhereIn('file_id', function ($subQ) use ($userId) {
-                                    $subQ->select('file_id')
-                                        ->from('file_requests')
-                                        ->where('requested_by', $userId)
-                                        ->where('request_status', 'approved');
+        // Only restrict if not admin
+        if ($role !== 'admin') {
+            // Get all folders with their status
+            $allFolders = Folder::all(['name', 'status']);
+            $publicFolders = $allFolders->where('status', 'public')->pluck('name')->toArray();
+            $privateFolders = $allFolders->where('status', 'private')->pluck('name')->toArray();
+
+            // Show all files in public folders
+            $files->where(function ($query) use ($publicFolders, $userId, $privateFolders) {
+                // Files in public folders
+                if (!empty($publicFolders)) {
+                    foreach ($publicFolders as $folder) {
+                        $query->orWhere('file_path', 'like', 'uploads/' . $folder . '/%');
+                    }
+                }
+                // Files in private folders: only show if user has approved file request or is uploader
+                if (!empty($privateFolders)) {
+                    foreach ($privateFolders as $folder) {
+                        $query->orWhere(function ($subQ) use ($folder, $userId) {
+                            $subQ->where('file_path', 'like', 'uploads/' . $folder . '/%')
+                                ->where(function ($fileQ) use ($userId) {
+                                    $fileQ->where('uploaded_by', $userId)
+                                        ->orWhereIn('file_id', function ($subQ2) use ($userId) {
+                                            $subQ2->select('file_id')
+                                                ->from('file_requests')
+                                                ->where('requested_by', $userId)
+                                                ->where('request_status', 'approved');
+                                        });
                                 });
                         });
-                });
-            }
+                    }
+                }
+            });
         }
 
         // Apply search filter
@@ -718,15 +758,30 @@ class StaffController extends Controller
         // Extract file IDs for use in the view
         $approvedFileRequests = $approvedRequests->pluck('file_id')->toArray();
 
-        $fileVersions = FileVersions::whereIn('file_id', $files->pluck('file_id'))->get();
+        // Fix for paginator: get file_ids as array
+        $fileIds = $files->getCollection()->pluck('file_id')->toArray();
+        $fileVersions = FileVersions::whereIn('file_id', $fileIds)->get();
 
+        // Subfolders logic (unchanged)
         $uploadPath = public_path('storage/uploads');
         $subfolders = [];
+        $approvedFolderAccessIds = FolderAccess::where('user_id', $userId)
+            ->where('status', 'approved')
+            ->pluck('folder_id')
+            ->toArray();
 
         if (\Illuminate\Support\Facades\File::exists($uploadPath)) {
-            $subfolders = collect(\Illuminate\Support\Facades\File::directories($uploadPath))->map(function ($path) {
+            $allSubfolders = collect(\Illuminate\Support\Facades\File::directories($uploadPath))->map(function ($path) {
                 return basename($path);
-            });
+            })->toArray();
+
+            $userFolders = Folder::where('user_id', $userId)->pluck('name')->toArray();
+            $approvedFolders = Folder::whereIn('id', $approvedFolderAccessIds)->pluck('name')->toArray();
+            $publicFolders = Folder::where('status', 'public')->pluck('name')->toArray();
+            $privateFolders = Folder::where('status', 'private')->pluck('name')->toArray();
+            $allowedFolders = array_unique(array_merge($userFolders, $approvedFolders, $publicFolders));
+            $allowedFolders = array_diff($allowedFolders, $privateFolders);
+            $subfolders = array_values(array_intersect($allSubfolders, $allowedFolders));
         }
 
         return view('staff.pages.StaffViewAllFilesActive', compact(

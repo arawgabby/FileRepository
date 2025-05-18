@@ -23,6 +23,7 @@
                         <option value="faculty_request">Faculty Request</option>
                         <option value="accreditation">Accreditation</option>
                         <option value="admin_docs">Admin Documents</option>
+                        <option value="custom_location">Custom Location</option>
                     </select>
                 </div>
 
@@ -72,29 +73,29 @@
                     <input type="text" name="authors" id="authors" class="p-2 border rounded w-full" placeholder="Enter authors, separated by comma">
                 </div>
 
-                <select name="folder" id="folder" class="mt-1 p-2 border rounded w-full">
-                    <option value="">Root (uploads/)</option>
-                    @foreach($subfolders as $folder)
+                <div class="mb-4" id="folderField">
+                    <select name="folder" id="folder" class="mt-1 p-2 border rounded w-full">
+                        <option value="">Root (uploads/)</option>
+                        @foreach($subfolders as $folder)
+                        @if($folder->status === 'private' && !$folder->user_has_access)
+                        <option value="{{ $folder->name }}" disabled class="text-red-500">
+                            {{ $folder->name }} (Private – cannot insert file)
+                        </option>
+                        @else
+                        <option value="{{ $folder->name }}">
+                            {{ $folder->name }}{{ $folder->status === 'private' ? ' (Private – access approved)' : '' }}
+                        </option>
+                        @endif
+                        @endforeach
+                    </select>
 
-                    @if($folder->status === 'private' && !$folder->user_has_access)
-                    <option value="{{ $folder->name }}" disabled class="text-red-500">
-                        {{ $folder->name }} (Private – cannot insert file)
-                    </option>
-                    @else
-                    <option value="{{ $folder->name }}">
-                        {{ $folder->name }}{{ $folder->status === 'private' ? ' (Private – access approved)' : '' }}
-                    </option>
-                    @endif
-
-                    @endforeach
-                </select>
-
+                    <span id="folderNote" class="text-sm text-gray-500 hidden">Folder selection is not required for Capstone, Thesis, Accreditation, Faculty Request & Admin Docs. Subfolders will be created automatically.</span>
+                </div>
 
                 <div class="mb-4" id="publishedByField">
                     <label for="published_by" class="block text-lg font-bold text-gray-700">Published By</label>
                     <input type="text" name="published_by" id="published_by" class="p-2 border rounded w-full" value="{{ auth()->user()->name }}" readonly>
                 </div>
-
 
                 <div class="mb-4">
                     <label for="year_published" class="block text-lg font-bold text-gray-700">Year Published</label>
@@ -146,12 +147,15 @@
         const fileDetails = document.getElementById("fileDetails");
         const categorySelect = document.getElementById("category");
         const accreditationFields = document.getElementById("accreditationFields");
-
         const publishedByInput = document.getElementById("published_by");
         const authorsField = document.getElementById("authorsField");
+        const folderSelect = document.getElementById("folder");
+        const folderNote = document.getElementById("folderNote");
 
         const parameterSelect = document.getElementById("parameter");
         const characterSelect = document.getElementById("character");
+        const folderField = document.getElementById("folderField");
+
 
         parameterSelect.addEventListener("change", function() {
             if (this.value !== "") {
@@ -168,6 +172,13 @@
                 authorsField.style.display = "none";
                 publishedByInput.readOnly = true;
                 publishedByInput.value = "{{ auth()->user()->name }}";
+                // Hide and disable folder select for accreditation
+                // folderField.style.display = "none";
+                folderSelect.value = "";
+                folderSelect.disabled = true;
+
+                // Disable folder selection for accreditation
+                folderNote.classList.remove("hidden");
             } else if (this.value === "capstone" || this.value === "thesis") {
                 accreditationFields.style.display = "none";
                 authorsField.style.display = "block";
@@ -176,6 +187,13 @@
                 document.getElementById("parameter").selectedIndex = 0;
                 publishedByInput.readOnly = false;
                 publishedByInput.value = "";
+                // Show and enable folder select
+                folderField.style.display = "block";
+                // folderSelect.disabled = false;
+                // Enable folder selection
+                folderSelect.value = "";
+                folderSelect.disabled = true;
+                folderNote.classList.remove("hidden");
             } else {
                 accreditationFields.style.display = "none";
                 authorsField.style.display = "none";
@@ -184,6 +202,12 @@
                 document.getElementById("parameter").selectedIndex = 0;
                 publishedByInput.readOnly = true;
                 publishedByInput.value = "{{ auth()->user()->name }}";
+                // Show and enable folder select
+                folderField.style.display = "block";
+                folderSelect.disabled = false;
+
+                // Enable folder selection
+                folderNote.classList.add("hidden");
             }
         });
 
@@ -225,8 +249,11 @@
         $('#uploadForm').submit(function(e) {
             e.preventDefault();
 
+            let selectedCategory = $('#category').val();
             let selectedFolder = $('#folder').val();
-            if (selectedFolder === "") {
+
+            // Only require folder if NOT accreditation
+            if (selectedCategory !== "accreditation" && selectedFolder === "") {
                 Swal.fire({
                     title: "Folder Required",
                     text: "Please select a specific folder (not Root).",
@@ -235,7 +262,6 @@
                 });
                 return;
             }
-
 
             let formData = new FormData(this);
             let fileInput = document.getElementById("file");
@@ -260,6 +286,11 @@
                 if (parameterSelect.value !== "") {
                     formData.append("character", characterSelect.value);
                 }
+                // Do NOT append folder for accreditation
+                formData.delete("folder");
+            } else {
+                // Append folder if not accreditation
+                formData.set("folder", folderSelect.value);
             }
 
             // Append authors if visible

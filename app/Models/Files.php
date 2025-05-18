@@ -25,6 +25,10 @@ class Files extends Model
         'published_by',
         'year_published',
         'description',
+        'level',
+        'area',
+        'parameter',
+        'character',
         'status',
     ];
 
