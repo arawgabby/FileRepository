@@ -22,18 +22,18 @@ class UserController extends Controller
         return view('admin.pages.AddUser'); // Ensure this blade file exists
     }
 
-
-
     public function store(Request $request)
     {
         // Validation
         $request->validate([
             'name' => 'required|string|max:255',
-            'email' => 'required|email|unique:users,email',
+            'email' => 'required|email|unique:users,email', // This already checks if email exists
             'password' => 'required|min:6',
             'status' => 'required|in:active,inactive,pending,deactivated',
-            'contact_number' => 'required|string|max:15', // Validate contact number
-            'role' => 'required|in:staff,faculty', // Validate role
+            'contact_number' => 'required|string|max:15',
+            'role' => 'required|in:staff,faculty',
+        ], [
+            'email.unique' => 'The email address is already registered.', // Custom error message
         ]);
 
         try {
@@ -44,17 +44,18 @@ class UserController extends Controller
             User::create([
                 'name' => $request->name,
                 'email' => $request->email,
-                'password' => Hash::make($request->password), // Encrypt password
-                'role_id' => $role->id, // Use role_id from roles table
+                'password' => Hash::make($request->password),
+                'role_id' => $role->id,
                 'status' => $request->status,
-                'contact_number' => $request->contact_number, // Store contact number
+                'contact_number' => $request->contact_number,
             ]);
 
-            // Success message
             return redirect()->route('admin.users')->with('success', 'User added successfully!');
         } catch (\Exception $e) {
-            // Error message
-            return redirect()->back()->with('error', 'Failed to add user. Please try again.');
+            \Log::error('User creation failed: ' . $e->getMessage());
+            return redirect()->back()
+                ->withInput()
+                ->withErrors(['email' => 'Failed to add user. ' . ($e->getCode() == 23000 ? 'The email address is already registered.' : 'Please try again.')]);
         }
     }
 
