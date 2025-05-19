@@ -89,7 +89,7 @@
                         @endforeach
                     </select>
 
-                    <span id="folderNote" class="text-sm text-gray-500 hidden">Folder selection is not required for Capstone, Thesis, Accreditation, Faculty Request & Admin Docs. Subfolders will be created automatically.</span>
+                    <span id="folderNote" class="text-sm text-gray-500 hidden">Folder selection is only required for Custom Location. For other categories, subfolders will be created automatically if needed.</span>
                 </div>
 
                 <div class="mb-4" id="publishedByField">
@@ -156,7 +156,6 @@
         const characterSelect = document.getElementById("character");
         const folderField = document.getElementById("folderField");
 
-
         parameterSelect.addEventListener("change", function() {
             if (this.value !== "") {
                 characterSelect.style.display = "block";
@@ -172,12 +171,8 @@
                 authorsField.style.display = "none";
                 publishedByInput.readOnly = true;
                 publishedByInput.value = "{{ auth()->user()->name }}";
-                // Hide and disable folder select for accreditation
-                // folderField.style.display = "none";
                 folderSelect.value = "";
                 folderSelect.disabled = true;
-
-                // Disable folder selection for accreditation
                 folderNote.classList.remove("hidden");
             } else if (this.value === "capstone" || this.value === "thesis") {
                 accreditationFields.style.display = "none";
@@ -187,12 +182,20 @@
                 document.getElementById("parameter").selectedIndex = 0;
                 publishedByInput.readOnly = false;
                 publishedByInput.value = "";
-                // Show and enable folder select
                 folderField.style.display = "block";
-                // folderSelect.disabled = false;
-                // Enable folder selection
                 folderSelect.value = "";
                 folderSelect.disabled = true;
+                folderNote.classList.remove("hidden");
+            } else if (this.value === "custom_location") {
+                accreditationFields.style.display = "none";
+                authorsField.style.display = "none";
+                document.getElementById("level").selectedIndex = 0;
+                document.getElementById("area").selectedIndex = 0;
+                document.getElementById("parameter").selectedIndex = 0;
+                publishedByInput.readOnly = true;
+                publishedByInput.value = "{{ auth()->user()->name }}";
+                folderField.style.display = "block";
+                folderSelect.disabled = false;
                 folderNote.classList.remove("hidden");
             } else {
                 accreditationFields.style.display = "none";
@@ -202,11 +205,8 @@
                 document.getElementById("parameter").selectedIndex = 0;
                 publishedByInput.readOnly = true;
                 publishedByInput.value = "{{ auth()->user()->name }}";
-                // Show and enable folder select
                 folderField.style.display = "block";
                 folderSelect.disabled = false;
-
-                // Enable folder selection
                 folderNote.classList.add("hidden");
             }
         });
@@ -252,11 +252,11 @@
             let selectedCategory = $('#category').val();
             let selectedFolder = $('#folder').val();
 
-            // Only require folder if NOT accreditation
-            if (selectedCategory !== "accreditation" && selectedFolder === "") {
+            // Only require folder if category is custom_location
+            if (selectedCategory === "custom_location" && selectedFolder === "") {
                 Swal.fire({
                     title: "Folder Required",
-                    text: "Please select a specific folder (not Root).",
+                    text: "Please select a specific folder (not Root) for Custom Location.",
                     icon: "warning",
                     confirmButtonText: "OK"
                 });
