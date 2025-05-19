@@ -84,6 +84,12 @@
             <thead class="bg-gray-100">
                 <tr>
                     <th class="px-4 py-2 text-left text-sm font-semibold text-gray-600">Filename</th>
+                    <th class="px-4 py-2 text-left text-sm font-semibold text-gray-600">File Category Type</th>
+                    <th class="px-4 py-2 text-left text-sm font-semibold text-gray-600">Level</th>
+                    <th class="px-4 py-2 text-left text-sm font-semibold text-gray-600">Area</th>
+                    <th class="px-4 py-2 text-left text-sm font-semibold text-gray-600">Paramameter</th>
+                    <th class="px-4 py-2 text-left text-sm font-semibold text-gray-600">Category</th>
+                    <th class="px-4 py-2 text-left text-sm font-semibold text-gray-600">Sub-Parameter</th>
                     <th class="px-4 py-2 text-left text-sm font-semibold text-gray-600">Year Published</th>
                     <th class="px-4 py-2 text-left text-sm font-semibold text-gray-600">Size</th>
                     <th class="px-4 py-2 text-left text-sm font-semibold text-gray-600">Authors</th> <!-- Add this line -->
@@ -102,14 +108,20 @@
 
                 <tr class="border-t file-row">
                     <td class="px-4 py-3 text-sm text-gray-800 filename">{{ $file->filename }}</td>
+                    <td class="px-4 py-3 text-sm text-gray-600 year">{{ $file->category }}</td>
+                    <td class="px-4 py-3 text-sm text-gray-600 year">{{ $file->level }}</td>
+                    <td class="px-4 py-3 text-sm text-gray-600 year">{{ $file->area }}</td>
+                    <td class="px-4 py-3 text-sm text-gray-600 year">{{ $file->character }}</td>
+                    <td class="px-4 py-3 text-sm text-gray-600 year">{{ $file->parameter }}</td>
+                    <td class="px-4 py-3 text-sm text-gray-600 year">{{ $file->subparam }}</td>
                     <td class="px-4 py-3 text-sm text-gray-600 year">{{ $file->year_published }}</td>
-                    <td class="px-4 py-3 text-sm text-gray-600">
-                        @if($file->file_size >= 1024 * 1024)
-                        {{ number_format($file->file_size / (1024 * 1024), 2) }} MB
-                        @else
-                        {{ number_format($file->file_size / 1024, 2) }} KB
-                        @endif
-                    </td>
+                    <td class="px-4 py-3 text-sm text-gray-600 year">@if($file->file_size >= 1024 * 1024 * 1024)
+        {{ number_format($file->file_size / (1024 * 1024 * 1024), 2) }} GB
+    @elseif($file->file_size >= 1024 * 1024)
+        {{ number_format($file->file_size / (1024 * 1024), 2) }} MB
+    @else
+        {{ number_format($file->file_size / 1024, 2) }} KB
+    @endif</td>
                     <td class="px-4 py-3 text-sm text-gray-600">{{ $file->authors }}</td> <!-- Display authors here -->
                     <td class="px-4 py-3 text-sm text-gray-600">{{ $file->published_by }}</td>
                     <td class="px-4 py-3 text-sm text-gray-600 file-type">
@@ -193,7 +205,7 @@
 
     <!-- Pagination -->
     <div class="mt-4">
-        {{ $files->links() }}
+        {{-- $files->links() --}}
     </div>
 
 </div>

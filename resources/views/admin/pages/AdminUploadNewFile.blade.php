@@ -51,19 +51,46 @@
                         <option value="9">9-LABORATORIES</option>
                         <option value="10">10-ADMINISTRATION</option>
                     </select>
-                    <select name="parameter" id="parameter" class="mt-1 p-2 border rounded w-full mb-2">
+                    <select name="character" id="character" class="mt-1 p-2 border rounded w-full" style="">
                         <option value="">Select Parameter</option>
+                        <option value="A"> A </option>
+                        <option value="B"> B</option>
+                        <option value="C"> C</option>
+                        <option value="D"> D</option>
+                        <option value="E"> E</option>
+                        <option value="F"> F</option>
+                        <option value="G"> G</option>
+                        <option value="H"> H</option>
+                        <option value="I"> I</option>
+                        <option value="J"> J</option>
+                        <option value="K"> K</option>
+                        <option value="L"> L</option>
+                        <option value="M"> M</option>
+                        <option value="N"> N</option>
+                        <option value="O"> O</option>
+                        <option value="P"> P</option>
+                        <option value="Q"> Q </option>
+                        <option value="R"> R</option>
+                        <option value="S"> S</option>
+                        <option value="T"> T</option>
+                        <option value="U"> U </option>
+                        <option value="V"> V</option>
+                        <option value="W"> W</option>
+                        <option value="X"> X</option>
+                        <option value="Y"> Y</option>
+                        <option value="Z"> Z</option>
+                    </select>
+                    <select name="parameter" id="parameter" class="mt-1 p-2 border rounded w-full mb-2">
+                        <option value="">Select Category</option>
                         <option value="System">System</option>
                         <option value="Input">Input</option>
                         <option value="Output">Output</option>
+        
                     </select>
-                    <!-- Character A-Z (hidden by default, shown when parameter is selected) -->
-                    <select name="character" id="character" class="mt-1 p-2 border rounded w-full" style="display: none;">
-                        <option value="">Select Character</option>
-                        @foreach(range('A','Z') as $char)
-                        <option value="{{ $char }}">{{ $char }}</option>
-                        @endforeach
-                    </select>
+                    <div class="mb-4" id="">
+                        <label for="subparam" class="block text-lg font-bold text-gray-700">Sub-parameter</label>
+                        <input type="text" name="subparam" id="subparam" class="p-2 border rounded w-full" placeholder="Enter Sub-Parameter">
+                    </div>
                 </div>
 
                 <!-- Authors Field (hidden by default) -->

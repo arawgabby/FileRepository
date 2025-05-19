@@ -260,6 +260,7 @@ class StaffController extends Controller
             'level' => 'required_if:category,accreditation|max:255',
             'area' => 'required_if:category,accreditation|max:255',
             'parameter' => 'required_if:category,accreditation|max:255',
+            'subparam' => 'required_if:category,accreditation|max:255',
             'character' => 'required_if:category,accreditation|max:255',
             'authors' => 'nullable|required_if:category,capstone,thesis|string|max:500',
         ]);
@@ -387,7 +388,10 @@ class StaffController extends Controller
                 $fileData['area'] = $request->input('area');
             }
             if ($request->filled('parameter')) {
-                $fileData['parameter'] = $request->input('parameter');
+                $fileData['character'] = $request->input('parameter');
+            }
+            if ($request->filled('subparam')) {
+                $fileData['subparam'] = $request->input('subparam');
             }
             if ($request->filled('character')) {
                 $fileData['character'] = $request->input('character');
@@ -477,7 +481,7 @@ class StaffController extends Controller
             $files->where('category', $request->category);
         }
 
-        $files = $files->paginate(20); // Paginate results
+        $files = $files->paginate(20)->sortByDesc('updated_at');
 
         // Fetch file versions separately and link to files
         $fileVersions = FileVersions::whereIn('file_id', $files->pluck('file_id'))->get();

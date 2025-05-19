@@ -188,6 +188,7 @@ class FileController extends Controller
             'level' => 'required_if:category,accreditation|max:255',
             'area' => 'required_if:category,accreditation|max:255',
             'parameter' => 'required_if:category,accreditation|max:255',
+            'subparam' => 'required_if:category,accreditation|max:255',
             'character' => 'required_if:category,accreditation|max:255',
             'authors' => 'nullable|required_if:category,capstone,thesis|string|max:500',
         ]);
@@ -316,6 +317,9 @@ class FileController extends Controller
             }
             if ($request->filled('parameter')) {
                 $fileData['parameter'] = $request->input('parameter');
+            }
+            if ($request->filled('subparam')) {
+                $fileData['subparam'] = $request->input('subparam');
             }
             if ($request->filled('character')) {
                 $fileData['character'] = $request->input('character');
@@ -509,7 +513,7 @@ class FileController extends Controller
             $files->where('file_path', 'LIKE', 'uploads/' . $request->subfolder . '/%');
         }
 
-        $files = $files->paginate(20)->appends(['subfolder' => $request->subfolder]);
+        $files = $files->paginate(20)->appends(['subfolder' => $request->subfolder])->sortByDesc('created_at');
 
         $fileVersions = FileVersions::whereIn('file_id', $files->pluck('file_id'))->get();
 

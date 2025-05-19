@@ -28,6 +28,7 @@ class Files extends Model
         'level',
         'area',
         'parameter',
+        'subparam',
         'character',
         'status',
     ];

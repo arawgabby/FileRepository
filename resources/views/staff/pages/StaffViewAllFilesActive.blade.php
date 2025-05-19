@@ -2,13 +2,8 @@
 @section('title', 'View All Files')
 @section('content')
 <style>
-    th,
     td {
         text-align: center;
-    }
-
-    td.filename {
-        text-align: left !important;
     }
 
     .card-view {
@@ -42,7 +37,6 @@
             <option value="pdf">Pdf</option>
             <option value="docx">Docx</option>
             <option value="pptx">Pptx</option>
-            <option value="xlsx">Xlsx</option>
         </select>
         <label for="subfolderFilter" class="block text-sm font-medium text-gray-700 mt-3">Subfolder</label>
         <form method="GET" action="{{ route('staff.active.files') }}" id="subfolderForm">
@@ -72,13 +66,19 @@
         <table class="min-w-full table-auto bg-white rounded-lg shadow-lg border">
             <thead class="bg-gray-100">
                 <tr>
-                    <th class="px-4 py-2 text-center text-sm font-semibold text-gray-600">Filename</th>
-                    <th class="px-4 py-2 text-center text-sm font-semibold text-gray-600">Year Published</th>
-                    <th class="px-4 py-2 text-center text-sm font-semibold text-gray-600">Size</th>
-                    <th class="px-4 py-2 text-center text-sm font-semibold text-gray-600">Authors</th>
-                    <th class="px-4 py-2 text-center text-sm font-semibold text-gray-600">Publisher</th>
-                    <th class="px-4 py-2 text-center text-sm font-semibold text-gray-600">File Type</th>
-                    <th class="px-4 py-2 text-center text-sm font-semibold text-gray-600">Actions</th>
+                    <th class="px-4 py-2 text-left text-sm font-semibold text-gray-600">Filename</th>
+                    <th class="px-4 py-2 text-left text-sm font-semibold text-gray-600">File Category Type</th>
+                    <th class="px-4 py-2 text-left text-sm font-semibold text-gray-600">Level</th>
+                    <th class="px-4 py-2 text-left text-sm font-semibold text-gray-600">Area</th>
+                    <th class="px-4 py-2 text-left text-sm font-semibold text-gray-600">Paramameter</th>
+                    <th class="px-4 py-2 text-left text-sm font-semibold text-gray-600">Category</th>
+                    <th class="px-4 py-2 text-left text-sm font-semibold text-gray-600">Sub-Parameter</th>
+                    <th class="px-4 py-2 text-left text-sm font-semibold text-gray-600">Year Published</th>
+                    <th class="px-4 py-2 text-left text-sm font-semibold text-gray-600">Size</th>
+                    <th class="px-4 py-2 text-left text-sm font-semibold text-gray-600">Authors</th> <!-- Add this line -->
+                    <th class="px-4 py-2 text-left text-sm font-semibold text-gray-600">Publisher</th>
+                    <th class="px-4 py-2 text-left text-sm font-semibold text-gray-600">File Type</th>
+                    <th class="px-4 py-2 text-left text-sm font-semibold text-gray-600">Actions</th>
                 </tr>
             </thead>
             <tbody>
@@ -88,17 +88,23 @@
                 $folderName = explode('/', $file->file_path)[1] ?? 'unknown';
                 $fileType = strtolower($file->file_type);
                 @endphp
-                <tr class="border-t file-row text-center">
-                    <td class="px-4 py-3 text-sm text-gray-800 filename text-left">{{ $file->filename }}</td>
+                <tr class="border-t file-row">
+                    <td class="px-4 py-3 text-sm text-gray-800 filename">{{ $file->filename }}</td>
+                    <td class="px-4 py-3 text-sm text-gray-600 year">{{ $file->category }}</td>
+                    <td class="px-4 py-3 text-sm text-gray-600 year">{{ $file->level }}</td>
+                    <td class="px-4 py-3 text-sm text-gray-600 year">{{ $file->area }}</td>
+                    <td class="px-4 py-3 text-sm text-gray-600 year">{{ $file->character }}</td>
+                    <td class="px-4 py-3 text-sm text-gray-600 year">{{ $file->parameter }}</td>
+                    <td class="px-4 py-3 text-sm text-gray-600 year">{{ $file->subparam }}</td>
                     <td class="px-4 py-3 text-sm text-gray-600 year">{{ $file->year_published }}</td>
-                    <td class="px-4 py-3 text-sm text-gray-600">
-                        @if($file->file_size >= 1024 * 1024)
-                        {{ number_format($file->file_size / (1024 * 1024), 2) }} MB
-                        @else
-                        {{ number_format($file->file_size / 1024, 2) }} KB
-                        @endif
-                    </td>
-                    <td class="px-4 py-3 text-sm text-gray-600">{{ $file->authors }}</td>
+                    <td class="px-4 py-3 text-sm text-gray-600 year">@if($file->file_size >= 1024 * 1024 * 1024)
+        {{ number_format($file->file_size / (1024 * 1024 * 1024), 2) }} GB
+    @elseif($file->file_size >= 1024 * 1024)
+        {{ number_format($file->file_size / (1024 * 1024), 2) }} MB
+    @else
+        {{ number_format($file->file_size / 1024, 2) }} KB
+    @endif</td>
+                    <td class="px-4 py-3 text-sm text-gray-600">{{ $file->authors }}</td> <!-- Display authors here -->
                     <td class="px-4 py-3 text-sm text-gray-600">{{ $file->published_by }}</td>
                     <td class="px-4 py-3 text-sm text-gray-600 file-type">
                         @if($fileType == 'pdf')
@@ -113,7 +119,7 @@
                         {{ strtoupper($fileType) }}
                     </td>
                     <td class="px-4 py-3 text-sm text-gray-600">
-                        <div class="flex space-x-4 justify-center">
+                        <div class="flex space-x-4">
                             <a href="{{ route('staff.files.download', basename($file->file_path)) }}" class="text-blue-500" title="Download">
                                 <i class="fas fa-download text-sm"></i>
                             </a>
@@ -139,8 +145,8 @@
                 @php
                 $fileType = strtolower($file->file_type);
                 @endphp
-                <tr class="border-t file-row bg-green-50 text-center">
-                    <td class="px-4 py-3 text-sm text-gray-800 filename text-left">{{ $file->filename }}</td>
+                <tr class="border-t file-row bg-green-50">
+                    <td class="px-4 py-3 text-sm text-gray-800 filename">{{ $file->filename }}</td>
                     <td class="px-4 py-3 text-sm text-gray-600 year">{{ $file->year_published }}</td>
                     <td class="px-4 py-3 text-sm text-gray-600">
                         @if($file->file_size >= 1024 * 1024)
@@ -149,7 +155,6 @@
                         {{ number_format($file->file_size / 1024, 2) }} KB
                         @endif
                     </td>
-                    <td class="px-4 py-3 text-sm text-gray-600">{{ $file->authors }}</td>
                     <td class="px-4 py-3 text-sm text-gray-600">{{ $file->published_by }}</td>
                     <td class="px-4 py-3 text-sm text-gray-600 file-type">
                         @if($fileType == 'pdf')
@@ -164,7 +169,7 @@
                         {{ strtoupper($fileType) }}
                     </td>
                     <td class="px-4 py-3 text-sm text-gray-600">
-                        <div class="flex space-x-4 justify-center">
+                        <div class="flex space-x-4">
                             <a href="{{ route('staff.files.download', basename($file->file_path)) }}" class="text-blue-500" title="Download">
                                 <i class="fas fa-download text-sm"></i>
                             </a>
