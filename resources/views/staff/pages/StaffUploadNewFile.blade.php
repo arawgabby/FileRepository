@@ -88,7 +88,7 @@
                         <option value="Output">Output</option>
                     </select>
                     <!-- Character A-Z (hidden by default, shown when parameter is selected) -->
-                    
+
                     <div class="mb-4" id="">
                         <label for="subparam" class="block text-lg font-bold text-gray-700">Sub-parameter</label>
                         <input type="text" name="subparam" id="subparam" class="p-2 border rounded w-full" placeholder="Enter Sub-">
@@ -193,7 +193,25 @@
             }
         });
 
+        folderSelect.disabled = true;
+
         categorySelect.addEventListener("change", function() {
+            if (!this.value) {
+                // If no category is selected, disable folder selection and show note
+                folderField.style.display = "block";
+                folderSelect.disabled = true;
+                folderNote.classList.remove("hidden");
+                accreditationFields.style.display = "none";
+                authorsField.style.display = "none";
+                publishedByInput.readOnly = true;
+                publishedByInput.value = "{{ auth()->user()->name }}";
+                document.getElementById("level").selectedIndex = 0;
+                document.getElementById("area").selectedIndex = 0;
+                document.getElementById("parameter").selectedIndex = 0;
+                return;
+            }
+
+
             if (this.value === "accreditation") {
                 accreditationFields.style.display = "block";
                 authorsField.style.display = "none";
@@ -202,7 +220,12 @@
                 folderSelect.value = "";
                 folderSelect.disabled = true;
                 folderNote.classList.remove("hidden");
-            } else if (this.value === "capstone" || this.value === "thesis") {
+            } else if (
+                this.value === "capstone" ||
+                this.value === "thesis" ||
+                this.value === "faculty_request" ||
+                this.value === "admin_docs"
+            ) {
                 accreditationFields.style.display = "none";
                 authorsField.style.display = "block";
                 document.getElementById("level").selectedIndex = 0;

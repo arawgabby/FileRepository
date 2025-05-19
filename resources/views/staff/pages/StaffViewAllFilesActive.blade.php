@@ -2,8 +2,22 @@
 @section('title', 'View All Files')
 @section('content')
 <style>
-    td {
+    th {
         text-align: center;
+        vertical-align: middle;
+    }
+
+    .file-row td {
+        text-align: center;
+        vertical-align: middle;
+    }
+
+    .file-row td.filename {
+        text-align: left !important;
+    }
+
+    .file-row td.actions-cell {
+        text-align: center !important;
     }
 
     .card-view {
@@ -34,9 +48,17 @@
         <label for="fileTypeFilter" class="block text-sm font-medium text-gray-700 mt-3">Type</label>
         <select id="fileTypeFilter" class="border rounded p-1 mt-2 text-sm">
             <option value="">All Types</option>
-            <option value="pdf">Pdf</option>
-            <option value="docx">Docx</option>
-            <option value="pptx">Pptx</option>
+            @php
+            $fileTypes = [];
+            foreach($files as $file) {
+            $ext = strtolower($file->file_type);
+            if ($ext && !in_array($ext, $fileTypes)) $fileTypes[] = $ext;
+            }
+            sort($fileTypes);
+            @endphp
+            @foreach($fileTypes as $type)
+            <option value="{{ $type }}">{{ strtoupper($type) }}</option>
+            @endforeach
         </select>
         <label for="subfolderFilter" class="block text-sm font-medium text-gray-700 mt-3">Subfolder</label>
         <form method="GET" action="{{ route('staff.active.files') }}" id="subfolderForm">
@@ -66,19 +88,23 @@
         <table class="min-w-full table-auto bg-white rounded-lg shadow-lg border">
             <thead class="bg-gray-100">
                 <tr>
-                    <th class="px-4 py-2 text-left text-sm font-semibold text-gray-600">Filename</th>
-                    <th class="px-4 py-2 text-left text-sm font-semibold text-gray-600">File Category Type</th>
-                    <th class="px-4 py-2 text-left text-sm font-semibold text-gray-600">Level</th>
-                    <th class="px-4 py-2 text-left text-sm font-semibold text-gray-600">Area</th>
-                    <th class="px-4 py-2 text-left text-sm font-semibold text-gray-600">Paramameter</th>
-                    <th class="px-4 py-2 text-left text-sm font-semibold text-gray-600">Category</th>
-                    <th class="px-4 py-2 text-left text-sm font-semibold text-gray-600">Sub-Parameter</th>
-                    <th class="px-4 py-2 text-left text-sm font-semibold text-gray-600">Year Published</th>
-                    <th class="px-4 py-2 text-left text-sm font-semibold text-gray-600">Size</th>
-                    <th class="px-4 py-2 text-left text-sm font-semibold text-gray-600">Authors</th> <!-- Add this line -->
-                    <th class="px-4 py-2 text-left text-sm font-semibold text-gray-600">Publisher</th>
-                    <th class="px-4 py-2 text-left text-sm font-semibold text-gray-600">File Type</th>
-                    <th class="px-4 py-2 text-left text-sm font-semibold text-gray-600">Actions</th>
+                    <th class="px-4 py-2 text-sm font-semibold text-gray-600">Filename</th>
+                    <th class="px-4 py-2 text-sm font-semibold text-gray-600">File Category Type</th>
+                    @if(request('subfolder') === 'accreditation')
+                    <th class="px-4 py-2 text-sm font-semibold text-gray-600">Level</th>
+                    <th class="px-4 py-2 text-sm font-semibold text-gray-600">Area</th>
+                    <th class="px-4 py-2 text-sm font-semibold text-gray-600">Parameter</th>
+                    <th class="px-4 py-2 text-sm font-semibold text-gray-600">Category</th>
+                    <th class="px-4 py-2 text-sm font-semibold text-gray-600">Sub-Parameter</th>
+                    @endif
+                    <th class="px-4 py-2 text-sm font-semibold text-gray-600">Year Published</th>
+                    <th class="px-4 py-2 text-sm font-semibold text-gray-600">Size</th>
+                    @if(request('subfolder') !== 'accreditation')
+                    <th class="px-4 py-2 text-sm font-semibold text-gray-600">Authors</th>
+                    @endif
+                    <th class="px-4 py-2 text-sm font-semibold text-gray-600">Publisher</th>
+                    <th class="px-4 py-2 text-sm font-semibold text-gray-600">File Type</th>
+                    <th class="px-4 py-2 text-sm font-semibold text-gray-600">Actions</th>
                 </tr>
             </thead>
             <tbody>
@@ -90,21 +116,27 @@
                 @endphp
                 <tr class="border-t file-row">
                     <td class="px-4 py-3 text-sm text-gray-800 filename">{{ $file->filename }}</td>
-                    <td class="px-4 py-3 text-sm text-gray-600 year">{{ $file->category }}</td>
+                    <td class="px-4 py-3 text-sm text-gray-600 year">{{ ucfirst($file->category) }}</td>
+                    @if(request('subfolder') === 'accreditation')
                     <td class="px-4 py-3 text-sm text-gray-600 year">{{ $file->level }}</td>
                     <td class="px-4 py-3 text-sm text-gray-600 year">{{ $file->area }}</td>
                     <td class="px-4 py-3 text-sm text-gray-600 year">{{ $file->character }}</td>
                     <td class="px-4 py-3 text-sm text-gray-600 year">{{ $file->parameter }}</td>
                     <td class="px-4 py-3 text-sm text-gray-600 year">{{ $file->subparam }}</td>
+                    @endif
                     <td class="px-4 py-3 text-sm text-gray-600 year">{{ $file->year_published }}</td>
-                    <td class="px-4 py-3 text-sm text-gray-600 year">@if($file->file_size >= 1024 * 1024 * 1024)
-        {{ number_format($file->file_size / (1024 * 1024 * 1024), 2) }} GB
-    @elseif($file->file_size >= 1024 * 1024)
-        {{ number_format($file->file_size / (1024 * 1024), 2) }} MB
-    @else
-        {{ number_format($file->file_size / 1024, 2) }} KB
-    @endif</td>
-                    <td class="px-4 py-3 text-sm text-gray-600">{{ $file->authors }}</td> <!-- Display authors here -->
+                    <td class="px-4 py-3 text-sm text-gray-600 year">
+                        @if($file->file_size >= 1024 * 1024 * 1024)
+                        {{ number_format($file->file_size / (1024 * 1024 * 1024), 2) }} GB
+                        @elseif($file->file_size >= 1024 * 1024)
+                        {{ number_format($file->file_size / (1024 * 1024), 2) }} MB
+                        @else
+                        {{ number_format($file->file_size / 1024, 2) }} KB
+                        @endif
+                    </td>
+                    @if(request('subfolder') !== 'accreditation')
+                    <td class="px-4 py-3 text-sm text-gray-600">{{ $file->authors }}</td>
+                    @endif
                     <td class="px-4 py-3 text-sm text-gray-600">{{ $file->published_by }}</td>
                     <td class="px-4 py-3 text-sm text-gray-600 file-type">
                         @if($fileType == 'pdf')
@@ -118,8 +150,8 @@
                         @endif
                         {{ strtoupper($fileType) }}
                     </td>
-                    <td class="px-4 py-3 text-sm text-gray-600">
-                        <div class="flex space-x-4">
+                    <td class="px-4 py-3 text-sm text-gray-600 actions-cell">
+                        <div class="flex space-x-4 justify-center">
                             <a href="{{ route('staff.files.download', basename($file->file_path)) }}" class="text-blue-500" title="Download">
                                 <i class="fas fa-download text-sm"></i>
                             </a>
@@ -168,8 +200,8 @@
                         @endif
                         {{ strtoupper($fileType) }}
                     </td>
-                    <td class="px-4 py-3 text-sm text-gray-600">
-                        <div class="flex space-x-4">
+                    <td class="px-4 py-3 text-sm text-gray-600 actions-cell">
+                        <div class="flex space-x-4 justify-center">
                             <a href="{{ route('staff.files.download', basename($file->file_path)) }}" class="text-blue-500" title="Download">
                                 <i class="fas fa-download text-sm"></i>
                             </a>

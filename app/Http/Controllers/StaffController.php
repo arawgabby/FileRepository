@@ -361,6 +361,14 @@ class StaffController extends Controller
                 Storage::disk('public')->makeDirectory($uploadPath, 0775, true);
             }
 
+            // === FILE EXISTENCE VALIDATION ===
+            if (Storage::disk('public')->exists($uploadPath . '/' . $filename)) {
+                return response()->json([
+                    'message' => 'A file with the same name already exists in this folder. Please rename your file or choose a different folder.'
+                ], 409);
+            }
+            // === END FILE EXISTENCE VALIDATION ===
+
             $filePath = $file->storeAs($uploadPath, $filename, 'public');
 
             // Prepare data for file entry
@@ -377,7 +385,7 @@ class StaffController extends Controller
                 'status' => 'active',
             ];
 
-            if (in_array($category, ['capstone', 'thesis'])) {
+            if (in_array($request->input('category'), ['capstone', 'thesis'])) {
                 $fileData['authors'] = $request->input('authors');
             }
 
@@ -388,7 +396,7 @@ class StaffController extends Controller
                 $fileData['area'] = $request->input('area');
             }
             if ($request->filled('parameter')) {
-                $fileData['character'] = $request->input('parameter');
+                $fileData['parameter'] = $request->input('parameter');
             }
             if ($request->filled('subparam')) {
                 $fileData['subparam'] = $request->input('subparam');
