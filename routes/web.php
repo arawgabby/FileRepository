@@ -128,8 +128,10 @@ Route::middleware(['staff.auth'])->group(function () {
 
     Route::post('/staff/request-file/{file_id}', [StaffController::class, 'requestFile'])->name('staff.requestFile');
 
-    Route::get('/staff/files/{file_id}/edit-primary', [StaffController::class, 'StaffeditPrimaryFile'])
-        ->name('staff.files.editPrimary');
+    // Route::get('/staff/files/{file_id}/edit-primary', [StaffController::class, 'StaffeditPrimaryFile'])
+    //     ->name('staff.files.editPrimary');
+
+    Route::get('/staff/files/edit-primary/{file_id}', [StaffController::class, 'editPrimaryFile'])->name('staff.files.editPrimary');
 
     Route::post('/staff/files/{file_id}/update-primary', [StaffController::class, 'StaffupdatePrimaryFile'])
         ->name('staff.files.updatePrimary');

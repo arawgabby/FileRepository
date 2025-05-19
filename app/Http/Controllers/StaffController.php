@@ -806,7 +806,7 @@ class StaffController extends Controller
         ));
     }
 
-    public function StaffeditPrimaryFile(Request $request, $file_id)
+    public function editPrimaryFile(Request $request, $file_id)
     {
         // Fetch the file
         $file = Files::findOrFail($file_id);
@@ -823,6 +823,7 @@ class StaffController extends Controller
 
         return view('staff.pages.StaffEditPrimaryFile', compact('file', 'folder'));
     }
+
 
     public function StaffupdatePrimaryFile(Request $request, $file_id)
     {

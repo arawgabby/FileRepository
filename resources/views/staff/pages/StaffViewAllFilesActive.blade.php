@@ -152,10 +152,11 @@
                     </td>
                     <td class="px-4 py-3 text-sm text-gray-600 actions-cell">
                         <div class="flex space-x-4 justify-center">
-                            <a href="{{ route('staff.files.download', basename($file->file_path)) }}" class="text-blue-500" title="Download">
+                            <a href="{{ asset('storage/' . $file->file_path) }}" class="text-blue-500" title="Download" target="_blank" rel="noopener">
                                 <i class="fas fa-download text-sm"></i>
                             </a>
-                            <a href="{{ route('staff.files.editPrimary', ['file_id' => $file->file_id]) }}" class="text-blue-500" title="Edit Primary File">
+                            <a href="{{ route('staff.files.editPrimary', ['file_id' => $file->file_id, 'subfolder' => explode('/', $file->file_path)[1] ?? '' ]) }}"
+                                class="text-blue-500" title="Edit Primary File">
                                 <i class="fas fa-edit"></i>
                             </a>
                             <form action="{{ route('files.archive.active', ['file_id' => $file->file_id]) }}" method="POST" onsubmit="return confirm('Are you sure you want to archive this file?')">
