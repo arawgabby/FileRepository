@@ -47,12 +47,25 @@
                         <form action="{{ route('file-request.assign-file') }}" method="POST">
                             @csrf
                             <input type="hidden" name="request_id" value="{{ $request->request_id }}">
+                            @php
+                            // Collect all assigned file_ids except the current request's file_id
+                            $assignedFileIds = $incomingRequests->filter(function($r) use ($request) {
+                            return $r->file_id && $r->request_id !== $request->request_id;
+                            })->pluck('file_id')->toArray();
+                            @endphp
+
                             <select name="file_id" class="border border-gray-300 rounded p-1" required>
                                 <option value="">-- Select File --</option>
                                 @foreach ($files as $file)
-                                <option value="{{ $file->file_id }}">{{ $file->filename }}</option>
+                                @if (!in_array($file->file_id, $assignedFileIds) || $file->file_id == $request->file_id)
+                                <option value="{{ $file->file_id }}"
+                                    {{ $request->file_id == $file->file_id ? 'selected' : '' }}>
+                                    {{ $file->filename }}
+                                </option>
+                                @endif
                                 @endforeach
                             </select>
+
                             <button type="submit"
                                 class="ml-2 bg-blue-500 text-white px-2 py-1 rounded hover:bg-blue-600 text-xs">
                                 Assign
@@ -61,7 +74,13 @@
                         @endif
                     </div>
 
-                    {{-- Update form - hidden by default --}}
+                    @php
+                    // Collect all assigned file_ids except the current request's file_id
+                    $assignedFileIds = $incomingRequests->filter(function($r) use ($request) {
+                    return $r->file_id && $r->request_id !== $request->request_id;
+                    })->pluck('file_id')->toArray();
+                    @endphp
+
                     <div id="update-form-{{ $request->request_id }}" class="hidden mt-2">
                         <form action="{{ route('file-request.assign-file') }}" method="POST">
                             @csrf
@@ -69,10 +88,12 @@
                             <select name="file_id" class="border border-gray-300 rounded p-1" required>
                                 <option value="">-- Select File --</option>
                                 @foreach ($files as $file)
+                                @if (!in_array($file->file_id, $assignedFileIds) || $file->file_id == $request->file_id)
                                 <option value="{{ $file->file_id }}"
                                     {{ $request->file_id == $file->file_id ? 'selected' : '' }}>
                                     {{ $file->filename }}
                                 </option>
+                                @endif
                                 @endforeach
                             </select>
                             <button type="submit"
@@ -83,6 +104,7 @@
                                 class="ml-1 text-xs text-red-500">Cancel</button>
                         </form>
                     </div>
+
                 </td>
                 <td class="px-4 py-2">
                     @if ($request->file_id)

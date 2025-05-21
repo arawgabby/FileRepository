@@ -61,6 +61,8 @@ Route::middleware(['staff.auth'])->group(function () {
 
     Route::get('/staff-incoming-request-view', [StaffController::class, 'showIncomingRequests'])->name('show.incoming.requests');
 
+    Route::get('/outgoing-requests', [StaffController::class, 'showOutgoingRequests'])->name('file-request.outgoing');
+
     Route::post('/file-request/assign', [FileRequestController::class, 'assignFile'])->name('file-request.assign-file');
 
 

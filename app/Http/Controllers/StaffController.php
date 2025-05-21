@@ -119,7 +119,7 @@ class StaffController extends Controller
     public function updateFileRequestStatus(Request $request, $id)
     {
         $request->validate([
-            'action' => 'required|in:approved,rejected',
+            'action' => 'required|in:approved',
         ]);
 
         $fileRequest = FileRequest::findOrFail($id);
@@ -146,7 +146,6 @@ class StaffController extends Controller
 
         if ($exists) {
             return redirect()->back()->with('duplicate', 'You have already submitted a request to this user and it has not yet been assigned a file.');
-
         }
 
 
@@ -179,6 +178,24 @@ class StaffController extends Controller
         $users = \App\Models\User::whereIn('id', $userIds)->get()->keyBy('id');
         $files = \App\Models\Files::all();
         return view('staff.pages.IncomingRequests', compact('incomingRequests', 'users', 'files'));
+    }
+    public function showOutgoingRequests()
+    {
+        $userId = auth()->id();
+
+        // Get requests made BY the logged-in user
+        $outgoingRequests = \App\Models\FileRequest::where('requested_by', $userId)
+            ->orderBy('created_at', 'desc')
+            ->get();
+
+        // Get all users (for displaying the "requested_to" user name)
+        $userIds = $outgoingRequests->pluck('requested_to')->unique()->toArray();
+        $users = \App\Models\User::whereIn('id', $userIds)->get()->keyBy('id');
+
+        // Get all files for displaying assigned file info
+        $files = \App\Models\Files::all();
+
+        return view('staff.pages.OutgoingRequests', compact('outgoingRequests', 'users', 'files'));
     }
 
 
