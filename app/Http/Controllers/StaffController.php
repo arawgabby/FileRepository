@@ -121,8 +121,10 @@ class StaffController extends Controller
         $request->validate([
             'action' => 'required|in:approved',
         ]);
-
         $fileRequest = FileRequest::findOrFail($id);
+        if ($fileRequest->file_id === null) {
+            return redirect()->back()->with('error', 'Cannot approve request. No file assigned.');
+        }
         $fileRequest->request_status = $request->action;
         $fileRequest->save();
 
