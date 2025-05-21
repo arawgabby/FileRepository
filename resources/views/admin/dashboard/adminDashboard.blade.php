@@ -67,19 +67,21 @@
                 <a href="{{ route('admin.uploadFiles') }}" class="flex items-center text-white hover:text-white text-sm">
                     <i class="fas fa-upload mr-4"></i> Upload
                 </a>
+                <a href="{{ route('admin.active.files') }}" class="flex items-center text-white hover:text-white mr-2 text-sm">
+                    <i class="fas fa-file-alt mr-5"></i> All Files
+                </a>
+
 
                 <a href="{{ route('admin.view.requests.file') }}" class="flex items-center text-white hover:text-white text-sm">
-                    <i class="fas fa-share-from-square mr-4"></i> File Requests
+                    <i class="fas fa-share-from-square mr-4"></i> Request File Upload
                 </a>
 
                 <a href="{{ route('admin.view.requests') }}" class="flex items-center text-white hover:text-white text-sm">
-                    <i class="fas fa-share-from-square mr-4"></i> Folder Requests
+                    <i class="fas fa-share-from-square mr-4"></i> My Request Uploads
                 </a>
-
-                <a href="{{ route('admin.active.files') }}" class="flex items-center text-white hover:text-white mr-2 text-sm">
-                    <i class="fas fa-file-alt mr-5"></i> Files
+                <a href="{{ route('admin.view.requests') }}" class="flex items-center text-white hover:text-white text-sm">
+                    <i class="fas fa-share-from-square mr-4"></i> Uploads Requests
                 </a>
-
                 <!-- <a href="#" class="flex items-center text-white hover:text-white ">
                 <i class="fas fa-info mr-4"></i> View File Request
             </a> -->

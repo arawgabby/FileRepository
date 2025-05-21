@@ -172,6 +172,11 @@ class FileController extends Controller
 
     public function AdminuploadFile(Request $request)
     {
+        Log::info('Admin upload file request', [
+            'user_id' => auth()->id(),
+            'selected_folder' => $request->input('folder'),
+            'request_data' => $request->all()
+        ]);
         $request->validate([
             'file' => 'required|file|max:502400',
             'category' => 'required|in:capstone,thesis,faculty_request,accreditation,admin_docs,custom_location',
@@ -283,14 +288,6 @@ class FileController extends Controller
             if (!Storage::disk('public')->exists($uploadPath)) {
                 Storage::disk('public')->makeDirectory($uploadPath, 0775, true);
             }
-
-            // === FILE EXISTENCE VALIDATION ===
-            if (Storage::disk('public')->exists($uploadPath . '/' . $filename)) {
-                return response()->json([
-                    'message' => 'A file with the same name already exists in this folder. Please rename your file or choose a different folder.'
-                ], 409);
-            }
-            // === END FILE EXISTENCE VALIDATION ===
 
             $filePath = $file->storeAs($uploadPath, $filename, 'public');
 

@@ -89,6 +89,8 @@ class StaffController extends Controller
     {
         $userId = auth()->id();
 
+        $users = \App\Models\User::all();
+
         // Get all private folder paths
         $privateFolderPaths = \App\Models\Folder::where('status', 'private')->pluck('path')->toArray();
 
@@ -111,7 +113,7 @@ class StaffController extends Controller
             ->latest()
             ->get();
 
-        return view('staff.pages.RequestFile', compact('files', 'requests', 'myFileRequests'));
+        return view('staff.pages.RequestFile', compact('users', 'files', 'requests', 'myFileRequests'));
     }
 
     public function updateFileRequestStatus(Request $request, $id)
@@ -250,6 +252,7 @@ class StaffController extends Controller
 
     public function StaffuploadFile(Request $request)
     {
+        
         $request->validate([
             'file' => 'required|file|max:502400',
             'category' => 'required|in:capstone,thesis,faculty_request,accreditation,admin_docs,custom_location',
@@ -361,14 +364,6 @@ class StaffController extends Controller
                 Storage::disk('public')->makeDirectory($uploadPath, 0775, true);
             }
 
-            // === FILE EXISTENCE VALIDATION ===
-            if (Storage::disk('public')->exists($uploadPath . '/' . $filename)) {
-                return response()->json([
-                    'message' => 'A file with the same name already exists in this folder. Please rename your file or choose a different folder.'
-                ], 409);
-            }
-            // === END FILE EXISTENCE VALIDATION ===
-
             $filePath = $file->storeAs($uploadPath, $filename, 'public');
 
             // Prepare data for file entry
@@ -385,7 +380,7 @@ class StaffController extends Controller
                 'status' => 'active',
             ];
 
-            if (in_array($request->input('category'), ['capstone', 'thesis'])) {
+            if (in_array($category, ['capstone', 'thesis'])) {
                 $fileData['authors'] = $request->input('authors');
             }
 
@@ -806,7 +801,7 @@ class StaffController extends Controller
         ));
     }
 
-    public function editPrimaryFile(Request $request, $file_id)
+    public function StaffeditPrimaryFile(Request $request, $file_id)
     {
         // Fetch the file
         $file = Files::findOrFail($file_id);
@@ -823,7 +818,6 @@ class StaffController extends Controller
 
         return view('staff.pages.StaffEditPrimaryFile', compact('file', 'folder'));
     }
-
 
     public function StaffupdatePrimaryFile(Request $request, $file_id)
     {
@@ -1427,5 +1421,9 @@ class StaffController extends Controller
             'status' => 'approved',
             'message' => "File ID {$approvedRequest->file_id} successfully accepted to storage. Please check your Active Files Section.",
         ]);
+    }
+
+    public function uploadRequest(){
+        return view('staff.pages.StaffUploadRequest');
     }
 }

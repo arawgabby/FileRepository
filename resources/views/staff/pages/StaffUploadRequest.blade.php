@@ -1,3 +1,4 @@
+Hello World
 @extends('staff.dashboard.staffDashboard')
 @section('title', 'Request File')
 @section('content')
@@ -5,7 +6,7 @@
 
     <div class="grid grid-cols-1 md:grid-cols-1 gap-6 p-6">
 
-        {{-- <div class="bg-white p-6 shadow-md mt-6">
+        <div class="bg-white p-6 shadow-md mt-6">
             <h2 class="text-xl font-semibold mb-4 border-b pb-2">Requests for My Files</h2>
             <div class="overflow-x-auto">
                 <table class="min-w-full divide-y divide-gray-200">
@@ -139,42 +140,7 @@
 
         </div> --}}
 
-        <div class="bg-white p-12 shadow-md">
-            <h1 class="text-xl font-bold mb-4 border-b border-gray pb-2">Submit a File Access Request</h1>
-
-            <form id="fileRequestForm" action="{{ route('file-request.submit') }}" method="POST"
-                onsubmit="return confirmRequest()">
-                @csrf
-
-                <!-- Hidden Input for requested_by -->
-                <input type="hidden" name="requested_by" value="{{ auth()->user()->name }}">
-
-                <!-- File Dropdown -->
-                <div class="mb-4">
-                    <label for="file_id" class="block text-sm font-medium text-gray-700">Select User</label>
-                    <select name="file_id" id="file_id"
-                        class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2" required>
-                        <option value="">-- Choose User --</option>
-                        @foreach ($users as $user)
-                            @continue($user->id == auth()->user()->id)
-                            <option value="{{ $user->id }}">{{ $user->name }}</option>
-                        @endforeach
-                    </select>
-                </div>
-
-                <!-- Note Field -->
-                <div class="mb-4">
-                    <label for="note" class="block text-sm font-medium text-gray-700">Note (Optional)</label>
-                    <textarea name="note" id="note" rows="3"
-                        class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2"></textarea>
-                </div>
-
-                <!-- Submit Button -->
-                <button type="submit" class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600">
-                    Submit Request
-                </button>
-            </form>
-        </div>
+        
 
         <script>
             function confirmRequest() {

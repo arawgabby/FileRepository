@@ -46,19 +46,22 @@
                 <a href="{{ route('staff.upload') }}" class="flex items-center text-white hover:text-white ">
                     <i class="fas fa-upload mr-5"></i> <span class='text-sm'> Upload </span>
                 </a>
+                <a href="{{ route('staff.active.files') }}" class="flex items-center text-white hover:text-white ">
+                    <i class="fas fa-folder-open mr-4"></i> <span class='text-sm'>All Files </span>
+                
 
                 <a href="{{ route('request.file.access') }}" class="flex items-center text-white hover:text-white ">
                     <i class="fas fa-share-from-square mr-2"></i>
-                    <span class='text-sm ml-2'> Request File Access </span>
+                    <span class='text-sm ml-2'> Request Upload File  </span>
                 </a>
 
                 <a href="{{ route('request.folder.access') }}" class="flex items-center text-white hover:text-white ">
                     <i class="fas fa-share-from-square mr-2"></i>
-                    <span class='text-sm ml-2'> Request Folder Access </span>
+                    <span class='text-sm ml-2'> My Request Uploads </span>
                 </a>
-
-                <a href="{{ route('staff.active.files') }}" class="flex items-center text-white hover:text-white ">
-                    <i class="fas fa-folder-open mr-4"></i> <span class='text-sm'> Files </span>
+                <a href="{{ route('staff-upload.request') }}" class="flex items-center text-white hover:text-white ">
+                    <i class="fas fa-share-from-square mr-2"></i>
+                    <span class='text-sm ml-2'> Upload Requests </span>
                 </a>
 
                 <a href="{{ route('staff.archived.files') }}" class="flex items-center text-white hover:text-white ">

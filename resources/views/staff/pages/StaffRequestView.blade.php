@@ -14,10 +14,10 @@
 </div>
 @endif
 
-<div class="grid grid-cols-1 md:grid-cols-2 gap-6 p-6">
+<div class="grid grid-cols-1 grid-cols-1 gap-8 p-6">
     <!-- Left: Display Folder Access Table -->
     <div class="bg-white p-6  shadow-md">
-        <h2 class="text-xl font-semibold mb-4 border-b pb-2">My Folder Access Requests</h2>
+        <h2 class="text-xl font-semibold mb-4 border-b pb-2">My File Upload Requests</h2>
 
         @if($folderAccesses->isEmpty())
         <p class="text-gray-600">No requests submitted yet.</p>
@@ -52,41 +52,6 @@
     </div>
 
     <!-- Right: Submit Form -->
-    <div class="bg-white p-6  shadow-md">
-        <h1 class="text-xl font-bold mb-4 border-b border-gray pb-2">Submit a Folder Access Request</h1>
-
-        <form action="{{ route('folder.access.submit') }}" method="POST" id="folderAccessForm">
-            @csrf
-            <div class="mb-4">
-                <label for="folder_id" class="block text-sm font-medium text-gray-700">Select a subFolder</label>
-                <select name="folder_id" id="folder_id" class="mt-1 block w-full border border-gray-300 rounded-lg p-2" required>
-                    <option value="">Select a Folder</option>
-                    @foreach($folders as $folder)
-                    <option value="{{ $folder->id }}">{{ $folder->name }}</option>
-                    @endforeach
-                </select>
-            </div>
-
-            <div class="mb-4">
-                <label for="status" class="block text-sm font-medium text-gray-700">Status</label>
-                <input type="text" name="status" id="status" value="Waiting Approval" class="mt-1 block w-full border border-gray-300 rounded-lg p-2" readonly>
-            </div>
-
-            <div class="mb-4">
-                <label for="note" class="block text-sm font-medium text-gray-700">Note (optional)</label>
-                <textarea name="note" id="note" rows="3" placeholder="Add a note for the approver..." class="mt-1 block w-full border border-gray-300 rounded-lg p-2"></textarea>
-            </div>
-
-
-            <div class="flex justify-end">
-                <button type="submit" class="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-700" id="submitBtn">
-                    Save
-                </button>
-            </div>
-        </form>
-    </div>
-
-
 </div>
 
 <script>
