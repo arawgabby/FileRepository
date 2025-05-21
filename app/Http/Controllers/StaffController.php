@@ -137,13 +137,18 @@ class StaffController extends Controller
         ]);
 
         // Check if a request already exists for the same user pair
+
+        // Prevent duplicate requests to the same user if no file has been assigned yet
         $exists = FileRequest::where('requested_by', auth()->id())
             ->where('requested_to', $request->requested_to)
-            ->first();
+            ->whereNull('file_id')
+            ->exists();
 
         if ($exists) {
-            return redirect()->back()->with('duplicate', 'You have already submitted a request to this user.');
+            return redirect()->back()->with('duplicate', 'You have already submitted a request to this user and it has not yet been assigned a file.');
+
         }
+
 
         try {
             FileRequest::create([
@@ -172,8 +177,8 @@ class StaffController extends Controller
         // Get requester names (no Eloquent relationship used)
         $userIds = $incomingRequests->pluck('requested_by')->unique()->toArray();
         $users = \App\Models\User::whereIn('id', $userIds)->get()->keyBy('id');
-
-        return view('staff.pages.IncomingRequests', compact('incomingRequests', 'users'));
+        $files = \App\Models\Files::all();
+        return view('staff.pages.IncomingRequests', compact('incomingRequests', 'users', 'files'));
     }
 
 

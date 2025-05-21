@@ -159,10 +159,11 @@
                 class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2" required>
                 <option value="">-- Choose User --</option>
                 @foreach ($users as $user)
-                @continue($user->id == auth()->user()->id)
+                @continue($user->id == auth()->user()->id || $user->role_id == 1)
                 <option value="{{ $user->id }}">{{ $user->name }}</option>
                 @endforeach
             </select>
+
         </div>
 
         <!-- Note Field -->

@@ -15,6 +15,8 @@
                 <th class="px-4 py-2 text-left">Note</th>
                 <th class="px-4 py-2 text-left">Status</th>
                 <th class="px-4 py-2 text-left">Requested At</th>
+                <th class="px-4 py-2 text-left">Assigned File</th>
+                <th class="px-4 py-2 text-left">Action</th>
             </tr>
         </thead>
         <tbody class="divide-y divide-gray-100">
@@ -35,9 +37,65 @@
                 <td class="px-4 py-2">
                     {{ \Carbon\Carbon::parse($request->created_at)->format('M d, Y H:i') }}
                 </td>
+                <td class="px-4 py-2">
+                    <div id="assigned-file-{{ $request->request_id }}">
+                        @if ($request->file_id)
+                        <span class="text-gray-800 font-medium">
+                            {{ $files->firstWhere('file_id', $request->file_id)->filename ?? 'File Not Found' }}
+                        </span>
+                        @else
+                        <form action="{{ route('file-request.assign-file') }}" method="POST">
+                            @csrf
+                            <input type="hidden" name="request_id" value="{{ $request->request_id }}">
+                            <select name="file_id" class="border border-gray-300 rounded p-1" required>
+                                <option value="">-- Select File --</option>
+                                @foreach ($files as $file)
+                                <option value="{{ $file->file_id }}">{{ $file->filename }}</option>
+                                @endforeach
+                            </select>
+                            <button type="submit"
+                                class="ml-2 bg-blue-500 text-white px-2 py-1 rounded hover:bg-blue-600 text-xs">
+                                Assign
+                            </button>
+                        </form>
+                        @endif
+                    </div>
+
+                    {{-- Update form - hidden by default --}}
+                    <div id="update-form-{{ $request->request_id }}" class="hidden mt-2">
+                        <form action="{{ route('file-request.assign-file') }}" method="POST">
+                            @csrf
+                            <input type="hidden" name="request_id" value="{{ $request->request_id }}">
+                            <select name="file_id" class="border border-gray-300 rounded p-1" required>
+                                <option value="">-- Select File --</option>
+                                @foreach ($files as $file)
+                                <option value="{{ $file->file_id }}"
+                                    {{ $request->file_id == $file->file_id ? 'selected' : '' }}>
+                                    {{ $file->filename }}
+                                </option>
+                                @endforeach
+                            </select>
+                            <button type="submit"
+                                class="ml-2 bg-yellow-500 text-white px-2 py-1 rounded hover:bg-yellow-600 text-xs">
+                                Update
+                            </button>
+                            <button type="button" onclick="cancelUpdate('{{ $request->request_id }}')"
+                                class="ml-1 text-xs text-red-500">Cancel</button>
+                        </form>
+                    </div>
+                </td>
+                <td class="px-4 py-2">
+                    @if ($request->file_id)
+                    <button onclick="enableUpdate('{{ $request->request_id }}')"
+                        class="bg-indigo-500 text-white px-2 py-1 rounded hover:bg-indigo-600 text-xs">
+                        Edit
+                    </button>
+                    @endif
+                </td>
             </tr>
             @endforeach
         </tbody>
+
     </table>
     @endif
     <!-- Note Modal -->
@@ -63,5 +121,16 @@
 
     function closeNoteModal() {
         document.getElementById('noteModal').classList.add('hidden');
+        document.getElementById('noteModal').classList.remove('flex');
+    }
+
+    function enableUpdate(id) {
+        document.getElementById('assigned-file-' + id).style.display = 'none';
+        document.getElementById('update-form-' + id).classList.remove('hidden');
+    }
+
+    function cancelUpdate(id) {
+        document.getElementById('assigned-file-' + id).style.display = '';
+        document.getElementById('update-form-' + id).classList.add('hidden');
     }
 </script>

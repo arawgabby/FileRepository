@@ -4,6 +4,7 @@ use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Auth;
 use App\Http\Controllers\Auth\AdminAuthController;
 use App\Http\Controllers\FileController;
+use App\Http\Controllers\FileRequestController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\StaffController;
 use App\Http\Controllers\FileTimeStampController;
@@ -59,6 +60,9 @@ Route::middleware(['staff.auth'])->group(function () {
     Route::get('/staff-folder-request-view', [StaffController::class, 'showRequestFolder'])->name('request.folder.access');
 
     Route::get('/staff-incoming-request-view', [StaffController::class, 'showIncomingRequests'])->name('show.incoming.requests');
+
+    Route::post('/file-request/assign', [FileRequestController::class, 'assignFile'])->name('file-request.assign-file');
+
 
     Route::get('/staff-file-request-view', [StaffController::class, 'showRequestFile'])->name('request.file.access');
 
