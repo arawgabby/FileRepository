@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\AdminController;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Auth;
 use App\Http\Controllers\Auth\AdminAuthController;
@@ -185,6 +186,18 @@ Route::middleware(['staff.auth'])->group(function () {
 //For Admin Middleware
 Route::middleware(['admin.auth'])->group(function () {
 
+    //newly added
+    Route::get('/admin/view-outgoing-requests', [AdminController::class, 'viewAllOutgoingRequests'])->name('admin.outgoing-requests');
+
+    Route::post('/admin/file-request/{id}/update-status', [AdminController::class, 'updateFileRequestStatusAdmin'])->name('admin.file-request.update-status');
+
+    Route::get('/admin/assign-file', [FileRequestController::class, 'showAssignFileForm'])->name('admin.assign-file.form');
+
+    Route::post('/admin/file-request/submit', [AdminController::class, 'submitFileRequests'])->name('admin.file-request.submit');
+
+    Route::get('/admin/outgoing-requests', [AdminController::class, 'viewMyOutgoingRequests'])->name('admin.outgoing.requests');
+
+    //until here
     Route::get('/admin-dashboard-view', function () {
         return view('admin.dashboard.adminDashboard');
     })->name('admin.dashboard');

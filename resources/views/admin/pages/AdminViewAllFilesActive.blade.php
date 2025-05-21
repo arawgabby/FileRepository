@@ -1,4 +1,4 @@
-@extends('admin.dashboard.admindashboard')
+@extends('admin.dashboard.adminDashboard')
 @section('title', 'View All Files')
 @section('content')
 

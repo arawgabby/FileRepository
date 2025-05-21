@@ -20,7 +20,7 @@
 </head>
 
 <body class="bg-gray-50 bg-cover bg-center"
-    style="background: url('{{ asset('storage/uploads/bodybackground.png') }}') no-repeat center center fixed; 
+    style="background: url('{{ asset('storage/uploads/bodybackground.png') }}') no-repeat center center fixed;
              background-size: contain;">
 
     <div class="flex h-screen">
@@ -72,15 +72,15 @@
                 </a>
 
 
-                <a href="{{ route('admin.view.requests.file') }}" class="flex items-center text-white hover:text-white text-sm">
-                    <i class="fas fa-share-from-square mr-4"></i> Request File Upload
+                <a href="{{ route('admin.assign-file.form') }}" class="flex items-center text-white hover:text-white text-sm">
+                    <i class="fas fa-share-from-square mr-4"></i> Assign User
                 </a>
 
-                <a href="{{ route('admin.view.requests') }}" class="flex items-center text-white hover:text-white text-sm">
+                <a href="{{ route('admin.outgoing.requests') }}" class="flex items-center text-white hover:text-white text-sm">
                     <i class="fas fa-share-from-square mr-4"></i> My Request Uploads
                 </a>
-                <a href="{{ route('admin.view.requests') }}" class="flex items-center text-white hover:text-white text-sm">
-                    <i class="fas fa-share-from-square mr-4"></i> Uploads Requests
+                <a href="{{ route('admin.outgoing-requests') }}" class="flex items-center text-white hover:text-white text-sm">
+                    <i class="fas fa-share-from-square mr-4"></i> View All Requests
                 </a>
                 <!-- <a href="#" class="flex items-center text-white hover:text-white ">
                 <i class="fas fa-info mr-4"></i> View File Request
@@ -182,9 +182,9 @@
                         </button> -->
 
                         <!-- Notification Modal (Hidden Initially) -->
-                        <!-- <div id="notificationModal" 
+                        <!-- <div id="notificationModal"
                             class="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center hidden transition-all duration-300 ease-in-out">
-                            
+
                             <div class="bg-white w-166 p-6 rounded-lg shadow-lg transform scale-95 opacity-0 transition-all duration-300 ease-in-out">
                                 <div class="flex justify-between items-center border-b pb-2">
                                     <h2 class="text-xl font-bold text-gray-800">Notifications</h2>
@@ -192,7 +192,7 @@
                                         <i class="fas fa-times"></i>
                                     </button>
                                 </div>
-                                
+
                                 <div class="mt-4">
                                     <p class="text-gray-600">🔔 You have new notifications!</p>
                                     <ul class="mt-2 space-y-2">
