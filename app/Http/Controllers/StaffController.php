@@ -131,26 +131,49 @@ class StaffController extends Controller
 
     public function submitFileRequests(Request $request)
     {
+        $request->validate([
+            'requested_to' => 'required|integer|exists:users,id',
+            'note' => 'nullable|string',
+        ]);
+
+        // Check if a request already exists for the same user pair
         $exists = FileRequest::where('requested_by', auth()->id())
-            ->where('file_id', $request->file_id)
+            ->where('requested_to', $request->requested_to)
             ->first();
 
         if ($exists) {
-            return redirect()->back()->with('duplicate', 'You have already requested access to this file.');
+            return redirect()->back()->with('duplicate', 'You have already submitted a request to this user.');
         }
 
         try {
             FileRequest::create([
-                'file_id' => $request->file_id,
+                'file_id' => null,
                 'requested_by' => auth()->id(),
+                'requested_to' => $request->requested_to,
                 'note' => $request->note,
-                'request_status' => 'Pending',
+                'request_status' => 'pending',
             ]);
 
-            return redirect()->back()->with('success', 'File access request submitted successfully.');
+            return redirect()->back()->with('success', 'Request submitted successfully.');
         } catch (\Exception $e) {
             return redirect()->back()->with('error', 'Failed to submit request.');
         }
+    }
+
+
+    public function showIncomingRequests()
+    {
+        $userId = auth()->id();
+
+        $incomingRequests = \App\Models\FileRequest::where('requested_to', $userId)
+            ->orderBy('created_at', 'desc')
+            ->get();
+
+        // Get requester names (no Eloquent relationship used)
+        $userIds = $incomingRequests->pluck('requested_by')->unique()->toArray();
+        $users = \App\Models\User::whereIn('id', $userIds)->get()->keyBy('id');
+
+        return view('staff.pages.IncomingRequests', compact('incomingRequests', 'users'));
     }
 
 
@@ -252,7 +275,7 @@ class StaffController extends Controller
 
     public function StaffuploadFile(Request $request)
     {
-        
+
         $request->validate([
             'file' => 'required|file|max:502400',
             'category' => 'required|in:capstone,thesis,faculty_request,accreditation,admin_docs,custom_location',
@@ -1423,7 +1446,8 @@ class StaffController extends Controller
         ]);
     }
 
-    public function uploadRequest(){
+    public function uploadRequest()
+    {
         return view('staff.pages.StaffUploadRequest');
     }
 }

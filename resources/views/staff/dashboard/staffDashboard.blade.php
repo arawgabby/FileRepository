@@ -48,53 +48,53 @@
                 </a>
                 <a href="{{ route('staff.active.files') }}" class="flex items-center text-white hover:text-white ">
                     <i class="fas fa-folder-open mr-4"></i> <span class='text-sm'>All Files </span>
-                
 
-                <a href="{{ route('request.file.access') }}" class="flex items-center text-white hover:text-white ">
-                    <i class="fas fa-share-from-square mr-2"></i>
-                    <span class='text-sm ml-2'> Request Upload File  </span>
-                </a>
 
-                <a href="{{ route('request.folder.access') }}" class="flex items-center text-white hover:text-white ">
-                    <i class="fas fa-share-from-square mr-2"></i>
-                    <span class='text-sm ml-2'> My Request Uploads </span>
-                </a>
-                <a href="{{ route('staff-upload.request') }}" class="flex items-center text-white hover:text-white ">
-                    <i class="fas fa-share-from-square mr-2"></i>
-                    <span class='text-sm ml-2'> Upload Requests </span>
-                </a>
+                    <a href="{{ route('request.file.access') }}" class="flex items-center text-white hover:text-white ">
+                        <i class="fas fa-share-from-square mr-2"></i>
+                        <span class='text-sm ml-2'> Request Upload File </span>
+                    </a>
 
-                <a href="{{ route('staff.archived.files') }}" class="flex items-center text-white hover:text-white ">
-                    <i class="fas fa-bookmark mr-5"></i> <span class='text-sm'> Archived Files </span>
-                </a>
+                    <a href="{{ route('request.folder.access') }}" class="flex items-center text-white hover:text-white ">
+                        <i class="fas fa-share-from-square mr-2"></i>
+                        <span class='text-sm ml-2'> My Request Uploads </span>
+                    </a>
+                    <a href="{{ route('show.incoming.requests') }}" class="flex items-center text-white hover:text-white ">
+                        <i class="fas fa-share-from-square mr-2"></i>
+                        <span class='text-sm ml-2'> Upload Requests </span>
+                    </a>
 
-                <p class="-m-6 mb-6 border-b border-white text-gray-200 pb-2"></p>
+                    <a href="{{ route('staff.archived.files') }}" class="flex items-center text-white hover:text-white ">
+                        <i class="fas fa-bookmark mr-5"></i> <span class='text-sm'> Archived Files </span>
+                    </a>
 
-                <p class="text-white text-1xl font-bold mt-8">
-                    <i class="fas fa-file-text mr-5"></i> <span class='text-sm'> ACTIVITY </span>
-                </p>
+                    <p class="-m-6 mb-6 border-b border-white text-gray-200 pb-2"></p>
 
-                <a href="{{ route ('timestamps.index')}}" class="flex items-center text-white hover:text-white ">
-                    <i class="fas fa-list mr-5"></i> <span class='text-sm'> File Timestamps </span>
-                </a>
+                    <p class="text-white text-1xl font-bold mt-8">
+                        <i class="fas fa-file-text mr-5"></i> <span class='text-sm'> ACTIVITY </span>
+                    </p>
 
-                <a href="{{ route('staff.logs.view') }}" class="flex items-center text-white hover:text-white ">
-                    <i class="fas fa-inbox mr-5"></i> <span class='text-sm'> Activity Logs </span>
-                </a>
+                    <a href="{{ route ('timestamps.index')}}" class="flex items-center text-white hover:text-white ">
+                        <i class="fas fa-list mr-5"></i> <span class='text-sm'> File Timestamps </span>
+                    </a>
 
-                <p class="-m-6 mb-6 border-b border-white text-gray-200 pb-2"></p>
+                    <a href="{{ route('staff.logs.view') }}" class="flex items-center text-white hover:text-white ">
+                        <i class="fas fa-inbox mr-5"></i> <span class='text-sm'> Activity Logs </span>
+                    </a>
 
-                <a href="{{ url('/staff-logout') }}" class="flex items-center text-white hover:text-white mr-2"
-                    style="font-weight: bold" onclick="return confirmLogout();">
-                    <i class="fas fa-sign-out mr-2"></i>
-                    Logout
-                </a>
+                    <p class="-m-6 mb-6 border-b border-white text-gray-200 pb-2"></p>
 
-                <script>
-                    function confirmLogout() {
-                        return confirm("Are you sure you want to log out?");
-                    }
-                </script>
+                    <a href="{{ url('/staff-logout') }}" class="flex items-center text-white hover:text-white mr-2"
+                        style="font-weight: bold" onclick="return confirmLogout();">
+                        <i class="fas fa-sign-out mr-2"></i>
+                        Logout
+                    </a>
+
+                    <script>
+                        function confirmLogout() {
+                            return confirm("Are you sure you want to log out?");
+                        }
+                    </script>
             </nav>
         </div>
 

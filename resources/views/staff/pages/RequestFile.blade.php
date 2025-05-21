@@ -3,9 +3,9 @@
 @section('content')
 
 
-    <div class="grid grid-cols-1 md:grid-cols-1 gap-6 p-6">
+<div class="grid grid-cols-1 md:grid-cols-1 gap-6 p-6">
 
-        {{-- <div class="bg-white p-6 shadow-md mt-6">
+    {{-- <div class="bg-white p-6 shadow-md mt-6">
             <h2 class="text-xl font-semibold mb-4 border-b pb-2">Requests for My Files</h2>
             <div class="overflow-x-auto">
                 <table class="min-w-full divide-y divide-gray-200">
@@ -23,57 +23,57 @@
                         @forelse($myFileRequests as $request)
                             <tr>
                                 <td class="px-4 py-2">{{ $request->file->filename ?? 'N/A' }}</td>
-                                <td class="px-4 py-2">{{ $request->requester->name ?? 'N/A' }}</td>
-                                <td class="px-4 py-2">
-                                    <button onclick="showNoteModal(`{{ $request->note ?? 'No note provided.' }}`)"
-                                        class="text-white text-sm font-bold bg-green-500 rounded-lg p-2">
-                                        View Note
-                                    </button>
-                                </td>
-                                <td class="px-4 py-2 text-sm text-gray-600">
-                                    {{ $request->created_at->format('M d, Y H:i') }}
-                                </td>
-                                <td class="px-4 py-2 capitalize">
-                                    <span
-                                        class="px-2 py-1 rounded text-white text-sm 
-                                        @if ($request->request_status === 'pending') bg-yellow-500 
-                                        @elseif($request->request_status === 'approved') bg-green-500 
-                                        @elseif($request->request_status === 'rejected') bg-red-500 
+    <td class="px-4 py-2">{{ $request->requester->name ?? 'N/A' }}</td>
+    <td class="px-4 py-2">
+        <button onclick="showNoteModal(`{{ $request->note ?? 'No note provided.' }}`)"
+            class="text-white text-sm font-bold bg-green-500 rounded-lg p-2">
+            View Note
+        </button>
+    </td>
+    <td class="px-4 py-2 text-sm text-gray-600">
+        {{ $request->created_at->format('M d, Y H:i') }}
+    </td>
+    <td class="px-4 py-2 capitalize">
+        <span
+            class="px-2 py-1 rounded text-white text-sm
+                                        @if ($request->request_status === 'pending') bg-yellow-500
+                                        @elseif($request->request_status === 'approved') bg-green-500
+                                        @elseif($request->request_status === 'rejected') bg-red-500
                                         @else bg-gray-400 @endif
                                     ">
-                                        {{ $request->request_status }}
-                                    </span>
+            {{ $request->request_status }}
+        </span>
 
-                                </td>
+    </td>
 
-                                <td class="px-4 py-2 capitalize">
-                                    @if ($request->request_status === 'Pending')
-                                        <form
-                                            action="{{ route('newFile-request.update-status', $request->id ?? $request->request_id) }}"
-                                            method="POST" class="inline">
-                                            @csrf
-                                            <button name="action" value="approved"
-                                                class="bg-green-500 text-white px-2 py-1 rounded ml-2 hover:bg-green-600"
-                                                onclick="return confirm('Approve this request?')">Approve</button>
-                                            <button name="action" value="rejected"
-                                                class="bg-red-500 text-white px-2 py-1 rounded ml-2 hover:bg-red-600"
-                                                onclick="return confirm('Reject this request?')">Reject</button>
-                                        </form>
-                                    @endif
-                                </td>
-                            </tr>
-                        @empty
-                            <tr>
-                                <td colspan="5" class="px-4 py-4 text-center text-gray-500">No requests for your files.
-                                </td>
-                            </tr>
-                        @endforelse
-                    </tbody>
-                </table>
-            </div>
-        </div> --}}
+    <td class="px-4 py-2 capitalize">
+        @if ($request->request_status === 'Pending')
+        <form
+            action="{{ route('newFile-request.update-status', $request->id ?? $request->request_id) }}"
+            method="POST" class="inline">
+            @csrf
+            <button name="action" value="approved"
+                class="bg-green-500 text-white px-2 py-1 rounded ml-2 hover:bg-green-600"
+                onclick="return confirm('Approve this request?')">Approve</button>
+            <button name="action" value="rejected"
+                class="bg-red-500 text-white px-2 py-1 rounded ml-2 hover:bg-red-600"
+                onclick="return confirm('Reject this request?')">Reject</button>
+        </form>
+        @endif
+    </td>
+    </tr>
+    @empty
+    <tr>
+        <td colspan="5" class="px-4 py-4 text-center text-gray-500">No requests for your files.
+        </td>
+    </tr>
+    @endforelse
+    </tbody>
+    </table>
+</div>
+</div> --}}
 
-        {{-- <div class="bg-white p-6  shadow-md">
+{{-- <div class="bg-white p-6  shadow-md">
             <h2 class="text-xl font-semibold mb-4 border-b pb-2">My File Access Requests</h2>
 
             <div class="overflow-x-auto">
@@ -91,120 +91,124 @@
                         @forelse($requests as $request)
                             <tr>
                                 <td class="px-4 py-2">{{ $request->file->filename ?? 'N/A' }}</td>
-                                <td class="px-4 py-2">
-                                    <button onclick="showNoteModal(`{{ $request->note ?? 'No note provided.' }}`)"
-                                        class="text-white text-sm font-bold bg-green-500 rounded-lg p-2">
-                                        View Note
-                                    </button>
-                                </td>
-                                <td class="px-4 py-2 text-sm text-gray-600">
-                                    {{ $request->created_at->format('M d, Y H:i') }}
-                                </td>
-                                <td class="px-4 py-2 text-sm text-gray-600">
-                                    {{ $request->file->published_by }}
-                                </td>
-                                <td class="px-4 py-2 capitalize">
-                                    <span
-                                        class="px-2 py-1 rounded text-white text-sm
-                                        @if ($request->request_status === 'pending') bg-yellow-500 
-                                        @elseif($request->request_status === 'approved') bg-green-500 
-                                        @elseif($request->request_status === 'rejected') bg-red-500 
+<td class="px-4 py-2">
+    <button onclick="showNoteModal(`{{ $request->note ?? 'No note provided.' }}`)"
+        class="text-white text-sm font-bold bg-green-500 rounded-lg p-2">
+        View Note
+    </button>
+</td>
+<td class="px-4 py-2 text-sm text-gray-600">
+    {{ $request->created_at->format('M d, Y H:i') }}
+</td>
+<td class="px-4 py-2 text-sm text-gray-600">
+    {{ $request->file->published_by }}
+</td>
+<td class="px-4 py-2 capitalize">
+    <span
+        class="px-2 py-1 rounded text-white text-sm
+                                        @if ($request->request_status === 'pending') bg-yellow-500
+                                        @elseif($request->request_status === 'approved') bg-green-500
+                                        @elseif($request->request_status === 'rejected') bg-red-500
                                         @else bg-gray-400 @endif
                                     ">
-                                        {{ $request->request_status }}
-                                    </span>
-                                </td>
-                            </tr>
-                        @empty
-                            <tr>
-                                <td colspan="4" class="px-4 py-4 text-center text-gray-500">No file access requests
-                                    found.</td>
-                            </tr>
-                        @endforelse
-                    </tbody>
-                </table>
-            </div>
+        {{ $request->request_status }}
+    </span>
+</td>
+</tr>
+@empty
+<tr>
+    <td colspan="4" class="px-4 py-4 text-center text-gray-500">No file access requests
+        found.</td>
+</tr>
+@endforelse
+</tbody>
+</table>
+</div>
 
-            <!-- Note Modal -->
-            <div id="noteModal" class="fixed inset-0 z-50 hidden items-center justify-center bg-black bg-opacity-50">
-                <div class="bg-white rounded-lg p-6 max-w-md w-full">
-                    <h3 class="text-lg font-semibold mb-4">Note</h3>
-                    <p id="noteContent" class="text-gray-700"></p>
-                    <div class="text-right mt-4">
-                        <button onclick="closeNoteModal()"
-                            class="px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600">Close</button>
-                    </div>
-                </div>
-            </div>
+<!-- Note Modal -->
+<div id="noteModal" class="fixed inset-0 z-50 hidden items-center justify-center bg-black bg-opacity-50">
+    <div class="bg-white rounded-lg p-6 max-w-md w-full">
+        <h3 class="text-lg font-semibold mb-4">Note</h3>
+        <p id="noteContent" class="text-gray-700"></p>
+        <div class="text-right mt-4">
+            <button onclick="closeNoteModal()"
+                class="px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600">Close</button>
+        </div>
+    </div>
+</div>
 
-        </div> --}}
+</div> --}}
 
-        <div class="bg-white p-12 shadow-md">
-            <h1 class="text-xl font-bold mb-4 border-b border-gray pb-2">Submit a File Access Request</h1>
+<div class="bg-white p-12 shadow-md">
+    <h1 class="text-xl font-bold mb-4 border-b border-gray pb-2">Submit a File Access Request</h1>
 
-            <form id="fileRequestForm" action="{{ route('file-request.submit') }}" method="POST"
-                onsubmit="return confirmRequest()">
-                @csrf
+    <form id="fileRequestForm" action="{{ route('file-request.submit') }}" method="POST"
+        onsubmit="return confirmRequest()">
+        @csrf
 
-                <!-- Hidden Input for requested_by -->
-                <input type="hidden" name="requested_by" value="{{ auth()->user()->name }}">
+        <!-- Hidden Input for requested_by -->
+        <input type="hidden" name="requested_by" value="{{ auth()->user()->name }}">
 
-                <!-- File Dropdown -->
-                <div class="mb-4">
-                    <label for="file_id" class="block text-sm font-medium text-gray-700">Select User</label>
-                    <select name="file_id" id="file_id"
-                        class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2" required>
-                        <option value="">-- Choose User --</option>
-                        @foreach ($users as $user)
-                            @continue($user->id == auth()->user()->id)
-                            <option value="{{ $user->id }}">{{ $user->name }}</option>
-                        @endforeach
-                    </select>
-                </div>
+        <!-- Hidden or pre-defined file_id -->
+        <input type="hidden" name="file_id" value="{{ $file_id ?? '1' }}"> <!-- Change or bind as needed -->
 
-                <!-- Note Field -->
-                <div class="mb-4">
-                    <label for="note" class="block text-sm font-medium text-gray-700">Note (Optional)</label>
-                    <textarea name="note" id="note" rows="3"
-                        class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2"></textarea>
-                </div>
-
-                <!-- Submit Button -->
-                <button type="submit" class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600">
-                    Submit Request
-                </button>
-            </form>
+        <!-- User Dropdown (actually requested_to) -->
+        <div class="mb-4">
+            <label for="requested_to" class="block text-sm font-medium text-gray-700">Select User</label>
+            <select name="requested_to" id="requested_to"
+                class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2" required>
+                <option value="">-- Choose User --</option>
+                @foreach ($users as $user)
+                @continue($user->id == auth()->user()->id)
+                <option value="{{ $user->id }}">{{ $user->name }}</option>
+                @endforeach
+            </select>
         </div>
 
-        <script>
-            function confirmRequest() {
-                return confirm("Are you sure you want to submit this file access request?");
-            }
+        <!-- Note Field -->
+        <div class="mb-4">
+            <label for="note" class="block text-sm font-medium text-gray-700">Note (Optional)</label>
+            <textarea name="note" id="note" rows="3"
+                class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2"></textarea>
+        </div>
 
-            @if (session('success'))
-                alert("{{ session('success') }}");
-            @endif
+        <!-- Submit Button -->
+        <button type="submit" class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600">
+            Submit Request
+        </button>
+    </form>
 
-            @if (session('error'))
-                alert("{{ session('error') }}");
-            @endif
-        </script>
+</div>
 
-        <script>
-            function showNoteModal(note) {
-                document.getElementById('noteContent').textContent = note;
-                document.getElementById('noteModal').classList.remove('hidden');
-                document.getElementById('noteModal').classList.add('flex');
-            }
+<script>
+    function confirmRequest() {
+        return confirm("Are you sure you want to submit this file access request?");
+    }
 
-            function closeNoteModal() {
-                document.getElementById('noteModal').classList.add('hidden');
-            }
-        </script>
+    @if(session('success'))
+    alert("{{ session('success') }}");
+    @endif
+
+    @if(session('error'))
+    alert("{{ session('error') }}");
+    @endif
+</script>
+
+<script>
+    function showNoteModal(note) {
+        document.getElementById('noteContent').textContent = note;
+        document.getElementById('noteModal').classList.remove('hidden');
+        document.getElementById('noteModal').classList.add('flex');
+    }
+
+    function closeNoteModal() {
+        document.getElementById('noteModal').classList.add('hidden');
+    }
+</script>
 
 
 
-    </div>
+</div>
 
 
 @endsection

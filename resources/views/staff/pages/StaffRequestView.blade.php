@@ -34,7 +34,7 @@
                 <tr class="border-b hover:bg-gray-50">
                     <td class="py-2 text-left">{{ $access->folder->name ?? 'N/A' }}</td>
                     <td class="py-2 text-center">
-                        <span class="px-2 py-1 rounded-full 
+                        <span class="px-2 py-1 rounded-full
                                     {{
                                         ($access->status === 'Approved') ? 'bg-green-200 text-green-800' :
                                         (($access->status === 'Restricted') ? 'bg-violet-700 text-white' :

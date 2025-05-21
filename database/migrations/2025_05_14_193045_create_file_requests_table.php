@@ -14,8 +14,9 @@ return new class extends Migration
         Schema::create('file_requests', function (Blueprint $table) {
             $table->increments('request_id');
             $table->unsignedInteger('requested_by');
+            $table->unsignedInteger('requested_to')->nullable();
             $table->unsignedInteger('processed_by')->default(0);
-            $table->unsignedInteger('file_id');
+            $table->unsignedInteger('file_id')->nullable();
             $table->text('note')->nullable();
             $table->string('request_status', 255)->default('pending');
             $table->timestamps();

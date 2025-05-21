@@ -776,7 +776,7 @@ class FileController extends Controller
 
         $activeUsers = User::where('status', 'active')->count();
 
-        return view('admin.pages.adminDashboardPage', compact(
+        return view('admin.pages.AdminDashboardPage', compact(
             'activeFilesCount',
             'pendingFilesCount',
             'recentUploadsCount',

@@ -58,6 +58,8 @@ Route::middleware(['staff.auth'])->group(function () {
 
     Route::get('/staff-folder-request-view', [StaffController::class, 'showRequestFolder'])->name('request.folder.access');
 
+    Route::get('/staff-incoming-request-view', [StaffController::class, 'showIncomingRequests'])->name('show.incoming.requests');
+
     Route::get('/staff-file-request-view', [StaffController::class, 'showRequestFile'])->name('request.file.access');
 
     Route::post('/file-request-staff/submit', [StaffController::class, 'submitFileRequests'])->name('file-request.submit');
