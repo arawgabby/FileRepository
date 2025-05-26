@@ -140,7 +140,7 @@
 </div> --}}
 
 <div class="bg-white p-12 shadow-md">
-    <h1 class="text-xl font-bold mb-4 border-b border-gray pb-2">Assign File to User</h1>
+    <h1 class="text-xl font-bold mb-4 border-b border-gray pb-2">Request File to User</h1>
 
     <form id="fileRequestForm" action="{{ route('file-request.submit') }}" method="POST"
         onsubmit="return confirmRequest()">

@@ -52,7 +52,7 @@
 
                     <a href="{{ route('request.file.access') }}" class="flex items-center text-white hover:text-white ">
                         <i class="fas fa-share-from-square mr-2"></i>
-                        <span class='text-sm ml-2'> Assign User </span>
+                        <span class='text-sm ml-2'> File Upload Request </span>
                     </a>
 
                     <a href="{{ route('file-request.outgoing') }}" class="flex items-center text-white hover:text-white ">

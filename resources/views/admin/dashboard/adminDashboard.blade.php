@@ -73,7 +73,7 @@
 
 
                 <a href="{{ route('admin.assign-file.form') }}" class="flex items-center text-white hover:text-white text-sm">
-                    <i class="fas fa-share-from-square mr-4"></i> Assign User
+                    <i class="fas fa-share-from-square mr-4"></i> Request Upload File
                 </a>
 
                 <a href="{{ route('admin.outgoing.requests') }}" class="flex items-center text-white hover:text-white text-sm">

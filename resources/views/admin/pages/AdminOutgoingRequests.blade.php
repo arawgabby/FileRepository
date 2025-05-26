@@ -16,8 +16,6 @@
                 <th class="px-4 py-2 text-left">Status</th>
                 <th class="px-4 py-2 text-left">File</th>
                 <th class="px-4 py-2 text-left">Requested At</th>
-                <th class="px-4 py-2 text-left">Action</th>
-
             </tr>
         </thead>
         <tbody class="divide-y divide-gray-100">
@@ -42,7 +40,7 @@
                     @endif
                 </td>
                 <td class="px-4 py-2">{{ \Carbon\Carbon::parse($request->created_at)->format('M d, Y H:i') }}</td>
-                <td class="px-4 py-2">
+                {{-- <td class="px-4 py-2">
                     @if(strtolower($request->request_status) !== 'approved')
                     <form action="{{ route('admin.file-request.update-status', $request->request_id) }}" method="POST">
                         @csrf
@@ -54,7 +52,7 @@
                     @else
                     <span class="text-green-600 font-semibold">Approved</span>
                     @endif
-                </td>
+                </td> --}}
 
             </tr>
             @endforeach

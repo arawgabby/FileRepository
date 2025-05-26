@@ -106,12 +106,26 @@
                     </div>
 
                 </td>
-                <td class="px-4 py-2">
+                {{-- <td class="px-4 py-2">
                     @if ($request->file_id)
                     <button onclick="enableUpdate('{{ $request->request_id }}')"
                         class="bg-indigo-500 text-white px-2 py-1 rounded hover:bg-indigo-600 text-xs">
                         Edit
                     </button>
+                    @endif
+                </td> --}}
+                <td class="px-4 py-2">
+                    @if(strtolower($request->request_status) !== 'approved')
+                    <form action="{{ route('newFile-request.update-status', $request->request_id) }}" method="POST">
+                        @csrf
+                        <input type="hidden" name="action" value="approved">
+                        <button type="submit"
+                            class="bg-blue-500 text-white text-xs px-3 py-1 rounded hover:bg-blue-600">
+                            Approve
+                        </button>
+                    </form>
+                    @else
+                    <span class="text-green-600 font-semibold">Approved</span>
                     @endif
                 </td>
             </tr>

@@ -513,7 +513,7 @@ class FileController extends Controller
             $files->where('file_path', 'LIKE', 'uploads/' . $request->subfolder . '/%');
         }
 
-        $files = $files->paginate(20)->appends(['subfolder' => $request->subfolder])->sortByDesc('created_at');
+        $files = $files->paginate(20)->appends(['subfolder' => $request->subfolder]);
 
         $fileVersions = FileVersions::whereIn('file_id', $files->pluck('file_id'))->get();
 

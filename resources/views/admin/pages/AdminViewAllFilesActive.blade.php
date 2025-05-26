@@ -176,7 +176,8 @@
                                 class="text-blue-500" title="Edit Primary File">
                                 <i class="fas fa-edit"></i>
                             </a>
-                            <form action="{{ route('files.archive.active', ['file_id' => $file->file_id]) }}" method="POST" onsubmit="return confirm('Are you sure you want to archive this file?')">
+
+                            <form action="{{ route('admin.files.archive.active', ['file_id' => $file->file_id]) }}" method="POST" onsubmit="return confirm('Are you sure you want to archive this file?')">
                                 @csrf
                                 <button type="submit" class="text-red-500" title="Archive this file">
                                     <i class="fas fa-archive"></i>
@@ -235,7 +236,7 @@
 
     <!-- Pagination -->
     <div class="mt-4">
-        {{-- $files->links() --}}
+        {{ $files->links() }}
     </div>
 
 </div>
