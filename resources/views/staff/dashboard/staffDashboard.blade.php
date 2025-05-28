@@ -29,7 +29,7 @@
      transition-transform duration-300 fixed top-0 bottom-0 z-40 overflow-y-auto">
 
             <div class="text-2xl font-bold flex justify-center">
-                <img src="{{ asset('storage/csitlogo.jpg') }}" alt="CSIT Logo" class="w-24 h-24 rounded-full">
+                <img src="{{ asset('storage/uploads/csitlogo.jpg') }}" alt="CSIT Logo" class="w-24 h-24 rounded-full">
             </div>
 
             <nav class="space-y-8">
