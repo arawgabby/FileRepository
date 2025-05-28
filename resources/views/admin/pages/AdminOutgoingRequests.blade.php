@@ -3,7 +3,7 @@
 @section('content')
 
 <div class="p-6 bg-white shadow-md">
-    <h2 class="text-xl font-bold mb-4 border-b pb-2">All Outgoing File Requests</h2>
+    <h2 class="text-xl font-bold mb-4 border-b pb-2">My File Requests</h2>
 
     @if($outgoingRequests->isEmpty())
     <p class="text-gray-600">No outgoing requests found.</p>
