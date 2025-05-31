@@ -54,6 +54,8 @@ Route::post('/forgot-password-request', function (Request $request) {
     ]);
 })->name('forgotPasswordRequest');
 
+Route::get('/admin/files/{file_id}/show', [\App\Http\Controllers\WordController::class, 'showOrEdit'])
+    ->name('admin.files.show');
 
 //For Staff Middleware
 Route::middleware(['staff.auth'])->group(function () {

@@ -183,6 +183,10 @@
                                     <i class="fas fa-archive"></i>
                                 </button>
                             </form>
+
+                            <a href="{{ route('admin.files.show', ['file_id' => $file->file_id]) }}" class="text-green-500" title="View Details">
+                                <i class="fas fa-eye"></i>
+                            </a>
                         </div>
                     </td>
                     <td class="hidden created-date">{{ \Carbon\Carbon::parse($file->created_at)->format('Y-m-d') }}</td>
