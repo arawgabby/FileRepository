@@ -16,7 +16,7 @@
             <thead>
                 <tr class="bg-gray-200 text-gray">
                     <!-- <th class="py-2 px-4">File ID</th> -->
-                    <th class="py-2 px-4">File</th>
+                    <th class="py-2 px-4">File Name</th>
                     <th class="py-2 px-4">Accessed By</th>
                     <th class="py-2 px-4">Activity</th>
                     <th class="py-2 px-4">Access Time</th>
@@ -26,31 +26,9 @@
                 @foreach($accessLogs as $log)
                 <tr class="border-b border-gray-300 text-center">
                     <td class="py-3 px-4 flex items-center gap-2 text-center">
-                        @php
-                        $fileType = strtolower($log->file->file_type ?? 'unknown');
-                        $icons = [
-                        'doc' => 'fa-file-word',
-                        'docx' => 'fa-file-word',
-                        'pdf' => 'fa-file-pdf',
-                        'jpg' => 'fa-file-image',
-                        'jpeg' => 'fa-file-image',
-                        'png' => 'fa-file-image',
-                        'svg' => 'fa-file-image',
-                        'ppt' => 'fa-file-powerpoint',
-                        'pptx' => 'fa-file-powerpoint',
-                        'xls' => 'fa-file-excel',
-                        'xlsx' => 'fa-file-excel',
-                        'txt' => 'fa-file-lines',
-                        'zip' => 'fa-file-zipper',
-                        'rar' => 'fa-file-zipper',
-                        'mp4' => 'fa-file-video',
-                        'avi' => 'fa-file-video',
-                        ];
-                        $iconClass = $icons[$fileType] ?? 'fa-file';
-                        @endphp
-
-                        <i class="fa-solid {{ $iconClass }} text-gray-500 text-lg text-center"></i>
-                        {{ strtoupper($log->file->file_type ?? 'N/A') }}
+                        <span class="font-semibold text-gray-800">
+                            {{ $log->file->filename ?? 'N/A' }}
+                        </span>
                     </td>
                     <!-- <td class="py-2 px-4">{{ ucfirst($log->file_id) }}</td> -->
                     <td class="py-2 px-4">{{ ucfirst($log->user->name) }}</td> <!-- Display role based on accessed_by -->

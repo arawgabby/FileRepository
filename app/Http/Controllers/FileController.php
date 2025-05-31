@@ -172,20 +172,16 @@ class FileController extends Controller
 
     public function AdminuploadFile(Request $request)
     {
-        Log::info('Admin upload file request', [
-            'user_id' => auth()->id(),
-            'selected_folder' => $request->input('folder'),
-            'request_data' => $request->all()
-        ]);
         $request->validate([
             'file' => 'required|file|max:502400',
             'category' => 'required|in:capstone,thesis,faculty_request,accreditation,admin_docs,custom_location',
-            'published_by' => 'required|string|max:255',
+            'published_by' => 'nullable|string|max:255',
             'year_published' => 'required|string|regex:/^\d{4}$/',
             'description' => 'nullable|string|max:1000',
             'folder' => 'nullable|string|max:255',
             // Accreditation fields validation
             'level' => 'required_if:category,accreditation|max:255',
+            'phase' => 'required_if:category,accreditation|max:255',
             'area' => 'required_if:category,accreditation|max:255',
             'parameter' => 'required_if:category,accreditation|max:255',
             'subparam' => 'required_if:category,accreditation|max:255',
@@ -208,22 +204,25 @@ class FileController extends Controller
 
             if ($request->input('category') === 'accreditation') {
                 $level = trim($request->input('level'));
+                $phase = trim($request->input('phase'));
                 $area = trim($request->input('area'));
                 $parameter = trim($request->input('parameter'));
                 $character = trim($request->input('character'));
 
                 $mergedLevel = 'Level-' . $level;
+                $mergedPhase = $phase;
                 $mergedArea = 'Area-' . $area;
                 $mergedParameterChar = $parameter . '-' . $character;
 
                 // Build the full path
                 $basePath = 'uploads/' . $category;
                 $levelPath = $basePath . '/' . $mergedLevel;
-                $areaPath = $levelPath . '/' . $mergedArea;
+                $phasePath = $levelPath . '/' . $mergedPhase;
+                $areaPath = $phasePath . '/' . $mergedArea;
                 $parameterCharPath = $areaPath . '/' . $mergedParameterChar;
 
                 // Create directories if not exist
-                foreach ([$basePath, $levelPath, $areaPath, $parameterCharPath] as $path) {
+                foreach ([$basePath, $levelPath, $phasePath, $areaPath, $parameterCharPath] as $path) {
                     if (!Storage::disk('public')->exists($path)) {
                         Storage::disk('public')->makeDirectory($path, 0775, true);
                     }
@@ -233,6 +232,7 @@ class FileController extends Controller
                 $folderPaths = [
                     ['name' => $category, 'path' => $basePath],
                     ['name' => $mergedLevel, 'path' => $levelPath],
+                    ['name' => $mergedPhase, 'path' => $phasePath],
                     ['name' => $mergedArea, 'path' => $areaPath],
                     ['name' => $mergedParameterChar, 'path' => $parameterCharPath],
                 ];
@@ -299,7 +299,7 @@ class FileController extends Controller
                 'file_type' => $file->getClientOriginalExtension(),
                 'uploaded_by' => $user->id,
                 'category' => $category, // This is either selected_folder or category
-                'published_by' => $request->published_by,
+                'published_by' => $request->published_by ?? null,
                 'year_published' => (string) $request->year_published,
                 'description' => $request->description ?? null,
                 'status' => 'active',
@@ -308,9 +308,11 @@ class FileController extends Controller
             if (in_array($request->input('category'), ['capstone', 'thesis'])) {
                 $fileData['authors'] = $request->input('authors');
             }
-
             if ($request->filled('level')) {
                 $fileData['level'] = $request->input('level');
+            }
+            if ($request->filled('phase')) {
+                $fileData['phase'] = $request->input('phase');
             }
             if ($request->filled('area')) {
                 $fileData['area'] = $request->input('area');
@@ -329,7 +331,7 @@ class FileController extends Controller
 
             if ($fileEntry) {
                 AccessLog::create([
-                    'file_id' => $fileEntry->id ?? 0,
+                    'file_id' => $fileEntry->file_id,
                     'accessed_by' => $user->id,
                     'action' => 'Uploaded file - Successful',
                     'access_time' => now(),
@@ -513,7 +515,7 @@ class FileController extends Controller
             $files->where('file_path', 'LIKE', 'uploads/' . $request->subfolder . '/%');
         }
 
-        $files = $files->paginate(20)->appends(['subfolder' => $request->subfolder]);
+        $files = $files->orderBy('created_at', 'desc')->paginate(20)->appends(['subfolder' => $request->subfolder]);
 
         $fileVersions = FileVersions::whereIn('file_id', $files->pluck('file_id'))->get();
 

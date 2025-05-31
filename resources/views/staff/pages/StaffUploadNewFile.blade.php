@@ -32,13 +32,18 @@
                     <label class="block text-lg font-bold text-gray-700 mb-2">Accreditation Details</label>
                     <select name="level" id="level" class="mt-1 p-2 border rounded w-full mb-2">
                         <option value="">Select Level</option>
-                        <option value="Level 1">1</option>
-                        <option value="Level 2">2</option>
-                        <option value="Level 3">3</option>
-                        <option value="phase 1">Phase 1</option>
-                        <option value="phase 2">Phase 2</option>
-                        <option value="Level 4">4</option>
+                        <option value="1">1</option>
+                        <option value="2">2</option>
+                        <option value="3">3</option>
+                        <option value="4">4</option>
                     </select>
+
+                    <select name="phase" id="phase" class="mt-1 p-2 border rounded w-full mb-2" style="display: none;">
+                        <option value="">Select Phase</option>
+                        <option value="Phase 1">Phase 1</option>
+                        <option value="Phase 2">Phase 2</option>
+                    </select>
+
                     <select name="area" id="area" class="mt-1 p-2 border rounded w-full mb-2">
                         <option value="">Select Area</option>
                         <option value="1">1-VISION, MISION, GOALS AND OBJECTIVES</option>
@@ -121,8 +126,8 @@
                 </div>
 
                 <div class="mb-4" id="publishedByField">
-                    <label for="published_by" class="block text-lg font-bold text-gray-700">Published By</label>
-                    <input type="text" name="published_by" id="published_by" class="p-2 border rounded w-full" value="{{ auth()->user()->name }}" readonly>
+                    <label for="published_by" class="block text-lg font-bold text-gray-700">Published By (Optional)</label>
+                    <input type="text" name="published_by" id="published_by" class="p-2 border rounded w-full" value="{{ auth()->user()->name }}">
                 </div>
 
                 <div class="mb-4">
@@ -184,6 +189,9 @@
         const characterSelect = document.getElementById("character");
         const folderField = document.getElementById("folderField");
 
+        const levelSelect = document.getElementById("level");
+        const phaseSelect = document.getElementById("phase");
+
         parameterSelect.addEventListener("change", function() {
             if (this.value !== "") {
                 characterSelect.style.display = "block";
@@ -194,6 +202,15 @@
         });
 
         folderSelect.disabled = true;
+
+        levelSelect.addEventListener("change", function() {
+            if (this.value !== "") {
+                phaseSelect.style.display = "block";
+            } else {
+                phaseSelect.style.display = "none";
+                phaseSelect.selectedIndex = 0;
+            }
+        });
 
         categorySelect.addEventListener("change", function() {
             if (!this.value) {
@@ -331,6 +348,7 @@
 
             if (categorySelect.value === "accreditation") {
                 formData.append("level", document.getElementById("level").value);
+                formData.append("phase", document.getElementById("phase").value);
                 formData.append("area", document.getElementById("area").value);
                 formData.append("parameter", document.getElementById("parameter").value);
                 // Append character if parameter is selected

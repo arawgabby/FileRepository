@@ -34,24 +34,29 @@
                         <option value="1">1</option>
                         <option value="2">2</option>
                         <option value="3">3</option>
-                        <option value="phase 1">Phase 1</option>
-                        <option value="phase 2">Phase 2</option>
                         <option value="4">4</option>
                     </select>
+
+                    <select name="phase" id="phase" class="mt-1 p-2 border rounded w-full mb-2" style="display: none;">
+                        <option value="">Select Phase</option>
+                        <option value="Phase 1">Phase 1</option>
+                        <option value="Phase 2">Phase 2</option>
+                    </select>
+
                     <select name="area" id="area" class="mt-1 p-2 border rounded w-full mb-2">
                         <option value="">Select Area</option>
-                        <option value="1">1-VISION, MISION, GOALS AND OBJECTIVES</option>
+                        <option value="1">1-VISION, MISSION, GOALS AND OBJECTIVES</option>
                         <option value="2">2-FACULTY</option>
                         <option value="3">3-CURRICULUM AND INSTRUCTIONS</option>
                         <option value="4">4-SUPPORT TO STUDENTS</option>
                         <option value="5">5-RESEARCH</option>
-                        <option value="6">6-EXTENSION AND COMMUNITY ENVOLVEMENT</option>
+                        <option value="6">6-EXTENSION AND COMMUNITY EVOLVEMENT</option>
                         <option value="7">7-LIBRARY</option>
                         <option value="8">8-PHYSICAL PLANT AND FACILITIES</option>
                         <option value="9">9-LABORATORIES</option>
                         <option value="10">10-ADMINISTRATION</option>
                     </select>
-                    <select name="character" id="character" class="mt-1 p-2 border rounded w-full" style="">
+                    <select name="character" id="character" class="mt-1 p-2 border rounded w-full">
                         <option value="">Select Parameter</option>
                         <option value="A"> A </option>
                         <option value="B"> B</option>
@@ -111,8 +116,8 @@
                 </div>
 
                 <div class="mb-4" id="publishedByField">
-                    <label for="published_by" class="block text-lg font-bold text-gray-700">Published By</label>
-                    <input type="text" name="published_by" id="published_by" class="p-2 border rounded w-full" value="{{ auth()->user()->name }}" readonly>
+                    <label for="published_by" class="block text-lg font-bold text-gray-700">Published By (Optional)</label>
+                    <input type="text" name="published_by" id="published_by" class="p-2 border rounded w-full" value="{{ auth()->user()->name }}">
                 </div>
 
                 <div class="mb-4">
@@ -167,13 +172,123 @@
         const accreditationFields = document.getElementById("accreditationFields");
         const publishedByInput = document.getElementById("published_by");
         const authorsField = document.getElementById("authorsField");
-        const folderSelect = document.getElementById("folder");
+        const folderSelect = document.getElementById("folder").parentElement;
         const folderNote = document.getElementById("folderNote");
+
+
+        const levelSelect = document.getElementById("level");
+        const phaseSelect = document.getElementById("phase");
+        const areaSelect = document.getElementById("area");
 
         const parameterSelect = document.getElementById("parameter");
         const characterSelect = document.getElementById("character");
 
         folderSelect.disabled = true;
+
+        // Store all area options for reset
+        const fullAreaOptions = [{
+                value: "",
+                text: "Select Area"
+            },
+            {
+                value: "1",
+                text: "1-VISION, MISSION, GOALS AND OBJECTIVES"
+            },
+            {
+                value: "2",
+                text: "2-FACULTY"
+            },
+            {
+                value: "3",
+                text: "3-CURRICULUM AND INSTRUCTIONS"
+            },
+            {
+                value: "4",
+                text: "4-SUPPORT TO STUDENTS"
+            },
+            {
+                value: "5",
+                text: "5-RESEARCH"
+            },
+            {
+                value: "6",
+                text: "6-EXTENSION AND COMMUNITY EVOLVEMENT"
+            },
+            {
+                value: "7",
+                text: "7-LIBRARY"
+            },
+            {
+                value: "8",
+                text: "8-PHYSICAL PLANT AND FACILITIES"
+            },
+            {
+                value: "9",
+                text: "9-LABORATORIES"
+            },
+            {
+                value: "10",
+                text: "10-ADMINISTRATION"
+            }
+        ];
+
+        const phase2AreaOptions = [{
+                value: "",
+                text: "Select Area"
+            },
+            {
+                value: "2",
+                text: "2-FACULTY"
+            },
+            {
+                value: "3",
+                text: "3-CURRICULUM AND INSTRUCTIONS"
+            },
+            {
+                value: "6",
+                text: "6-EXTENSION AND COMMUNITY EVOLVEMENT"
+            },
+            {
+                value: "7",
+                text: "7-LIBRARY"
+            },
+            {
+                value: "11",
+                text: "LICENSURE EXAM"
+            },
+            {
+                value: "12",
+                text: "CONSORTIA OR LINKAGES"
+            },
+        ];
+
+        function setAreaOptions(options) {
+            areaSelect.innerHTML = "";
+            options.forEach(opt => {
+                let option = document.createElement("option");
+                option.value = opt.value;
+                option.text = opt.text;
+                areaSelect.appendChild(option);
+            });
+        }
+
+        phaseSelect.addEventListener("change", function() {
+            if (this.value === "phase 2") {
+                setAreaOptions(phase2AreaOptions);
+            } else {
+                setAreaOptions(fullAreaOptions);
+            }
+            areaSelect.selectedIndex = 0;
+        });
+
+        levelSelect.addEventListener("change", function() {
+            if (this.value !== "") {
+                phaseSelect.style.display = "block";
+            } else {
+                phaseSelect.style.display = "none";
+                phaseSelect.selectedIndex = 0;
+            }
+        });
 
         parameterSelect.addEventListener("change", function() {
             if (this.value !== "") {
@@ -212,9 +327,6 @@
                 folderSelect.value = "";
                 folderSelect.disabled = true;
                 folderNote.classList.remove("hidden");
-
-
-
             } else if (
                 this.value === "capstone" ||
                 this.value === "thesis" ||
@@ -302,6 +414,7 @@
             // Append accreditation fields if visible
             if (categorySelect.value === "accreditation") {
                 formData.append("level", document.getElementById("level").value);
+                formData.append("phase", document.getElementById("phase").value);
                 formData.append("area", document.getElementById("area").value);
                 formData.append("parameter", document.getElementById("parameter").value);
 

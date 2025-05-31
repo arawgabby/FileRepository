@@ -10,8 +10,8 @@ class Files extends Model
     use HasFactory;
 
     protected $table = 'files';
-
     protected $primaryKey = 'file_id';
+    public $timestamps = true;
 
     protected $fillable = [
         'file_id',
@@ -26,14 +26,13 @@ class Files extends Model
         'year_published',
         'description',
         'level',
+        'phase',
         'area',
         'parameter',
         'subparam',
         'character',
         'status',
     ];
-
-    public $timestamps = true;
 
     public function user()
     {

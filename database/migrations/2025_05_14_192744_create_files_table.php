@@ -18,14 +18,15 @@ return new class extends Migration
             $table->integer('file_size');
             $table->string('file_type', 50);
             $table->string('authors', 500)->nullable();
-            $table->string('published_by', 255)->default('null');
-            $table->string('year_published', 255)->default('null');
+            $table->string('published_by', 255)->nullable();
+            $table->string('year_published', 255)->nullable();
             $table->unsignedInteger('uploaded_by');
-            $table->string('category', 255)->default('null'); // ['capstone', 'thesis', 'faculty_request', 'accreditation', 'admin_docs', 'custom_location']
-            $table->string('description', 255)->default('null');
+            $table->string('category', 255)->nullable(); // ['capstone', 'thesis', 'faculty_request', 'accreditation', 'admin_docs', 'custom_location']
+            $table->string('description', 255)->nullable();
             $table->string('status', 225)->default('pending');
 
             $table->string('level', 255)->nullable();
+            $table->string('phase', 255)->nullable();
             $table->string('area', 255)->nullable();
             $table->string('parameter', 255)->nullable();
             $table->string('character', 255)->nullable();
