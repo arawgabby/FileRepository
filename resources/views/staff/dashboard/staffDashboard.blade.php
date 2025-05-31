@@ -74,9 +74,9 @@
                         <i class="fas fa-file-text mr-5"></i> <span class='text-sm'> ACTIVITY </span>
                     </p>
 
-                    <a href="{{ route ('timestamps.index')}}" class="flex items-center text-white hover:text-white ">
+                    <!-- <a href="{{ route ('timestamps.index')}}" class="flex items-center text-white hover:text-white ">
                         <i class="fas fa-list mr-5"></i> <span class='text-sm'> File Timestamps </span>
-                    </a>
+                    </a> -->
 
                     <a href="{{ route('staff.logs.view') }}" class="flex items-center text-white hover:text-white ">
                         <i class="fas fa-inbox mr-5"></i> <span class='text-sm'> Activity Logs </span>

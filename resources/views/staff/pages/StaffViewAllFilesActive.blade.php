@@ -163,6 +163,10 @@
                                             class="text-blue-500" title="Edit Primary File">
                                             <i class="fas fa-edit"></i>
                                         </a> -->
+
+                            <a href="{{ route('staff.files.show', ['file_id' => $file->file_id]) }}" class="text-green-500" title="View Details">
+                                <i class="fas fa-eye"></i>
+                            </a>
                         </div>
                     </td>
                     <td class="hidden created-date">
