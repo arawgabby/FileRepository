@@ -790,7 +790,7 @@ class StaffController extends Controller
             $files->where('file_type', $request->file_type);
         }
 
-        $files = $files->paginate(20)->appends($request->all());
+        $files = $files->orderBy('created_at', 'desc')->paginate(20)->appends($request->all());
 
         // Fetch all approved requests for the current user, eager load the file relation
         $approvedRequests = FileRequest::with('file')
