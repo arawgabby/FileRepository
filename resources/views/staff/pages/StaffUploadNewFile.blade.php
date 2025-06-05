@@ -189,8 +189,105 @@
         const characterSelect = document.getElementById("character");
         const folderField = document.getElementById("folderField");
 
+        const areaSelect = document.getElementById("area");
         const levelSelect = document.getElementById("level");
         const phaseSelect = document.getElementById("phase");
+
+        // Store all area options for reset
+        const fullAreaOptions = [{
+                value: "",
+                text: "Select Area"
+            },
+            {
+                value: "1",
+                text: "1-VISION, MISSION, GOALS AND OBJECTIVES"
+            },
+            {
+                value: "2",
+                text: "2-FACULTY"
+            },
+            {
+                value: "3",
+                text: "3-CURRICULUM AND INSTRUCTIONS"
+            },
+            {
+                value: "4",
+                text: "4-SUPPORT TO STUDENTS"
+            },
+            {
+                value: "5",
+                text: "5-RESEARCH"
+            },
+            {
+                value: "6",
+                text: "6-EXTENSION AND COMMUNITY EVOLVEMENT"
+            },
+            {
+                value: "7",
+                text: "7-LIBRARY"
+            },
+            {
+                value: "8",
+                text: "8-PHYSICAL PLANT AND FACILITIES"
+            },
+            {
+                value: "9",
+                text: "9-LABORATORIES"
+            },
+            {
+                value: "10",
+                text: "10-ADMINISTRATION"
+            }
+        ];
+
+        const phase2AreaOptions = [{
+                value: "",
+                text: "Select Area"
+            },
+            {
+                value: "2",
+                text: "2-FACULTY"
+            },
+            {
+                value: "3",
+                text: "3-CURRICULUM AND INSTRUCTIONS"
+            },
+            {
+                value: "6",
+                text: "6-EXTENSION AND COMMUNITY EVOLVEMENT"
+            },
+            {
+                value: "7",
+                text: "7-LIBRARY"
+            },
+            {
+                value: "11",
+                text: "LICENSURE EXAM"
+            },
+            {
+                value: "12",
+                text: "CONSORTIA OR LINKAGES"
+            },
+        ];
+
+        function setAreaOptions(options) {
+            areaSelect.innerHTML = "";
+            options.forEach(opt => {
+                let option = document.createElement("option");
+                option.value = opt.value;
+                option.text = opt.text;
+                areaSelect.appendChild(option);
+            });
+        }
+
+        phaseSelect.addEventListener("change", function() {
+            if (this.value === "Phase 2") {
+                setAreaOptions(phase2AreaOptions);
+            } else {
+                setAreaOptions(fullAreaOptions);
+            }
+            areaSelect.selectedIndex = 0;
+        });
 
         parameterSelect.addEventListener("change", function() {
             if (this.value !== "") {

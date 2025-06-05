@@ -273,7 +273,7 @@
         }
 
         phaseSelect.addEventListener("change", function() {
-            if (this.value === "phase 2") {
+            if (this.value === "Phase 2") {
                 setAreaOptions(phase2AreaOptions);
             } else {
                 setAreaOptions(fullAreaOptions);
